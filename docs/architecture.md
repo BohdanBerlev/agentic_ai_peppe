@@ -13,13 +13,9 @@ flowchart LR
     Agent --> API
     Agent --> LLM{LLM adapter}
     LLM --> Ollama[Native Ollama]
-    LLM --> ICC[HAW ICC\nOpenAI-compatible endpoint]
 
     Agent --> Trace[Local JSONL traces]
     Trace --> Cost[Cost analysis]
-
-    LangSmith[LangSmith\noptional / approval required]
-    Agent -. optional .-> LangSmith
 ```
 
 ## Baseline design decisions
