@@ -12,8 +12,7 @@
 # - one agent may support multiple roles only if role-specific behavior/output
 #   is technically distinguishable and traceable.
 #
-# Source: company wiki (Home.md). Wiki status "backlog" mapped to "planned".
-# Product Owner: wiki lists "agent"; set to human (Mehrose Farooq) per team statement.
+# Source: company wiki (Home.md). Product Owner set to human (Mehrose Farooq).
 
 roles:
   - id: managing_director_customer_lead

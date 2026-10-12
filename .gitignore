@@ -219,3 +219,7 @@ __marimo__/
 
 # Generated agent logs; commit selected, sanitized evidence separately.
 logs/*.jsonl
+
+repo_to_markdown.py
+
+repo_komplett.md
