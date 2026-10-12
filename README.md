@@ -1,3 +1,23 @@
+## Team setup
+
+Die folgende Übersicht dokumentiert die Entwicklungsumgebungen und die vom
+Team gemeldeten Setup-Ergebnisse für Termin 1.
+
+| Teammitglied | Betriebssystem | Entwicklungsumgebung | Python | LLM-Zugang | Modell | Testergebnisse |
+|---|---|---|---|---|---|---|
+| Leon | macOS | VS Code | 3.12 | oMLX |  `Qwen3.8 27B` | Erfolgreich |
+| Maxim | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
+| Mero | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
+| David | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
+| Lars | Windows 11 | IntelliJ IDEA | 3.12.0 | Ollama |  `Qwen 3.5 9B` | Erfolgreich |
+| Bohdan | Linux | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
+
+### Abweichungen vom Starter-Setup
+
+- **Leon:** oMLX mit Qwen3.8 27B statt Ollama mit `qwen3:4b`
+- **Lars:** Qwen 3.5 9B statt des Starter-Modells `qwen3:4b`
+
+
 # Agentic AI Software Company – Starter Repository
 
 Starter repository for the HAW Hamburg elective project **Agentic AI / Human–Agent Software Company**.
