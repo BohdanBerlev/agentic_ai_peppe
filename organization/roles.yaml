@@ -11,40 +11,42 @@
 # - a role counts only when team-owned executable evidence exists.
 # - one agent may support multiple roles only if role-specific behavior/output
 #   is technically distinguishable and traceable.
+#
+# Source: company wiki (Home.md). Product Owner set to human (Mehrose Farooq).
 
 roles:
   - id: managing_director_customer_lead
     title: Managing Director / Customer Lead
-    responsibility: Customer communication, priorities, company decisions
+    responsibility: Customer communication, priorities, company-level decisions
     current_actor_type: human
     current_actor: Mehrose Farooq
     target_actor_type: human
-    target_actor: TBD
-    accountable_human: TBD
+    target_actor: Mehrose Farooq
+    accountable_human: Mehrose Farooq
     human_approval_required: true
-    implementation_status: backlog
+    implementation_status: planned
 
   - id: product_owner_requirements
     title: Product Owner / Requirements Engineer
-    responsibility: Requirements, user stories, acceptance criteria
-    current_actor_type: agent
-    current_actor: agent
+    responsibility: Requirements, user stories, acceptance criteria, backlog value
+    current_actor_type: human
+    current_actor: Mehrose Farooq
     target_actor_type: agent
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
+    accountable_human: Mehrose Farooq
+    human_approval_required: true
     implementation_status: planned
 
   - id: project_manager
     title: Project Manager
-    responsibility: Planning, task assignment, dependencies, delivery risks
+    responsibility: Planning, task allocation, progress, dependencies, delivery risk
     current_actor_type: human
     current_actor: Mehrose Farooq
     target_actor_type: hybrid
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: Mehrose Farooq
+    human_approval_required: false
+    implementation_status: planned
 
   - id: software_architect
     title: Software Architect
@@ -53,94 +55,94 @@ roles:
     current_actor: Bohdan Berlev
     target_actor_type: hybrid
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: Bohdan Berlev
+    human_approval_required: false
+    implementation_status: planned
 
   - id: backend_api_engineer
     title: Backend / API Engineer
-    responsibility: FastAPI, business logic, API contracts
+    responsibility: FastAPI services, business logic, API contracts
     current_actor_type: human
-    current_actor: Maxim Bers/Lars Boos
+    current_actor: Maxim Bers, Lars Boos
     target_actor_type: hybrid
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: Maxim Bers
+    human_approval_required: false
+    implementation_status: planned
 
   - id: data_rag_engineer
     title: Data & RAG Engineer
-    responsibility: PostgreSQL, pgvector, ingestion, retrieval, embeddings
+    responsibility: PostgreSQL, pgvector, ingestion, chunking, retrieval, embeddings
     current_actor_type: human
     current_actor: Maxim Bers
     target_actor_type: hybrid
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: Maxim Bers
+    human_approval_required: false
+    implementation_status: planned
 
   - id: agent_engineer
     title: Agent Engineer
-    responsibility: LangGraph workflows, LangChain, agent state, tools
+    responsibility: LangGraph workflows, LangChain integration, agent state and tools
     current_actor_type: human
-    current_actor: David Pisarkiewicz/Heyen Leon
+    current_actor: David Pisarkiewicz, Heyen Leon
     target_actor_type: hybrid
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: David Pisarkiewicz
+    human_approval_required: false
+    implementation_status: planned
 
   - id: integration_engineer
     title: Integration Engineer
-    responsibility: Agent-to-agent and agent-to-system interfaces
+    responsibility: Agent-to-agent and agent-to-system interfaces and handovers
     current_actor_type: human
-    current_actor: David Pisarkiewicz/Heyen Leon
+    current_actor: David Pisarkiewicz, Heyen Leon
     target_actor_type: agent
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: David Pisarkiewicz
+    human_approval_required: false
+    implementation_status: planned
 
   - id: qa_test_engineer
     title: QA & Test Engineer
-    responsibility: pytest, regression tests, agent evaluation
+    responsibility: pytest, regression testing, agent evaluation, quality evidence
     current_actor_type: human
-    current_actor: Maxim Bers/Lars Boos
+    current_actor: Maxim Bers, Lars Boos
     target_actor_type: agent
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: Maxim Bers
+    human_approval_required: true
+    implementation_status: planned
 
   - id: devops_engineer
     title: DevOps Engineer
-    responsibility: Docker, GitHub Actions, build, deployment
+    responsibility: Docker, GitHub Actions, build, deployment and reproducibility
     current_actor_type: human
     current_actor: Bohdan Berlev
     target_actor_type: human
-    target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    target_actor: Bohdan Berlev
+    accountable_human: Bohdan Berlev
+    human_approval_required: true
+    implementation_status: planned
 
   - id: ai_safety_security_engineer
     title: AI Safety & Security Engineer
-    responsibility: Tool permissions, guardrails, secrets, agent risks
+    responsibility: Tool permissions, guardrails, secrets, prompt and agent risks
     current_actor_type: human
-    current_actor: Lars Boos/Bohdan Berlev
+    current_actor: Lars Boos, Bohdan Berlev
     target_actor_type: hybrid
     target_actor: TBD
-    accountable_human: TBD
+    accountable_human: Lars Boos
     human_approval_required: true
-    implementation_status: backlog
+    implementation_status: planned
 
   - id: cost_observability_engineer
     title: Cost & Observability Engineer
-    responsibility: Traces, execution times, token usage, cost engineering
+    responsibility: Traces, runtime, token usage, cost model and cost optimization
     current_actor_type: human
-    current_actor: Lars Boos/Bohdan Berlev
+    current_actor: Lars Boos, Bohdan Berlev
     target_actor_type: agent
     target_actor: TBD
-    accountable_human: TBD
-    human_approval_required: TBD
-    implementation_status: backlog
+    accountable_human: Lars Boos
+    human_approval_required: false
+    implementation_status: planned
