@@ -15,21 +15,21 @@
 roles:
   - id: managing_director_customer_lead
     title: Managing Director / Customer Lead
-    responsibility: Customer communication, priorities, company-level decisions
+    responsibility: Customer communication, priorities, company decisions
     current_actor_type: human
-    current_actor: TBD
+    current_actor: Mehrose Farooq
     target_actor_type: human
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: true
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: product_owner_requirements
     title: Product Owner / Requirements Engineer
-    responsibility: Requirements, user stories, acceptance criteria, backlog value
-    current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    responsibility: Requirements, user stories, acceptance criteria
+    current_actor_type: agent
+    current_actor: agent
+    target_actor_type: agent
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
@@ -37,110 +37,110 @@ roles:
 
   - id: project_manager
     title: Project Manager
-    responsibility: Planning, task allocation, progress, dependencies, delivery risk
+    responsibility: Planning, task assignment, dependencies, delivery risks
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Mehrose Farooq
+    target_actor_type: hybrid
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: software_architect
     title: Software Architect
     responsibility: System architecture, interfaces, ADRs, technical standards
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Bohdan Berlev
+    target_actor_type: hybrid
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: backend_api_engineer
     title: Backend / API Engineer
-    responsibility: FastAPI services, business logic, API contracts
+    responsibility: FastAPI, business logic, API contracts
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Maxim Bers/Lars Boos
+    target_actor_type: hybrid
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: data_rag_engineer
     title: Data & RAG Engineer
-    responsibility: PostgreSQL, pgvector, ingestion, chunking, retrieval, embeddings
+    responsibility: PostgreSQL, pgvector, ingestion, retrieval, embeddings
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Maxim Bers
+    target_actor_type: hybrid
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: agent_engineer
     title: Agent Engineer
-    responsibility: LangGraph workflows, LangChain integration, agent state and tools
+    responsibility: LangGraph workflows, LangChain, agent state, tools
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: David Pisarkiewicz/Heyen Leon
+    target_actor_type: hybrid
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: integration_engineer
     title: Integration Engineer
-    responsibility: Agent-to-agent and agent-to-system interfaces and handovers
+    responsibility: Agent-to-agent and agent-to-system interfaces
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: David Pisarkiewicz/Heyen Leon
+    target_actor_type: agent
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: qa_test_engineer
     title: QA & Test Engineer
-    responsibility: pytest, regression testing, agent evaluation, quality evidence
+    responsibility: pytest, regression tests, agent evaluation
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Maxim Bers/Lars Boos
+    target_actor_type: agent
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: devops_engineer
     title: DevOps Engineer
-    responsibility: Docker, GitHub Actions, build, deployment and reproducibility
+    responsibility: Docker, GitHub Actions, build, deployment
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Bohdan Berlev
+    target_actor_type: human
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: ai_safety_security_engineer
     title: AI Safety & Security Engineer
-    responsibility: Tool permissions, guardrails, secrets, prompt and agent risks
+    responsibility: Tool permissions, guardrails, secrets, agent risks
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Lars Boos/Bohdan Berlev
+    target_actor_type: hybrid
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: true
-    implementation_status: planned
+    implementation_status: backlog
 
   - id: cost_observability_engineer
     title: Cost & Observability Engineer
-    responsibility: Traces, runtime, token usage, cost model and cost optimization
+    responsibility: Traces, execution times, token usage, cost engineering
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: TBD
+    current_actor: Lars Boos/Bohdan Berlev
+    target_actor_type: agent
     target_actor: TBD
     accountable_human: TBD
     human_approval_required: TBD
-    implementation_status: planned
+    implementation_status: backlog
