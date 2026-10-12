@@ -62,3 +62,20 @@ und messbaren Kosten.
   Review-Aufwand).
 - Bei Überschreitung des Task-Budgets stoppt die Arbeit und wird an den
   **Project Manager** eskaliert; Fortsetzung nur mit menschlicher Freigabe.
+
+## Pflichtentscheidungen (Termin 1)
+
+1. **Erste agentisch unterstützte Rolle: QA & Test Engineer.**
+   Begründung: hoher Wiederholungsaufwand, objektiv prüfbares Ergebnis, ein
+   reales Tool (Dateien lesen / `pytest`) und damit klare Trace- und
+   Test-Evidenz. Der erste Agent liefert einen strukturierten Test-/Review-Report.
+
+2. **Bewusst menschlich bleibt: Managing Director / Customer Lead.**
+   Begründung: Kundenkontakt, Priorisierung und unternehmerische Verantwortung
+   beruhen auf Vertrauen und Haftung — das bleibt beim Menschen.
+
+3. **Human Approval Gate: Security und kritische Freigaben.**
+   Begründung: Bei AI Safety & Security sowie vor Releases/Requirements- und
+   Architektur-Freigaben ist der Mensch unersetzlich. Ein LLM-Status wie
+   `approved` ist keine menschliche Freigabe; die Entscheidung muss dem Task
+   zuordenbar dokumentiert werden.
