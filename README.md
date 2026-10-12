@@ -312,6 +312,25 @@ and troubleshooting: [Lokales Setup](docs/SETUP_LOCAL_DE.md) / [Local setup](doc
 
 ---
 
+## Team setup
+
+Company: **PepeGroup** (6 members) – see `organization/company.md` and `organization/roles.yaml`.
+
+- **OS / dev environments:** macOS and Windows (mixed); Python and Docker run locally.
+- **Python:** 3.12 (macOS: 3.12.15 via Homebrew; environment via `python3.12 -m venv .venv`).
+- **LLM access:** local Ollama (`qwen3:4b`).
+- **Setup deviations:** host port 5432 was already in use, so the PostgreSQL/pgvector
+  container is published on **5433** (`docker-compose.override.yml`); `DATABASE_URL`
+  and `LANGCHAIN_POSTGRES_URL` point to 5433.
+- **Known limitations:** `docker-compose.override.yml` and `.env` are local only;
+  the HAW ICC endpoint is not configured yet.
+- **Results:**
+  - `python -m pytest`: **4 passed**
+  - `/db/health`: **ok** (PostgreSQL 17.11, pgvector 0.8.6)
+  - Reference run (`examples/file_review_agent.py`): **not run yet / no trace** (no local LLM during setup)
+
+---
+
 # First team tasks
 
 The starter deliberately leaves these areas incomplete:
