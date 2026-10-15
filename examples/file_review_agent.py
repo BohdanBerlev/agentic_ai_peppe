@@ -24,6 +24,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field, ValidationError
 
+from src.app.settings import get_settings
 from src.llm.factory import get_chat_model
 from src.observability.tracing import (
     append_trace,
@@ -103,10 +104,12 @@ def _parse_result(text: str) -> ReviewResult:
         )
 
 
-def build_graph(llm: Any | None = None):
-    llm = llm or get_chat_model()
+def build_graph(llm: Any | None = None, *, trace_context: dict[str, Any] | None = None):
+    llm = llm if llm is not None else get_chat_model()
+    trace_context = trace_context if trace_context is not None else {"tools": [], "calls": 0}
 
     def load_file(state: ReviewState) -> ReviewState:
+        trace_context["tools"].append("read_repository_text_file")
         try:
             return {
                 "file_content": read_repository_text_file(state["input_path"])
@@ -133,7 +136,9 @@ def build_graph(llm: Any | None = None):
                 f"FILE CONTENT:\n{state['file_content']}"
             )
         )
+        trace_context["calls"] += 1
         response = llm.invoke([system, human])
+        trace_context["input_tokens"], trace_context["output_tokens"] = usage_from_message(response)
         result = _parse_result(_message_text(response))
         result_dict = result.model_dump()
         result_dict["_usage"] = usage_from_message(response)
@@ -155,50 +160,59 @@ def run_review(
     llm: Any | None = None,
     trace_file: str | None = None,
 ) -> ReviewResult:
+    settings = get_settings()
     run_id = str(uuid.uuid4())
     started = time.perf_counter()
-    graph = build_graph(llm)
-    state = graph.invoke({"input_path": input_path})
-    duration = time.perf_counter() - started
-
-    if state.get("error"):
+    context: dict[str, Any] = {
+        "tools": [], "calls": 0, "input_tokens": None, "output_tokens": None,
+    }
+    record: dict[str, Any] = {
+        "run_id": run_id,
+        "workflow_id": run_id,
+        "task_id": task_id,
+        "agent": "starter-file-review-agent",
+        "role": "reference_file_reviewer",
+        "provider": settings.llm_provider if llm is None else "injected",
+        "model": settings.llm_model if llm is None else (
+            getattr(llm, "model", None) or getattr(llm, "model_name", None)
+            or type(llm).__name__
+        ),
+        "status": "error",
+    }
+    try:
+        graph = build_graph(llm, trace_context=context)
+        state = graph.invoke({"input_path": input_path}, {"recursion_limit": 10})
+        if state.get("error"):
+            raise RuntimeError(state["error"])
+        raw = dict(state["result"])
+        raw.pop("_usage", None)
+        result = ReviewResult.model_validate(raw)
+        record["result_status"] = result.status
+        record["status"] = "invalid_output" if result.status == "unparseable" else "success"
+        return result
+    except (Exception, KeyboardInterrupt) as exc:
+        record["status"] = "interrupted" if isinstance(exc, KeyboardInterrupt) else "error"
+        # Do not persist provider exception text: it may contain credentials/URLs.
+        record["error_type"] = type(exc).__name__
+        raise
+    finally:
+        duration = time.perf_counter() - started
         append_trace(
             {
-                "run_id": run_id,
-                "task_id": task_id,
-                "agent": "starter-file-review-agent",
-                "status": "error",
-                "tools": ["read_repository_text_file"],
+                **record,
+                **context,
                 "duration_seconds": round(duration, 4),
-                "error": state["error"],
+                "estimated_cost_credits": estimate_cost_credits(
+                    duration_seconds=duration,
+                    input_tokens=context["input_tokens"],
+                    output_tokens=context["output_tokens"],
+                    calls=context["calls"],
+                ),
+                "token_usage_complete": context["input_tokens"] is not None
+                and context["output_tokens"] is not None,
             },
             trace_file,
         )
-        raise RuntimeError(state["error"])
-
-    raw = dict(state["result"])
-    input_tokens, output_tokens = raw.pop("_usage", (None, None))
-    result = ReviewResult.model_validate(raw)
-
-    append_trace(
-        {
-            "run_id": run_id,
-            "task_id": task_id,
-            "agent": "starter-file-review-agent",
-            "status": "success",
-            "tools": ["read_repository_text_file"],
-            "duration_seconds": round(duration, 4),
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "estimated_cost_credits": estimate_cost_credits(
-                duration_seconds=duration,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-            ),
-        },
-        trace_file,
-    )
-    return result
 
 
 def main() -> None:

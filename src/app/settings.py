@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,7 +19,8 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://localhost:11434"
     llm_api_key: str = ""
     llm_temperature: float = 0.0
-    llm_timeout_seconds: float = 120.0
+    llm_timeout_seconds: float = Field(default=120.0, gt=0)
+    llm_max_output_tokens: int = Field(default=768, gt=0)
 
     embedding_provider: Literal["ollama", "openai_compatible"] = "ollama"
     embedding_model: str = "nomic-embed-text"
@@ -32,7 +34,7 @@ class Settings(BaseSettings):
         "postgresql+psycopg://agentic:agentic_dev_only@localhost:5432/agentic_company"
     )
 
-    trace_file: str = "logs/agent-runs.jsonl"
+    trace_file: str = "logs/RUN_ID.jsonl"
     cost_call_base_credits: float = 1.0
     cost_runtime_credits_per_second: float = 0.01
     cost_input_credits_per_1k_tokens: float = 0.02

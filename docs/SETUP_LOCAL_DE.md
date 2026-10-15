@@ -270,7 +270,7 @@ Führt dann aus:
 python -m examples.file_review_agent --input src/app/main.py
 ```
 
-**Erwartet:** Der Agent liest die Datei mit seinem Tool, ruft das konfigurierte LLM auf und gibt ein strukturiertes Review mit `status`, `summary` und `findings` aus. Zusätzlich entsteht ein Eintrag in `logs/agent-runs.jsonl`.
+**Erwartet:** Der Agent liest die Datei mit seinem Tool, ruft das konfigurierte LLM auf und gibt ein strukturiertes Review mit `status`, `summary` und `findings` aus. Zusätzlich entsteht ein Eintrag in `logs/<run_id>.jsonl` (`TRACE_FILE=logs/RUN_ID.jsonl`).
 
 Ein Ergebnis `unparseable` bedeutet, dass ein Review nicht als gültiges Ergebnis geparst werden konnte. Es ist noch kein erfolgreicher fachlicher Review. Prüft die Ausgabe und dokumentiert diesen Befund.
 
@@ -346,7 +346,7 @@ Uvicorn muss in einem separaten Terminal weiterlaufen. Wenn der Server nach `Ctr
 
 Im Probelauf dauerte ein erfolgreicher Referenzlauf rund 12 Minuten und 38 Sekunden. Dies ist eine beobachtete Laufzeit, keine Soll-Laufzeit. Aus dem Trace allein ist die Ursache nicht bekannt. Ein laufender Prozess ohne Ausgabe ist noch kein abgeschlossener Lauf.
 
-Der mitgelieferte Ollama-Pfad in `src/llm/factory.py` setzt in dieser Starterfassung weder eine Ausgabegrenze noch einen verlässlichen Workflow-Timeout. `LLM_TIMEOUT_SECONDS=120` in `.env` allein begrenzt diesen Ollama-Referenzlauf daher nicht auf 120 Sekunden. Wiederholt einen langen Lauf nicht mehrfach parallel. Bei einem Abbruch mit `Ctrl+C` kann der Abschluss-Trace fehlen; dokumentiert den Abbruch als solchen.
+Der Ollama-Adapter setzt jetzt einen HTTP-Client-Timeout über `LLM_TIMEOUT_SECONDS` (Standard: 120 Sekunden) und eine Ausgabegrenze über `LLM_MAX_OUTPUT_TOKENS` (Standard: 768). Ein HTTP-Timeout ist keine harte Grenze für die Gesamtlaufzeit des Workflows. Wiederholt lange Läufe nicht parallel. Fehler und `Ctrl+C` werden im Referenzlauf als Trace erfasst; ein harter Prozessabbruch kann dies verhindern.
 
 Für euren eigenen Agenten plant ihr ein explizites Ausgabe- und Zeitbudget sowie ein strukturiertes Fehlerergebnis bei Überschreitung. Die spätere eigene Implementierung wird getrennt vom mitgelieferten Referenzagenten bewertet.
 

@@ -17,11 +17,15 @@
     "examples/**",
     "tests/starter/**"
   ],
-  "starter_revision": 3,
+  "starter_revision": 4,
   "mixed_team_rule": "operational agent/hybrid roles >= 12 - number_of_human_team_members by end of Session 2",
   "role_model": {
     "session_1": "current_actor_type and target_actor_type are separate; one own operational LangGraph agent required",
     "session_2": "operational agent/hybrid-supported roles >= 12 - number_of_human_team_members"
   },
-  "assessment_note": "Session 1 evaluates team delta: company setup, platform use, first own agent, tests/evidence, cost measurement, engineering process."
+  "assessment_note": "Session 1 evaluates team delta: company setup, platform use, first own agent, tests/evidence, cost measurement, engineering process.",
+  "session_2_infrastructure_update": {
+    "previous_baseline_commit": "2685668b92bf5afb8a7886876ba00a6585057006",
+    "note": "Supplied infrastructure and documentation update; not student achievement. Existing teams retain their original baseline and record this update separately."
+  }
 }
