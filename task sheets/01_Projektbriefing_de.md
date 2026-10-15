@@ -213,7 +213,7 @@ Die ausführliche Einrichtung von Python, Docker und Ollama bzw. des HAW-ICC-Zug
 - Deutsch: [SETUP_LOCAL_DE.md](../docs/SETUP_LOCAL_DE.md)
 - Englisch: [SETUP_LOCAL_EN.md](../docs/SETUP_LOCAL_EN.md)
 
-Die konkreten Aufgaben und Abgabe-Checklisten stehen in [Aufgaben Termin 1 und 2 – Deutsch](Aufgaben_Termin_1_und_2_de.md) bzw. [Tasks Sessions 1 and 2 – English](Tasks_Session_1_and_2_en.md). Die Bewertungskriterien stehen im [Bewertungsraster für Termin 1 und 2](03_Bewertungsraster_GitHub_Termin_1_und_2_v3.2.md).
+Die konkreten Aufgaben und Abgabe-Checklisten stehen in [Aufgaben Termin 1 und 2 – Deutsch](Aufgaben_Termin_1_und_2_de.md) bzw. [Tasks Sessions 1 and 2 – English](Tasks_Session_1_and_2_en.md). Die Bewertungskriterien stehen im [Bewertungsraster für Termin 1 und 2](03_Bewertungsraster_GitHub_Termin_1_und_2.md).
 
 ### Standard-Testaufruf
 

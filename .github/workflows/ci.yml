@@ -8,6 +8,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:0.8.6-pg17-bookworm
+        env:
+          POSTGRES_DB: agentic_company
+          POSTGRES_USER: agentic
+          POSTGRES_PASSWORD: agentic_dev_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agentic -d agentic_company"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://agentic:agentic_dev_only@localhost:5432/agentic_company
+      LANGCHAIN_POSTGRES_URL: postgresql+psycopg://agentic:agentic_dev_only@localhost:5432/agentic_company
+      STARTER_DATABASE_TEST: "1"
 
     steps:
       - name: Check out repository
@@ -23,6 +41,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+
+      - name: Initialize common database baseline
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/init.sql
 
       - name: Run tests
         run: python -m pytest -q

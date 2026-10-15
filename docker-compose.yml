@@ -25,13 +25,14 @@ services:
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.0}
       LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-120}
+      LLM_MAX_OUTPUT_TOKENS: ${LLM_MAX_OUTPUT_TOKENS:-768}
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-ollama}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nomic-embed-text}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://host.docker.internal:11434}
       EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
       DATABASE_URL: postgresql://${POSTGRES_USER:-agentic}:${POSTGRES_PASSWORD:-agentic_dev_only}@db:5432/${POSTGRES_DB:-agentic_company}
       LANGCHAIN_POSTGRES_URL: postgresql+psycopg://${POSTGRES_USER:-agentic}:${POSTGRES_PASSWORD:-agentic_dev_only}@db:5432/${POSTGRES_DB:-agentic_company}
-      TRACE_FILE: ${TRACE_FILE:-logs/agent-runs.jsonl}
+      TRACE_FILE: ${TRACE_FILE:-logs/RUN_ID.jsonl}
       COST_CALL_BASE_CREDITS: ${COST_CALL_BASE_CREDITS:-1.0}
       COST_RUNTIME_CREDITS_PER_SECOND: ${COST_RUNTIME_CREDITS_PER_SECOND:-0.01}
       COST_INPUT_CREDITS_PER_1K_TOKENS: ${COST_INPUT_CREDITS_PER_1K_TOKENS:-0.02}
@@ -41,6 +42,8 @@ services:
       LANGSMITH_PROJECT: ${LANGSMITH_PROJECT:-agentic-ai-course}
     ports:
       - "8000:8000"
+    volumes:
+      - ./logs:/workspace/logs
     depends_on:
       db:
         condition: service_healthy

@@ -270,7 +270,7 @@ Then run:
 python -m examples.file_review_agent --input src/app/main.py
 ```
 
-**Expected:** The agent reads the file using its tool, calls the configured LLM, and returns a structured review with `status`, `summary`, and `findings`. It also creates an entry in `logs/agent-runs.jsonl`.
+**Expected:** The agent reads the file using its tool, calls the configured LLM, and returns a structured review with `status`, `summary`, and `findings`. It also creates an entry in `logs/<run_id>.jsonl` (`TRACE_FILE=logs/RUN_ID.jsonl`).
 
 An `unparseable` result means that the review could not be parsed as a valid result. It is not yet a successful substantive review. Check the output and document this finding.
 
@@ -346,7 +346,7 @@ Uvicorn must remain running in a separate terminal. If the server was stopped wi
 
 In the trial run, a successful reference run took approximately 12 minutes and 38 seconds. This is an observed runtime, not a target runtime. The trace alone does not establish the cause. A running process with no output is not yet a completed run.
 
-In this starter version, the supplied Ollama path in `src/llm/factory.py` sets neither an output limit nor a reliable workflow timeout. `LLM_TIMEOUT_SECONDS=120` in `.env` alone therefore does not limit this Ollama reference run to 120 seconds. Do not repeat a long run several times in parallel. If you interrupt it with `Ctrl+C`, the completion trace may be missing; document the interruption as such.
+The Ollama adapter now sets an HTTP client timeout through `LLM_TIMEOUT_SECONDS` (default: 120 seconds) and an output limit through `LLM_MAX_OUTPUT_TOKENS` (default: 768). An HTTP timeout is not a hard deadline for the entire workflow. Do not repeat long runs in parallel. Errors and `Ctrl+C` are traced by the reference runner; a hard process termination can prevent this.
 
 For your own agent, plan an explicit output and time budget, and a structured error result if the budget is exceeded. Your subsequent implementation is assessed separately from the supplied reference agent.
 

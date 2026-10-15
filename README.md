@@ -8,7 +8,8 @@ The repository provides a deliberately small, common technical baseline so that 
 
 - Project briefing: [English](task%20sheets/01_Project_Briefing_en.md) / [Deutsch](task%20sheets/01_Projektbriefing_de.md)
 - Tasks for Sessions 1 and 2: [English](task%20sheets/Tasks_Session_1_and_2_en.md) / [Deutsch](task%20sheets/Aufgaben_Termin_1_und_2_de.md)
-- [Evaluation rubric for Sessions 1 and 2 (German)](task%20sheets/03_Bewertungsraster_GitHub_Termin_1_und_2_v3.2.md)
+- Evaluation rubric: [English](task%20sheets/Evaluation_Rubric_Sessions_1_and_2_en.md) / [Deutsch](task%20sheets/03_Bewertungsraster_GitHub_Termin_1_und_2.md)
+- Session 2 guide and update instructions: [English](docs/SESSION_02_EN.md) / [Deutsch](docs/SESSION_02_DE.md)
 - Setup instructions: [English](docs/SETUP_LOCAL_EN.md) / [Deutsch](docs/SETUP_LOCAL_DE.md)
 
 The sessions run on Mondays from **10:00 to 15:00**. Assessment evaluates the team's changes to the starter, not the supplied examples and tests.
@@ -252,7 +253,7 @@ This verifies LangGraph + LangChain + LLM + local trace logging:
 python -m examples.file_review_agent --input src/app/main.py
 ```
 
-The example writes a trace to `logs/agent-runs.jsonl`.
+The example writes a separate trace to `logs/<run_id>.jsonl` using `TRACE_FILE=logs/RUN_ID.jsonl`. Existing `.env` files must be updated manually. See the Session 2 guide for evidence export and costs.
 
 Remember: this supplied example does **not** count as a team agent.
 
@@ -319,7 +320,7 @@ The starter deliberately leaves these areas incomplete:
 1. complete `organization/company.md`
 2. assign all roles in `organization/roles.yaml`
 3. adapt `docs/architecture.md` to the team's real architecture
-4. define the team's cost assumptions in `costs/cost-model.yaml`
+4. use the common course rates in `costs/cost-model.yaml` and record actual usage
 5. implement at least one **team-owned** agent under `src/agents/`
 6. add meaningful tests outside `tests/starter/`
 7. create GitHub Issues for the work

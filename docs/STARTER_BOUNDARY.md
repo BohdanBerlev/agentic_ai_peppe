@@ -81,3 +81,9 @@ One agent implementation may support multiple roles only when role-specific beha
 ## Evaluation instruction
 
 > Evaluate the delta to the starter. Do not award points merely because the starter contains working CI, FastAPI, PostgreSQL wiring, tracing utilities or a reference LangGraph agent.
+
+## Session 2 infrastructure update (revision 4)
+
+The updated provider limits, tracing helpers, reference runner, Docker exclusions, log mount, CI database service and all tests under `tests/starter/` remain supplied infrastructure. Do not score their adoption as team achievement. `pytest.ini` is also excluded.
+
+Existing teams retain the starter commit/ZIP they actually used as their initial baseline and record the revision-4 update commit separately. Use both when distinguishing team work from later supplied fixes.
