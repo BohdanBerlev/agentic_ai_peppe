@@ -19,6 +19,8 @@ def get_chat_model(settings: Settings | None = None) -> Any:
             model=settings.llm_model,
             base_url=settings.llm_base_url,
             temperature=settings.llm_temperature,
+            client_kwargs={"timeout": settings.llm_timeout_seconds},
+            num_predict=settings.llm_max_output_tokens,
         )
 
     if settings.llm_provider == "openai_compatible":
@@ -30,7 +32,8 @@ def get_chat_model(settings: Settings | None = None) -> Any:
             api_key=settings.llm_api_key or "not-required",
             temperature=settings.llm_temperature,
             timeout=settings.llm_timeout_seconds,
-            max_retries=2,
+            max_tokens=settings.llm_max_output_tokens,
+            max_retries=0,
             stream_usage=False,
             use_responses_api=False,
         )

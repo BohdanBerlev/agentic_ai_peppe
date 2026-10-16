@@ -213,7 +213,7 @@ The setup guides explain how to install and configure Python, Docker and Ollama 
 - German: [SETUP_LOCAL_DE.md](../docs/SETUP_LOCAL_DE.md)
 - English: [SETUP_LOCAL_EN.md](../docs/SETUP_LOCAL_EN.md)
 
-The detailed assignments and submission checklists are in [Tasks Sessions 1 and 2 – English](Tasks_Session_1_and_2_en.md) and [Aufgaben Termin 1 und 2 – German](Aufgaben_Termin_1_und_2_de.md). The evaluation criteria are in the [Session 1 and 2 evaluation rubric (German)](03_Bewertungsraster_GitHub_Termin_1_und_2_v3.2.md).
+The detailed assignments and submission checklists are in [Tasks Sessions 1 and 2 – English](Tasks_Session_1_and_2_en.md) and [Aufgaben Termin 1 und 2 – German](Aufgaben_Termin_1_und_2_de.md). The evaluation criteria are in the [Session 1 and 2 evaluation rubric (German)](Evaluation_Rubric_Sessions_1_and_2_en.md).
 
 ### Standard Test Command
 
