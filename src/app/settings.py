@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     app_name: str = "Agentic AI Software Company"
 
-    llm_provider: Literal["ollama", "openai_compatible"] = "ollama"
+    llm_provider: Literal["ollama", "openai_compatible", "google"] = "ollama"
     llm_model: str = "qwen3:4b"
     llm_base_url: str = "http://localhost:11434"
     llm_api_key: str = ""

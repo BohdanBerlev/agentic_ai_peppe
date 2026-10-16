@@ -2,6 +2,9 @@ from typing import Any
 
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.rate_limiters import InMemoryRateLimiter
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from src.app.settings import Settings, get_settings
 
@@ -38,6 +41,20 @@ def get_chat_model(settings: Settings | None = None) -> Any:
             use_responses_api=False,
         )
 
+    if settings.llm_provider == "google":
+        # Drosselung: max 15 Requests pro Minute für die Free-API
+        rate_limiter = InMemoryRateLimiter(
+            requests_per_second=0.25, 
+            check_every_n_seconds=0.1, 
+            max_bucket_size=1
+        )
+        return ChatGoogleGenerativeAI(
+            model="gemini-3.8-flash",
+            rate_limiter=rate_limiter,
+            temperature=settings.llm_temperature,
+            api_key=settings.llm_api_key
+        )
+
     raise ValueError(f"Unsupported LLM provider: {settings.llm_provider}")
 
 
@@ -56,6 +73,12 @@ def get_embeddings(settings: Settings | None = None) -> Any:
             model=settings.embedding_model,
             base_url=settings.embedding_base_url,
             api_key=settings.embedding_api_key or "not-required",
+        )
+
+    if settings.embedding_provider == "google":
+        return GoogleGenerativeAIEmbeddings(
+            model="models/embedding-001",
+            google_api_key=settings.embedding_api_key or settings.llm_api_key
         )
 
     raise ValueError(

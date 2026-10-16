@@ -1,11 +1,12 @@
 """
 Cost & Observability Agent
-Reads the agent execution trace file, extracts token/runtime usage,
-and uses the LLM to generate a structured cost report.
+Reads all agent execution trace files, extracts token/runtime usage,
+and uses the LLM to generate a structured cost report based on user queries.
 """
 import json
 import time
 import uuid
+import argparse
 from pathlib import Path
 from typing import Any, Literal, TypedDict, List
 
@@ -36,36 +37,36 @@ class CostReport(BaseModel):
 class CostState(TypedDict, total=False):
     log_file_path: str
     log_content: str
+    user_query: str
     result: dict[str, Any]
     error: str
 
 
-# 3. Das Tool: Die Funktion zum Lesen der Trace-Datei
-def read_log_file(relative_path: str) -> str:
-    """Liest die JSONL-Logdatei mit den Agenten-Aufzeichnungen."""
-    requested = (REPO_ROOT / relative_path).resolve()
-    if not requested.is_file():
-        raise FileNotFoundError(f"Log file not found: {relative_path}")
+# 3. Das Tool: Die Funktion zum Lesen der Trace-Dateien
+def read_log_file(directory_path: str = "logs") -> str:
+    """Liest ALLE JSONL-Logdateien im Ordner aus und fasst sie zusammen."""
+    log_dir = (REPO_ROOT / directory_path).resolve()
     
-    # Lese die Datei ein und extrahiere relevante Felder um das LLM nicht zu überladen
     extracted_data = []
-    with open(requested, "r", encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                try:
-                    data = json.loads(line)
-                    # Nur relevante Felder für die Kosten behalten
-                    extracted_data.append({
-                        "agent": data.get("agent", "unknown"),
-                        "status": data.get("status", "unknown"),
-                        "duration": data.get("duration_seconds", 0),
-                        "input_tokens": data.get("input_tokens", 0),
-                        "output_tokens": data.get("output_tokens", 0),
-                        "cost": data.get("estimated_cost_credits", 0)
-                    })
-                except json.JSONDecodeError:
-                    continue
-                    
+    
+    # Durchsuche alle .jsonl Dateien im logs/ Ordner
+    for file_path in log_dir.glob("*.jsonl"):
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        data = json.loads(line)
+                        # Nur relevante Felder für die Kosten behalten
+                        extracted_data.append({
+                            "task_id": data.get("task_id", "unknown"),
+                            "run_id": data.get("run_id", "unknown"),
+                            "agent": data.get("agent", "unknown"),
+                            "duration": data.get("duration_seconds", 0),
+                            "cost": data.get("estimated_cost_credits", 0)
+                        })
+                    except json.JSONDecodeError:
+                        continue
+                        
     if not extracted_data:
         return "No execution data found in logs."
         
@@ -75,7 +76,18 @@ def read_log_file(relative_path: str) -> str:
 # Hilfsfunktionen fürs LLM (Parsing)
 def _message_text(message: Any) -> str:
     content = getattr(message, "content", "")
-    return content if isinstance(content, str) else str(content)
+    if isinstance(content, str):
+        return content
+    # Diese Logik packt verschachtelte Listen (wie bei Gemini) sauber aus
+    if isinstance(content, list):
+        parts: list[str] = []
+        for item in content:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict) and isinstance(item.get("text"), str):
+                parts.append(item["text"])
+        return "\n".join(parts)
+    return str(content)
 
 def _parse_result(text: str) -> CostReport:
     cleaned = text.strip()
@@ -91,7 +103,10 @@ def _parse_result(text: str) -> CostReport:
 
     try:
         return CostReport.model_validate(json.loads(cleaned))
-    except (json.JSONDecodeError, ValidationError):
+    except Exception as e:
+        # Neutraler, teamtauglicher Debug-Print
+        print(f"\n--- DEBUG: LLM OUTPUT FEHLERHAFT ---\n{text}\n--------------------------------------")
+        print(f"PARSING-FEHLER: {e}\n")
         return CostReport(
             status="unparseable",
             total_runs_analyzed=0,
@@ -104,10 +119,10 @@ def _parse_result(text: str) -> CostReport:
 def build_cost_graph(llm: Any | None = None):
     llm = llm or get_chat_model()
 
-    # Node 1: Log-Datei einlesen
+    # Node 1: Log-Dateien einlesen
     def load_logs(state: CostState) -> CostState:
         try:
-            content = read_log_file(state["log_file_path"])
+            content = read_log_file(state.get("log_file_path", "logs"))
             return {"log_content": content}
         except Exception as exc:
             return {"error": str(exc)}
@@ -117,17 +132,19 @@ def build_cost_graph(llm: Any | None = None):
         return END if state.get("error") else "analyze"
 
     # Node 2: LLM Analyse
+    # Node 2: LLM Analyse
     def analyze(state: CostState) -> CostState:
         system = SystemMessage(
             content=(
                 "You are the Cost & Observability Engineer. Analyze the provided execution logs. "
-                "Return ONLY valid JSON matching this schema: "
-                '{"status": "success", "total_runs_analyzed": integer, "summary": "brief overview", '
-                '"insights": [{"agent_name": "agent1", "finding": "observation about cost/tokens"}]}'
+                "Return ONLY valid JSON matching this exact schema. NEVER translate the JSON keys or the 'status' value! "
+                '{"status": "success", "total_runs_analyzed": 5, "summary": "brief summary", '
+                '"insights": [{"agent_name": "agent1", "finding": "observation"}]}'
             )
         )
+        query = state.get("user_query", "Summarize the overall cost and usage.")
         human = HumanMessage(
-            content=f"Please analyze these execution logs and summarize the cost/usage data:\n{state['log_content']}"
+            content=f"User Request: {query}\n\nExecution logs:\n{state.get('log_content', '')}"
         )
         response = llm.invoke([system, human])
         result = _parse_result(_message_text(response))
@@ -144,9 +161,10 @@ def build_cost_graph(llm: Any | None = None):
     return builder.compile()
 
 
-# 5. Die Ausführungs-Funktion (wie run_review im Starter)
+# 5. Die Ausführungs-Funktion
 def run_cost_analysis(
-    log_file_path: str = "logs/agent-runs.jsonl",
+    log_directory: str = "logs",
+    user_query: str = "Summarize the overall cost and usage.",
     *,
     task_id: str = "COST-REPORT-001",
     trace_file: str | None = None,
@@ -155,7 +173,10 @@ def run_cost_analysis(
     started = time.perf_counter()
     graph = build_cost_graph()
     
-    state = graph.invoke({"log_file_path": log_file_path})
+    state = graph.invoke({
+        "log_file_path": log_directory,
+        "user_query": user_query
+    })
     duration = time.perf_counter() - started
 
     # Fehlerbehandlung
@@ -196,9 +217,13 @@ def run_cost_analysis(
 
 
 if __name__ == "__main__":
-    print("Running Cost Agent...")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--query", type=str, default="Fasse die generellen Kosten und Dauer aller Logs zusammen.")
+    args = parser.parse_args()
+
+    print(f"Running Cost Agent with query: '{args.query}'...")
     try:
-        result = run_cost_analysis()
+        result = run_cost_analysis(user_query=args.query)
         print(result.model_dump_json(indent=2))
     except Exception as e:
         print(f"Agent failed: {e}")
