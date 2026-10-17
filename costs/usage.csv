@@ -1,1 +1,4 @@
 date,task_id,actor_type,actor,quantity,unit,credits,notes
+2026-10-12,SESSION-01,human,Team 3,30.0,hours,0.0,Setup und Rollenverteilung alle 6 Mitglieder
+2026-10-17,COST-01,human,David,5.0,hours,0.0,Cost Agent Development und Bugfixing
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,4,runs,3.37,Auswertung der Traces im evidence-Ordner

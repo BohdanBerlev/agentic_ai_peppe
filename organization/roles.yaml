@@ -30,7 +30,7 @@ roles:
     current_actor_type: human
     current_actor: Mehrose Farooq
     target_actor_type: agent
-    target_actor: TBD
+    target_actor: Requirements_Agent
     accountable_human: Mehrose Farooq
     human_approval_required: true
     implementation_status: planned
@@ -41,7 +41,7 @@ roles:
     current_actor_type: human
     current_actor: Mehrose Farooq
     target_actor_type: hybrid
-    target_actor: TBD
+    target_actor: PM_Agent
     accountable_human: Mehrose Farooq
     human_approval_required: false
     implementation_status: planned
@@ -52,9 +52,9 @@ roles:
     current_actor_type: human
     current_actor: Bohdan Berlev
     target_actor_type: hybrid
-    target_actor: TBD
+    target_actor: Architect_Agent
     accountable_human: Bohdan Berlev
-    human_approval_required: false
+    human_approval_required: true
     implementation_status: planned
 
   - id: backend_api_engineer
@@ -63,7 +63,7 @@ roles:
     current_actor_type: human
     current_actor: Maxim Bers, Lars Boos
     target_actor_type: hybrid
-    target_actor: TBD
+    target_actor: Backend_Agent
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -74,7 +74,7 @@ roles:
     current_actor_type: human
     current_actor: Maxim Bers
     target_actor_type: hybrid
-    target_actor: TBD
+    target_actor: RAG_Agent
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -85,7 +85,7 @@ roles:
     current_actor_type: human
     current_actor: David Pisarkiewicz, Heyen Leon
     target_actor_type: hybrid
-    target_actor: TBD
+    target_actor: Graph_Builder_Agent
     accountable_human: David Pisarkiewicz
     human_approval_required: false
     implementation_status: planned
@@ -96,7 +96,7 @@ roles:
     current_actor_type: human
     current_actor: David Pisarkiewicz, Heyen Leon
     target_actor_type: agent
-    target_actor: TBD
+    target_actor: Integration_Agent
     accountable_human: David Pisarkiewicz
     human_approval_required: false
     implementation_status: planned
@@ -107,7 +107,7 @@ roles:
     current_actor_type: human
     current_actor: Maxim Bers, Lars Boos
     target_actor_type: agent
-    target_actor: TBD
+    target_actor: QA_Agent
     accountable_human: Maxim Bers
     human_approval_required: true
     implementation_status: planned
@@ -129,7 +129,7 @@ roles:
     current_actor_type: human
     current_actor: Lars Boos, Bohdan Berlev
     target_actor_type: hybrid
-    target_actor: TBD
+    target_actor: Security_Agent
     accountable_human: Lars Boos
     human_approval_required: true
     implementation_status: planned
@@ -137,10 +137,10 @@ roles:
   - id: cost_observability_engineer
     title: Cost & Observability Engineer
     responsibility: Traces, runtime, token usage, cost model and cost optimization
-    current_actor_type: human
-    current_actor: Lars Boos, Bohdan Berlev
+    current_actor_type: agent
+    current_actor: Cost_Agent
     target_actor_type: agent
-    target_actor: TBD
+    target_actor: Cost_Agent
     accountable_human: Lars Boos
     human_approval_required: false
-    implementation_status: planned
+    implementation_status: operational

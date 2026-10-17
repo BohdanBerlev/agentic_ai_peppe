@@ -25,7 +25,7 @@ Agenten, mit klaren Rollen und messbaren Kosten.
 
 - Bei Security und anderen kritischen Themen entscheidet der Mensch. Ein
   LLM-Status wie `approved` ist keine Freigabe.
-- Freigabepflichtig: Requirements, Architektur, QA-Ergebnis, Release, Security.
+- Freigabepflichtig: Requirements, Architektur, QA-Ergebnisse, DevOps/Release, AI Safety & Security sowie alle übergeordneten Kunden- und Projektentscheidungen.
 
 ## Agenten
 
@@ -40,7 +40,6 @@ Agenten, mit klaren Rollen und messbaren Kosten.
 
 ## Erste Entscheidungen
 
-1. Erster Agent: **QA & Test** – wiederkehrende Arbeit, prüfbares Ergebnis,
-   echtes Tool (pytest).
+1. Erster Agent: **Cost_Agent** – übernimmt die Rolle des Cost & Observability Engineers, liest Trace-Logs aus dem `evidence/`-Ordner aus, aggregiert deterministisch Token-/Laufzeitdaten und generiert strukturierte Kostenreports.
 2. Bleibt menschlich: **Managing Director** – Kundenkontakt und Verantwortung.
 3. **Human Gate:** Security und Freigaben vor einem Release.

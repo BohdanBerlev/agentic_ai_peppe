@@ -1,33 +1,48 @@
-# Architecture – initial course baseline
+# Architecture
 
-> Team-owned after Session 1. Adapt this document so that it reflects the real company infrastructure.
+## Current System (Termin 1)
+
+Das aktuelle System basiert auf LangGraph und nutzt einen dedizierten Agenten zur Auswertung von Ausführungsnachweisen (Traces) des gesamten Teams.
+
+### Agentic Flow: Cost & Observability
+
+Der folgende Graph zeigt die Architektur unseres aktuell operativen `cost_observability_agent`:
 
 ```mermaid
-flowchart LR
-    Human[Human team members] --> GH[GitHub / Issues / PRs]
-    Agent[Team agents\nLangGraph + LangChain] --> GH
-    GH --> CI[GitHub Actions]
-    CI --> Tests[pytest]
-
-    API[FastAPI] --> DB[(PostgreSQL + pgvector)]
-    Agent --> API
-    Agent --> LLM{LLM adapter}
-    LLM --> Ollama[Native Ollama]
-
-    Agent --> Trace[Local JSONL traces]
-    Trace --> Cost[Cost analysis]
+graph TD
+    User([Team Member / CLI]) -->|--query| CostAgent[Cost Agent Graph]
+    
+    subgraph LangGraph
+        CostAgent --> Node1[Node: load_logs]
+        Node1 -->|Tool: read_log_file| EvidenceDir[(evidence/ Ordner)]
+        Node1 -->|Success| Node2[Node: analyze]
+        Node1 -->|Error| End((END))
+        
+        Node2 -->|Prompt & Logs| LLM{LLM API}
+        LLM -->|JSON Output| Parser[Pydantic Parser]
+        Parser --> End
+    end
+    
+    End -->|Output| Report[CostReport JSON]
+    End -->|Save| LocalLogs[(Lokale logs/)]
 ```
 
-## Baseline design decisions
+### Baseline Design Decisions
 
-1. Agent orchestration uses LangGraph.
-2. LangChain provides model/integration abstractions.
-3. Team code must not depend directly on a specific LLM deployment.
-4. PostgreSQL + pgvector is the common relational and vector data platform.
-5. Local structured traces are mandatory project evidence.
-6. LangSmith is optional and cannot replace local evidence.
-7. Ollama normally runs natively on the host when used on macOS.
+* **Agent Orchestration:** Uses LangGraph.
+* **Abstractions:** LangChain provides model/integration abstractions.
+* **LLM Independence:** Team code must not depend directly on a specific LLM deployment.
+* **Data Platform:** PostgreSQL + pgvector is the common relational and vector data platform.
+* **Project Evidence:** Local structured traces are mandatory project evidence.
+* **Observability:** LangSmith is optional and cannot replace local evidence.
+* **Local Environment:** Ollama normally runs natively on the host when used on macOS.
 
-## Team changes
+## Team Changes
 
-Document all material changes here and add ADRs where appropriate.
+Document all material changes here and add ADRs (Architecture Decision Records) where appropriate.
+
+### Technische Entscheidungen (Termin 1)
+
+* **LLM Provider:** Wir nutzen eine Factory-Abstraktion. Die Agenten laufen flexibel über die Gemini API oder lokale Modelle (z.B. Ollama/oMLX), je nach `.env`-Konfiguration des jeweiligen Teammitglieds.
+* **Datenaustausch:** Lokale Logs werden aus Sicherheits- und Konfliktgründen von Git ignoriert (`.gitignore`). Bereinigte Traces werden manuell in das Verzeichnis `evidence/` gepusht. Der Cost Agent liest dieses Verzeichnis dynamisch aus, um Team-übergreifende Auswertungen zu ermöglichen.
+* **Sicherheit:** Das Tool `read_log_file` enthält eine strikte Pfadgrenze, um Path Traversal außerhalb von `evidence/` und `logs/` zu blockieren.

@@ -1,0 +1,1 @@
+{"logged_at": "2026-10-17T00:12:39.354793+00:00", "run_id": "966dde86-9ee4-48f3-9f8a-26dc2620bf90", "task_id": "COST-REPORT-001", "agent": "cost_observability_agent", "status": "success", "tools": ["read_log_file"], "duration_seconds": 11.4559, "input_tokens": 795, "output_tokens": 910, "estimated_cost_credits": 1.1669}
