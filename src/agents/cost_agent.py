@@ -43,14 +43,22 @@ class CostState(TypedDict, total=False):
 
 
 # 3. Das Tool: Die Funktion zum Lesen der Trace-Dateien
-def read_log_file(directory_path: str = "logs") -> str:
+# 3. Das Tool: Die Funktion zum Lesen der Trace-Dateien
+def read_log_file(directory_path: str = "evidence") -> str:
     """Liest ALLE JSONL-Logdateien im Ordner aus und fasst sie zusammen."""
     log_dir = (REPO_ROOT / directory_path).resolve()
     
+    # SECURITY-FIX (Kritikpunkt C5): Verhindert Path Traversal
+    allowed_evidence = (REPO_ROOT / "evidence").resolve()
+    allowed_logs = (REPO_ROOT / "logs").resolve()
+    
+    if not (str(log_dir).startswith(str(allowed_evidence)) or str(log_dir).startswith(str(allowed_logs))):
+        raise ValueError(f"Security Violation: Pfad '{directory_path}' verlässt die erlaubten Verzeichnisse!")
+    
     extracted_data = []
     
-    # Durchsuche alle .jsonl Dateien im logs/ Ordner
-    for file_path in log_dir.glob("*.jsonl"):
+    # rglob("*.jsonl") durchsucht automatisch auch Unterordner wie 'session-01'
+    for file_path in log_dir.rglob("*.jsonl"):
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
@@ -68,7 +76,7 @@ def read_log_file(directory_path: str = "logs") -> str:
                         continue
                         
     if not extracted_data:
-        return "No execution data found in logs."
+        return f"No execution data found in {directory_path}."
         
     return json.dumps(extracted_data, indent=2)
 
@@ -163,7 +171,7 @@ def build_cost_graph(llm: Any | None = None):
 
 # 5. Die Ausführungs-Funktion
 def run_cost_analysis(
-    log_directory: str = "logs",
+    log_directory: str = "evidence",
     user_query: str = "Summarize the overall cost and usage.",
     *,
     task_id: str = "COST-REPORT-001",

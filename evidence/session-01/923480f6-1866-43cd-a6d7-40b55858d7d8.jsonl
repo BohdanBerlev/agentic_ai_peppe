@@ -1,0 +1,1 @@
+{"logged_at": "2026-10-16T23:13:32.379452+00:00", "run_id": "923480f6-1866-43cd-a6d7-40b55858d7d8", "task_id": "COST-REPORT-001", "agent": "cost_observability_agent", "status": "error", "tools": ["read_log_file"], "duration_seconds": 0.6005, "error": "Log file not found: logs/agent-runs.jsonl"}
