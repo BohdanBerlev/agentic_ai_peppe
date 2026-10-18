@@ -1,4 +1,9 @@
 date,task_id,actor_type,actor,quantity,unit,credits,notes
-2026-10-12,SESSION-01,human,Team 3,30.0,hours,0.0,Setup und Rollenverteilung alle 6 Mitglieder
-2026-10-17,COST-01,human,David,5.0,hours,0.0,Cost Agent Development und Bugfixing
-2026-10-17,COST-REPORT-001,agent,cost_observability_agent,4,runs,3.37,Auswertung der Traces im evidence-Ordner
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1577,model=unknown; status=success; 10.7s; in=693; out=918
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1417,model=unknown; status=success; 10.0s; in=503; out=792
+2026-10-16,STARTER-DEMO,agent,starter-file-review-agent,1,run,1.0504,model=qwen3:4b; status=error; 5.0s; in=None; out=None
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1458,model=unknown; status=success; 9.8s; in=717; out=846
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1669,model=unknown; status=success; 11.5s; in=795; out=910
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1726,model=unknown; status=success; 11.3s; in=795; out=1082
+2026-10-16,STARTER-DEMO,agent,starter-file-review-agent,1,run,1.1533,model=qwen3:4b; status=success; 12.0s; in=265; out=693
+2026-10-12,TERMIN-1,human,PepeGroup (6),30,hours,3000.0,Termin 1 session 6 members x 5h (estimate)
