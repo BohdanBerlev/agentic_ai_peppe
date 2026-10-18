@@ -2,9 +2,6 @@ from typing import Any
 
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.rate_limiters import InMemoryRateLimiter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from src.app.settings import Settings, get_settings
 
@@ -42,6 +39,9 @@ def get_chat_model(settings: Settings | None = None) -> Any:
         )
 
     if settings.llm_provider == "google":
+        from langchain_core.rate_limiters import InMemoryRateLimiter
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
         # Drosselung: max 15 Requests pro Minute für die Free-API
         rate_limiter = InMemoryRateLimiter(
             requests_per_second=0.25, 
@@ -76,6 +76,8 @@ def get_embeddings(settings: Settings | None = None) -> Any:
         )
 
     if settings.embedding_provider == "google":
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
         return GoogleGenerativeAIEmbeddings(
             model="models/embedding-001",
             google_api_key=settings.embedding_api_key or settings.llm_api_key
