@@ -3,6 +3,13 @@ name: Agentic Issue Reviewer (Google Gemini)
 on:
   issues:
     types: [opened, edited, pinned]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "GitHub Issue Number to process"
+        required: true
+        default: "1"
+        type: string
 
 jobs:
   run-gemini-pipeline:
@@ -29,7 +36,14 @@ jobs:
       - name: Pipeline mit Google AI Studio ausführen
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          LLM_PROVIDER: "google"  # Übergibt den Provider an eure LLM-Factory
+          LLM_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LLM_PROVIDER: "google"
         run: |
-          python -m src.workflows.run_github_issue --issue-number ${{ github.event.issue.number }}
+          # Ermittelt die Issue-Nummer entweder aus dem Webhook-Event oder dem manuellen Input
+          TARGET_ISSUE="${{ github.event.issue.number }}"
+          if [ -z "$TARGET_ISSUE" ]; then
+            TARGET_ISSUE="${{ github.event.inputs.issue_number }}"
+          fi
+          
+          echo "Running pipeline for issue number: $TARGET_ISSUE"
+          python -m src.workflows.run_github_issue --issue-number "$TARGET_ISSUE"
