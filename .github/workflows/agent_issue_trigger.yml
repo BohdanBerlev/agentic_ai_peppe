@@ -36,8 +36,10 @@ jobs:
       - name: Pipeline mit Google AI Studio ausführen
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LLM_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LLM_PROVIDER: "google"
+          PYTHONPATH: "."
         run: |
           # Ermittelt die Issue-Nummer entweder aus dem Webhook-Event oder dem manuellen Input
           TARGET_ISSUE="${{ github.event.issue.number }}"
