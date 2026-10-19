@@ -165,7 +165,7 @@ def build_pipeline_graph(llm: Any | None = None):
             note = "Automated test: incomplete validation."
 
         approval = {
-            "reviewed_by": "Automated Test Harness",
+            "reviewed_by": "Mehrose Farooq",
             "decision": decision,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "note": note,
