@@ -1,7 +1,7 @@
 """
-GitHub Issue Runner mit Google Gemini Support
-Liest ein GitHub Issue über die REST API aus, wandelt es in ein 
-EngineeringTask-Modell um und führt die Agenten-Pipeline aus.
+GitHub Issue Runner mit Google Gemini Support und Auto-Close
+Liest ein GitHub Issue über die REST API aus, führt die Agenten-Pipeline aus 
+und schließt das Issue bei Erfolg automatisch.
 """
 
 import os
@@ -31,6 +31,44 @@ def fetch_issue_details(repo: str, issue_number: int) -> dict:
     
     return response.json()
 
+def close_issue_with_success(repo: str, issue_number: int, summary: str):
+    """Postet einen Kommentar und schließt das GitHub Issue automatisch (Done)."""
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        print("Warning: GITHUB_TOKEN not found, skipping auto-close.")
+        return
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+    
+    # 1. Kommentar mit dem Pipeline-Ergebnis posten
+    comment_url = f"https://api.github.com/repos/{repo}/issues/{issue_number}/comments"
+    comment_payload = {
+        "body": f"🤖 **Agentic Pipeline Execution Successful!**\n\n{summary}\n\n*Status: Moved to Done automatically by Agent Runner.*"
+    }
+    
+    print(f"Posting success comment to issue #{issue_number}...")
+    comment_res = httpx.post(comment_url, headers=headers, json=comment_payload)
+    if comment_res.status_code != 201:
+        print(f"Warning: Could not post comment: {comment_res.status_code} - {comment_res.text}")
+
+    # 2. Issue Status auf 'closed' (Done) setzen
+    patch_url = f"https://api.github.com/repos/{repo}/issues/{issue_number}"
+    patch_payload = {
+        "state": "closed",
+        "state_reason": "completed"
+    }
+    
+    print(f"Closing GitHub Issue #{issue_number} (Done)...")
+    patch_res = httpx.patch(patch_url, headers=headers, json=patch_payload)
+    if patch_res.status_code == 200:
+        print(f"Successfully closed issue #{issue_number}!")
+    else:
+        print(f"Warning: Could not close issue: {patch_res.status_code} - {patch_res.text}")
+
 def main():
     parser = argparse.ArgumentParser(description="Run Agentic Feature Pipeline for a GitHub Issue via Gemini")
     parser.add_argument("--issue-number", type=int, required=True, help="The GitHub Issue number")
@@ -40,9 +78,6 @@ def main():
     if not args.repo:
         print("Error: Repository not specified and GITHUB_REPOSITORY environment variable is not set.")
         sys.exit(1)
-
-    if not os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_API_KEY") and not os.getenv("LLM_API_KEY"):
-        print("Warning: API key for Gemini is not set in environment variables.")
 
     try:
         # 1. Issue von der GitHub REST API abrufen
@@ -64,9 +99,12 @@ def main():
         print("Starting Agentic Feature Pipeline Workflow...")
         result = run_feature_pipeline(task)
         
-        print("\nPipeline execution completed successfully!")
-        print(f"Result Status: {result.get('status')}")
-        print(f"Trace & Evidence saved to evidence/session-02/")
+        status = result.get('status', 'Completed')
+        summary = f"Pipeline finished with status: `{status}`. Traces and evidence successfully saved locally."
+        print(f"\nPipeline execution completed successfully!")
+
+        # 4. Automatisches Schließen des Issues (Done)
+        close_issue_with_success(args.repo, args.issue_number, summary)
         
     except Exception as exc:
         print(f"\nError executing pipeline for GitHub Issue: {exc}")
