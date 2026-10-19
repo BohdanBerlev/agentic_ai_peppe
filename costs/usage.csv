@@ -12,4 +12,4 @@ date,task_id,actor_type,actor,quantity,unit,credits,notes
 2026-10-19,SESSION-02,human,human_david,5,hours,500.0,Durchführung Dry Runs und Finalisierung Session 2
 2026-10-19,SESSION-02,human,human_maxim,5,hours,500.0,Code-Review und Finalisierung Session 2
 2026-10-19,SESSION-02,human,human_lars,5,hours,500.0,Code-Review und Finalisierung Session 2
-2026-10-19,SESSION-02,human,human_[Name 4],5,hours,500.0,Code-Review und Finalisierung Session 2
+2026-10-19,SESSION-02,human,human_mehrose,5,hours,500.0,Code-Review und Finalisierung Session 2
