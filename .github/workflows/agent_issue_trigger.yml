@@ -39,6 +39,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LLM_PROVIDER: "google"
+          LLM_MODEL: "gemini-1.5-pro"  # Erzwingt Google Gemini statt lokaler Modelle
           PYTHONPATH: "."
         run: |
           # Ermittelt die Issue-Nummer entweder aus dem Webhook-Event oder dem manuellen Input
