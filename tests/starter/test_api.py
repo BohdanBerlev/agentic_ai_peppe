@@ -9,4 +9,4 @@ def test_health_endpoint() -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "ok"
-    assert body["llm_provider"] in {"ollama", "openai_compatible"}
+    assert body["llm_provider"] in {"ollama", "openai_compatible", "google"}
