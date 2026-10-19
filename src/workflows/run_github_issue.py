@@ -1,7 +1,7 @@
 """
 GitHub Issue Runner mit Google Gemini Support
-Liest ein GitHub Issue aus, wandelt es in ein EngineeringTask-Modell um 
-und führt die Agenten-Pipeline aus.
+Liest ein GitHub Issue über die REST API aus, wandelt es in ein 
+EngineeringTask-Modell um und führt die Agenten-Pipeline aus.
 """
 
 import os
@@ -41,9 +41,8 @@ def main():
         print("Error: Repository not specified and GITHUB_REPOSITORY environment variable is not set.")
         sys.exit(1)
 
-    # Prüfen, ob Google API Key gesetzt ist
-    if not os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_API_KEY"):
-        print("Warning: GEMINI_API_KEY / GOOGLE_API_KEY is not set. Falling back to default or mock config.")
+    if not os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_API_KEY") and not os.getenv("LLM_API_KEY"):
+        print("Warning: API key for Gemini is not set in environment variables.")
 
     try:
         # 1. Issue von der GitHub REST API abrufen
@@ -61,7 +60,7 @@ def main():
             input_files=["src/app/main.py"]
         )
 
-        # 3. Die Feature Pipeline starten (nutzt intern Requirements, Architect, QA Agents)
+        # 3. Die Feature Pipeline starten
         print("Starting Agentic Feature Pipeline Workflow...")
         result = run_feature_pipeline(task)
         
