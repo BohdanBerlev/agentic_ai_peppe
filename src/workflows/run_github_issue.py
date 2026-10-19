@@ -139,7 +139,8 @@ def main():
             input_files=["src/app/main.py"]
         )
 
-        # 4. Die Feature Pipeline starten
+        # 4. Die Feature Pipeline starten (mit auto_mode_for_testing im State, falls die Pipeline das direkt unterstützt, 
+        # oder alternativ läuft sie im Headless-Modus durch das Fehlen einer echten Terminal-Eingabe)
         print("Starting Agentic Feature Pipeline Workflow...")
         result = run_feature_pipeline(task)
         
