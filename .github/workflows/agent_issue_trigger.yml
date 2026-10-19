@@ -2,7 +2,7 @@ name: Agentic Issue Reviewer (Google Gemini)
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, pinned]
 
 jobs:
   run-gemini-pipeline:
