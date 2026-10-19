@@ -268,11 +268,13 @@ def run_cost_analysis(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, default="Fasse die generellen Kosten und Dauer aller Logs zusammen.")
+    parser.add_argument("--dir", type=str, default="evidence/session-02") # NEU: Standardmäßig nur Session 2
     args = parser.parse_args()
 
-    print(f"Running Cost Agent with query: '{args.query}'...")
+    print(f"Running Cost Agent in directory '{args.dir}' with query: '{args.query}'...")
     try:
-        result = run_cost_analysis(user_query=args.query)
+        # NEU: Wir übergeben das Verzeichnis an die Analyse-Funktion
+        result = run_cost_analysis(log_directory=args.dir, user_query=args.query)
         print(result.model_dump_json(indent=2))
     except Exception as e:
         print(f"Agent failed: {e}")

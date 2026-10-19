@@ -1,21 +1,42 @@
+from contextlib import asynccontextmanager
+from typing import Optional, List
+
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
 import psycopg
+from psycopg_pool import ConnectionPool
 
 from src.app.db import database_health
 from src.app.settings import get_settings
 
 settings = get_settings()
-app = FastAPI(title=settings.app_name, version="0.1.0")
 
-# Pydantic-Modell für ein Work Item (unser Daten-Bauplan)
-class WorkItemCreate(BaseModel):
+# Globaler Connection Pool zur Vermeidung von Resource Exhaustion
+pool = ConnectionPool(settings.database_url, open=False)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    pool.open()
+    yield
+    pool.close()
+
+app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
+
+# --- Pydantic Models mit strikter Input-Validierung ---
+class WorkItemResponse(BaseModel):
+    id: int
     title: str
     description: Optional[str] = None
+    status: str
+    created_at: str
+
+class WorkItemCreate(BaseModel):
+    title: str = Field(..., max_length=100, description="Titel des Work Items")
+    description: Optional[str] = Field(default=None, max_length=1000)
 
 class WorkItemUpdate(BaseModel):
-    status: str
+    status: str = Field(..., max_length=50)
+
 
 @app.get("/health")
 def health() -> dict[str, str]:
@@ -25,98 +46,71 @@ def health() -> dict[str, str]:
         "llm_model": settings.llm_model,
     }
 
-
 @app.get("/db/health")
 def db_health() -> dict:
     try:
         return database_health()
-    except Exception as exc:
-        raise HTTPException(status_code=503, detail=f"database unavailable: {exc}") from exc
+    except Exception:
+        raise HTTPException(status_code=503, detail="Database unavailable")
 
+# --- Work Item Endpunkte ---
 
-# --- NEU: Work Item Endpunkte für den Dry Run ---
-
-@app.post("/work-items", status_code=201)
+@app.post("/work-items", status_code=201, response_model=WorkItemResponse)
 def create_work_item(item: WorkItemCreate):
-    """Erstellt ein neues Work Item in PostgreSQL."""
     try:
-        with psycopg.connect(settings.database_url) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO work_items (title, description) VALUES (%s, %s) RETURNING id, title, description, status, created_at",
                     (item.title, item.description)
                 )
                 row = cur.fetchone()
-                return {
-                    "id": row[0],
-                    "title": row[1],
-                    "description": row[2],
-                    "status": row[3],
-                    "created_at": row[4]
-                }
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Database error: {exc}")
+                return {"id": row[0], "title": row[1], "description": row[2], "status": row[3], "created_at": str(row[4])}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error during creation.")
 
-
-@app.get("/work-items")
+@app.get("/work-items", response_model=List[WorkItemResponse])
 def list_work_items():
-    """Listet alle Work Items aus PostgreSQL auf."""
     try:
-        with psycopg.connect(settings.database_url) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT id, title, description, status, created_at FROM work_items ORDER BY id DESC")
                 rows = cur.fetchall()
-                result = []
-                for row in rows:
-                    result.append({
-                        "id": row[0],
-                        "title": row[1],
-                        "description": row[2],
-                        "status": row[3],
-                        "created_at": row[4]
-                    })
-                return result
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Database error: {exc}")
+                return [
+                    {"id": r[0], "title": r[1], "description": r[2], "status": r[3], "created_at": str(r[4])}
+                    for r in rows
+                ]
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error during fetch.")
 
-
-@app.patch("/work-items/{item_id}")
+@app.patch("/work-items/{item_id}", response_model=WorkItemResponse)
 def update_work_item(item_id: int, item: WorkItemUpdate):
-    """Aktualisiert den Status eines Work Items (z.B. auf 'done')."""
     try:
-        with psycopg.connect(settings.database_url) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "UPDATE work_items SET status = %s WHERE id = %s RETURNING id, title, description, status",
+                    "UPDATE work_items SET status = %s WHERE id = %s RETURNING id, title, description, status, created_at",
                     (item.status, item_id)
                 )
                 row = cur.fetchone()
                 if not row:
                     raise HTTPException(status_code=404, detail="Work item not found")
-                return {
-                    "id": row[0],
-                    "title": row[1],
-                    "description": row[2],
-                    "status": row[3]
-                }
+                return {"id": row[0], "title": row[1], "description": row[2], "status": row[3], "created_at": str(row[4])}
     except HTTPException:
         raise
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Database error: {exc}")
-
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error during update.")
 
 @app.delete("/work-items/{item_id}", status_code=200)
 def delete_work_item(item_id: int):
-    """Löscht ein Work Item aus PostgreSQL."""
     try:
-        with psycopg.connect(settings.database_url) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM work_items WHERE id = %s RETURNING id", (item_id,))
-                row = cur.fetchone()
-                if not row:
+                if not cur.fetchone():
                     raise HTTPException(status_code=404, detail="Work item not found")
-                return {"status": "deleted", "id": row[0]}
+                return {"status": "deleted", "id": item_id}
     except HTTPException:
         raise
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Database error: {exc}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error during deletion.")

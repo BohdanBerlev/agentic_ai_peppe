@@ -7,3 +7,9 @@ date,task_id,actor_type,actor,quantity,unit,credits,notes
 2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1726,model=unknown; status=success; 11.3s; in=795; out=1082
 2026-10-16,STARTER-DEMO,agent,starter-file-review-agent,1,run,1.1533,model=qwen3:4b; status=success; 12.0s; in=265; out=693
 2026-10-12,TERMIN-1,human,PepeGroup (6),30,hours,3000.0,Termin 1 session 6 members x 5h (estimate)
+2026-10-18,DEV-001,human,human_david,5,hours,500.0,Implementierung der kompletten LangGraph Agenten-Infrastruktur
+2026-10-19,DRYRUN-002,agent,feature_pipeline_workflow,1,run,16.5785,model=gemini-3.8-flash; status=success; 919.5s; calls=7; Bereinigte LLM-Gesamtkosten Dry Run 002
+2026-10-19,SESSION-02,human,human_david,5,hours,500.0,Durchführung Dry Runs und Finalisierung Session 2
+2026-10-19,SESSION-02,human,human_maxim,5,hours,500.0,Code-Review und Finalisierung Session 2
+2026-10-19,SESSION-02,human,human_lars,5,hours,500.0,Code-Review und Finalisierung Session 2
+2026-10-19,SESSION-02,human,human_[Name 4],5,hours,500.0,Code-Review und Finalisierung Session 2
