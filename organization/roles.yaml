@@ -7,10 +7,13 @@
 #
 # End of Session 2:
 # - at least (12 - number_of_human_team_members) roles must be operationally
-#   supported by an agent or hybrid implementation.
+#   supported by an agent or hybrid implementation (4 people -> 8 roles).
 # - a role counts only when team-owned executable evidence exists.
 # - one agent may support multiple roles only if role-specific behavior/output
 #   is technically distinguishable and traceable.
+#
+# Source: company wiki (Home.md). Wiki column "current_actor_type" holds the
+# current actor (name / "agent" / "-"); status "backlog" mapped to "planned".
 
 roles:
   - id: managing_director_customer_lead
@@ -27,10 +30,10 @@ roles:
   - id: product_owner_requirements
     title: Product Owner / Requirements Engineer
     responsibility: Requirements, user stories, acceptance criteria, backlog value
-    current_actor_type: human
-    current_actor: Mehrose Farooq
+    current_actor_type: agent
+    current_actor: requirements_agent
     target_actor_type: agent
-    target_actor: Requirements_Agent
+    target_actor: requirements_agent
     accountable_human: Mehrose Farooq
     human_approval_required: true
     implementation_status: planned
@@ -39,21 +42,21 @@ roles:
     title: Project Manager
     responsibility: Planning, task allocation, progress, dependencies, delivery risk
     current_actor_type: human
-    current_actor: Mehrose Farooq
+    current_actor: Lars Boos
     target_actor_type: hybrid
-    target_actor: PM_Agent
-    accountable_human: Mehrose Farooq
+    target_actor: requirements_agent
+    accountable_human: Lars Boos
     human_approval_required: false
     implementation_status: planned
 
   - id: software_architect
     title: Software Architect
     responsibility: System architecture, interfaces, ADRs, technical standards
-    current_actor_type: human
-    current_actor: Bohdan Berlev
-    target_actor_type: hybrid
-    target_actor: Architect_Agent
-    accountable_human: Bohdan Berlev
+    current_actor_type: agent
+    current_actor: architect_agent
+    target_actor_type: agent
+    target_actor: architect_agent
+    accountable_human: David Pisarkiewicz
     human_approval_required: true
     implementation_status: planned
 
@@ -61,9 +64,9 @@ roles:
     title: Backend / API Engineer
     responsibility: FastAPI services, business logic, API contracts
     current_actor_type: human
-    current_actor: Maxim Bers, Lars Boos
-    target_actor_type: hybrid
-    target_actor: Backend_Agent
+    current_actor: TBD
+    target_actor_type: agent
+    target_actor: TBD
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -72,9 +75,9 @@ roles:
     title: Data & RAG Engineer
     responsibility: PostgreSQL, pgvector, ingestion, chunking, retrieval, embeddings
     current_actor_type: human
-    current_actor: Maxim Bers
-    target_actor_type: hybrid
-    target_actor: RAG_Agent
+    current_actor: TBD
+    target_actor_type: agent
+    target_actor: TBD
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -83,9 +86,9 @@ roles:
     title: Agent Engineer
     responsibility: LangGraph workflows, LangChain integration, agent state and tools
     current_actor_type: human
-    current_actor: David Pisarkiewicz, Heyen Leon
+    current_actor: David Pisarkiewicz
     target_actor_type: hybrid
-    target_actor: Graph_Builder_Agent
+    target_actor: requirements_agent
     accountable_human: David Pisarkiewicz
     human_approval_required: false
     implementation_status: planned
@@ -94,9 +97,9 @@ roles:
     title: Integration Engineer
     responsibility: Agent-to-agent and agent-to-system interfaces and handovers
     current_actor_type: human
-    current_actor: David Pisarkiewicz, Heyen Leon
-    target_actor_type: agent
-    target_actor: Integration_Agent
+    current_actor: David Pisarkiewicz
+    target_actor_type: hybrid
+    target_actor: requirements_agent
     accountable_human: David Pisarkiewicz
     human_approval_required: false
     implementation_status: planned
@@ -104,11 +107,11 @@ roles:
   - id: qa_test_engineer
     title: QA & Test Engineer
     responsibility: pytest, regression testing, agent evaluation, quality evidence
-    current_actor_type: human
-    current_actor: Maxim Bers, Lars Boos
+    current_actor_type: agent
+    current_actor: qa_security_agent
     target_actor_type: agent
-    target_actor: QA_Agent
-    accountable_human: Maxim Bers
+    target_actor: qa_security_agent
+    accountable_human: Lars Boos
     human_approval_required: true
     implementation_status: planned
 
@@ -116,20 +119,20 @@ roles:
     title: DevOps Engineer
     responsibility: Docker, GitHub Actions, build, deployment and reproducibility
     current_actor_type: human
-    current_actor: Bohdan Berlev
-    target_actor_type: human
-    target_actor: Bohdan Berlev
-    accountable_human: Bohdan Berlev
+    current_actor: TBD
+    target_actor_type: hybrid
+    target_actor: TBD
+    accountable_human: Maxim Bers
     human_approval_required: true
     implementation_status: planned
 
   - id: ai_safety_security_engineer
     title: AI Safety & Security Engineer
     responsibility: Tool permissions, guardrails, secrets, prompt and agent risks
-    current_actor_type: human
-    current_actor: Lars Boos, Bohdan Berlev
-    target_actor_type: hybrid
-    target_actor: Security_Agent
+    current_actor_type: agent
+    current_actor: qa_security_agent
+    target_actor_type: agent
+    target_actor: qa_security_agent
     accountable_human: Lars Boos
     human_approval_required: true
     implementation_status: planned
@@ -137,10 +140,10 @@ roles:
   - id: cost_observability_engineer
     title: Cost & Observability Engineer
     responsibility: Traces, runtime, token usage, cost model and cost optimization
-    current_actor_type: agent
-    current_actor: Cost_Agent
-    target_actor_type: agent
-    target_actor: Cost_Agent
-    accountable_human: Lars Boos
+    current_actor_type: human
+    current_actor: Maxim Bers
+    target_actor_type: hybrid
+    target_actor: cost_agent
+    accountable_human: Maxim Bers
     human_approval_required: false
-    implementation_status: operational
+    implementation_status: planned
