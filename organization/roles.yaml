@@ -11,9 +11,6 @@
 # - a role counts only when team-owned executable evidence exists.
 # - one agent may support multiple roles only if role-specific behavior/output
 #   is technically distinguishable and traceable.
-#
-# Source: company wiki (Home.md). Wiki column "current_actor_type" holds the
-# current actor (name / "agent" / "-"); status "backlog" mapped to "planned".
 
 roles:
   - id: managing_director_customer_lead
@@ -23,6 +20,7 @@ roles:
     current_actor: Mehrose Farooq
     target_actor_type: human
     target_actor: Mehrose Farooq
+    supporting_agent: none
     accountable_human: Mehrose Farooq
     human_approval_required: true
     implementation_status: planned
@@ -34,9 +32,10 @@ roles:
     current_actor: requirements_agent
     target_actor_type: agent
     target_actor: requirements_agent
+    supporting_agent: requirements_agent
     accountable_human: Mehrose Farooq
     human_approval_required: true
-    implementation_status: planned
+    implementation_status: operational
 
   - id: project_manager
     title: Project Manager
@@ -45,9 +44,10 @@ roles:
     current_actor: Lars Boos
     target_actor_type: hybrid
     target_actor: requirements_agent
+    supporting_agent: requirements_agent
     accountable_human: Lars Boos
     human_approval_required: false
-    implementation_status: planned
+    implementation_status: operational
 
   - id: software_architect
     title: Software Architect
@@ -56,9 +56,10 @@ roles:
     current_actor: architect_agent
     target_actor_type: agent
     target_actor: architect_agent
+    supporting_agent: architect_agent
     accountable_human: David Pisarkiewicz
     human_approval_required: true
-    implementation_status: planned
+    implementation_status: operational
 
   - id: backend_api_engineer
     title: Backend / API Engineer
@@ -66,7 +67,8 @@ roles:
     current_actor_type: human
     current_actor: TBD
     target_actor_type: agent
-    target_actor: TBD
+    target_actor: implementation_agent
+    supporting_agent: implementation_agent
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -77,7 +79,8 @@ roles:
     current_actor_type: human
     current_actor: TBD
     target_actor_type: agent
-    target_actor: TBD
+    target_actor: implementation_agent
+    supporting_agent: implementation_agent
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -89,9 +92,10 @@ roles:
     current_actor: David Pisarkiewicz
     target_actor_type: hybrid
     target_actor: requirements_agent
+    supporting_agent: requirements_agent
     accountable_human: David Pisarkiewicz
     human_approval_required: false
-    implementation_status: planned
+    implementation_status: operational
 
   - id: integration_engineer
     title: Integration Engineer
@@ -100,9 +104,10 @@ roles:
     current_actor: David Pisarkiewicz
     target_actor_type: hybrid
     target_actor: requirements_agent
+    supporting_agent: requirements_agent
     accountable_human: David Pisarkiewicz
     human_approval_required: false
-    implementation_status: planned
+    implementation_status: operational
 
   - id: qa_test_engineer
     title: QA & Test Engineer
@@ -111,9 +116,10 @@ roles:
     current_actor: qa_security_agent
     target_actor_type: agent
     target_actor: qa_security_agent
+    supporting_agent: qa_security_agent
     accountable_human: Lars Boos
     human_approval_required: true
-    implementation_status: planned
+    implementation_status: operational
 
   - id: devops_engineer
     title: DevOps Engineer
@@ -122,6 +128,7 @@ roles:
     current_actor: TBD
     target_actor_type: hybrid
     target_actor: TBD
+    supporting_agent: none
     accountable_human: Maxim Bers
     human_approval_required: true
     implementation_status: planned
@@ -133,9 +140,10 @@ roles:
     current_actor: qa_security_agent
     target_actor_type: agent
     target_actor: qa_security_agent
+    supporting_agent: qa_security_agent
     accountable_human: Lars Boos
     human_approval_required: true
-    implementation_status: planned
+    implementation_status: operational
 
   - id: cost_observability_engineer
     title: Cost & Observability Engineer
@@ -144,6 +152,7 @@ roles:
     current_actor: Maxim Bers
     target_actor_type: hybrid
     target_actor: cost_agent
+    supporting_agent: cost_agent
     accountable_human: Maxim Bers
     human_approval_required: false
-    implementation_status: planned
+    implementation_status: operational
