@@ -7,12 +7,12 @@ Agenten, mit klaren Rollen und messbaren Kosten.
 
 ## Team
 
-- **Mehrose Farooq** ([@Vanitas50](https://github.com/Vanitas50)) – Managing Director, Product Owner, Project Manager
-- **Bohdan Berlev** ([@BohdanBerlev](https://github.com/BohdanBerlev)) – Software Architect, DevOps
-- **Maxim Bers** ([@Valik71186](https://github.com/Valik71186)) – Backend/API, Data & RAG, QA
-- **Lars Boos** ([@Lbo114](https://github.com/Lbo114)) – AI Safety & Security, Cost & Observability, Backend/API, QA
-- **David Pisarkiewicz** ([@DavidPisark](https://github.com/DavidPisark)) – Agent Engineer, Integration
-- **Heyen Leon** ([@heyenleon](https://github.com/heyenleon)) – Agent Engineer, Integration
+- **Mehrose Farooq** ([@Vanitas50](https://github.com/Vanitas50)) – Managing Director, Product Owner
+- **Lars Boos** ([@Lbo114](https://github.com/Lbo114)) – Project Manager, QA & Test, AI Safety & Security
+- **Maxim Bers** ([@Valik71186](https://github.com/Valik71186)) – Backend/API, Data & RAG, DevOps, Cost & Observability
+- **David Pisarkiewicz** ([@DavidPisark](https://github.com/DavidPisark)) – Software Architect, Agent Engineer, Integration
+
+> 4 Mitglieder → bis Ende Termin 2 mindestens **8 Rollen** operativ agentisch/hybrid.
 
 ## Zusammenarbeit
 

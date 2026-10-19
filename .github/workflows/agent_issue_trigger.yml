@@ -1,0 +1,35 @@
+name: Agentic Issue Reviewer (Google Gemini)
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  run-gemini-pipeline:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python 3.12 einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Pipeline mit Google AI Studio ausführen
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LLM_PROVIDER: "google"  # Übergibt den Provider an eure LLM-Factory
+        run: |
+          python -m src.workflows.run_github_issue --issue-number ${{ github.event.issue.number }}
