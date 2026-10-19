@@ -1,7 +1,7 @@
 """
-GitHub Issue Runner mit Google Gemini Support, In-Progress-Markierung und Auto-Close
+GitHub Issue Runner mit Google Gemini Support, In-Progress-Markierung und intelligenter Status-Prüfung.
 Liest ein GitHub Issue über die REST API aus, führt die Agenten-Pipeline aus 
-und aktualisiert den Status auf GitHub automatisch.
+und aktualisiert das Issue auf GitHub basierend auf dem Pipeline-Ergebnis.
 """
 
 import os
@@ -50,9 +50,23 @@ def mark_issue_in_progress(repo: str, issue_number: int):
     }
     httpx.post(comment_url, headers=headers, json=comment_payload)
 
-    # 2. Label 'in-progress' hinzufügen (hilft dem Project Board bei der Automatisierung)
+    # 2. Label 'in-progress' hinzufügen
     label_url = f"https://api.github.com/repos/{repo}/issues/{issue_number}/labels"
     httpx.post(label_url, headers=headers, json={"labels": ["in-progress"]})
+
+def post_comment_only(repo: str, issue_number: int, message: str):
+    """Postet nur einen Kommentar (z. B. bei Fehlern), ohne das Issue zu schließen."""
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        return
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+    comment_url = f"https://api.github.com/repos/{repo}/issues/{issue_number}/comments"
+    httpx.post(comment_url, headers=headers, json={"body": message})
 
 def close_issue_with_success(repo: str, issue_number: int, summary: str):
     """Postet einen Abschlusskommentar und schließt das GitHub Issue automatisch (Done)."""
@@ -129,12 +143,18 @@ def main():
         print("Starting Agentic Feature Pipeline Workflow...")
         result = run_feature_pipeline(task)
         
-        status = result.get('status', 'Completed')
-        summary = f"Pipeline finished with status: `{status}`. Traces and evidence successfully saved locally."
-        print(f"\nPipeline execution completed successfully!")
+        status = result.get('status', 'completed')
+        print(f"\nPipeline finished with status: {status}")
 
-        # 5. Automatisches Schließen des Issues (Done) nach erfolgreichem Durchlauf
-        close_issue_with_success(args.repo, args.issue_number, summary)
+        # 5. Intelligente Prüfung: Nur bei echten Fehlern offen lassen, sonst auf Done setzen
+        if status in ['error', 'failed']:
+            error_summary = f"⚠️ **Agentic Pipeline ist auf einen Fehler gelaufen!**\n\nStatus: `{status}`. Bitte prüfe die Logs in den GitHub Actions. Das Issue bleibt offen zur manuellen Überprüfung."
+            post_comment_only(args.repo, args.issue_number, error_summary)
+            print("Pipeline encountered an error. Issue left open for review.")
+            sys.exit(1)
+        else:
+            success_summary = f"Pipeline finished with status: `{status}`. Traces and evidence successfully saved locally."
+            close_issue_with_success(args.repo, args.issue_number, success_summary)
         
     except Exception as exc:
         print(f"\nError executing pipeline for GitHub Issue: {exc}")
