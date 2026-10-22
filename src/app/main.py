@@ -21,4 +21,4 @@ def db_health() -> dict:
     try:
         return database_health()
     except Exception as exc:  # endpoint should report failure without crashing app
-        raise HTTPException(status_code=503, detail=f"database unavailable: {exc}") from exc
+        raise HTTPException(status_code=503, detail="database unavailable") from exc

@@ -87,3 +87,7 @@ One agent implementation may support multiple roles only when role-specific beha
 The updated provider limits, tracing helpers, reference runner, Docker exclusions, log mount, CI database service and all tests under `tests/starter/` remain supplied infrastructure. Do not score their adoption as team achievement. `pytest.ini` is also excluded.
 
 Existing teams retain the starter commit/ZIP they actually used as their initial baseline and record the revision-4 update commit separately. Use both when distinguishing team work from later supplied fixes.
+
+## Session 3 infrastructure update (revision 5)
+
+Course documents under `task sheets/session-03/`, technical notes, unchanged templates under `docs/templates/session-03/`, CI evidence capture, generic DB-health errors, optional factory controls and `tests/starter/test_session_03_infrastructure.py` are supplied infrastructure, not student achievement. Do not overwrite team implementations when integrating this update. Customer features, migrations, own persistence tests and own human-gate logic remain team work. Session 3 uses its own announced rubric; do not retroactively rescore Sessions 1/2.
