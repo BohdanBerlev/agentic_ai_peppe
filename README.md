@@ -1,21 +1,19 @@
 ## Team setup
 
-Die folgende Übersicht dokumentiert die Entwicklungsumgebungen und die vom
-Team gemeldeten Setup-Ergebnisse für Termin 1.
+Die folgende Übersicht dokumentiert das aktuelle Kernteam (4 aktive Mitglieder ab Termin 2; 2 ursprüngliche Mitglieder aus Termin 1 sind ausgeschieden) sowie die Entwicklungsumgebungen:
 
 | Teammitglied | Betriebssystem | Entwicklungsumgebung | Python | LLM-Zugang | Modell | Testergebnisse |
 |---|---|---|---|---|---|---|
-| Leon | macOS | VS Code | 3.12 | oMLX |  `Qwen3.8 27B` | Erfolgreich |
-| Maxim | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
-| Mero | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
-| David | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
-| Lars | Windows 11 | IntelliJ IDEA | 3.12.0 | Ollama |  `Qwen 3.5 9B` | Erfolgreich |
-| Bohdan | Linux | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
+| Maxim Bers | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
+| Mehrose Farooq | macOS | PyCharm | 3.12 | Ollama | `qwen3:4b` | Erfolgreich |
+| David Pisarkiewicz | Windows 11 (HP Envy x360) | VS Code | 3.12 | Google AI Studio (`google`) | `gemini-3.8-flash` | Erfolgreich |
+| Lars Boos | Windows 11 | IntelliJ IDEA | 3.12.0 | Ollama | `Qwen 3.5 9B` | Erfolgreich |
 
-### Abweichungen vom Starter-Setup
+### Abweichungen & Hinweise zum Setup
 
-- **Leon:** oMLX mit Qwen3.8 27B statt Ollama mit `qwen3:4b`
-- **Lars:** Qwen 3.5 9B statt des Starter-Modells `qwen3:4b`
+- **Teamgröße:** In Termin 1 bestand die Gruppe aus 6 Personen (inkl. Leon und Bohdan, daher 30h in der historischen Kostenzeile `TERMIN-1` in `costs/usage.csv`). Seit Termin 2 besteht das aktive Team aus **4 Mitgliedern** (siehe `organization/company.md`), weshalb mindestens **8 Rollen** operativ durch Agenten/Hybrid-Workflows abgedeckt werden.
+- **David (Begründung für Google AI Studio / `gemini-3.8-flash`):** Nach notwendigem Gerätewechsel von macOS auf einen älteren Windows-11-Laptop (HP Envy x360) mit VS Code ist die lokale Ausführung von Ollama hardwareseitig nicht mehr stabil möglich. Da der HAW-ICC-Endpunkt seitens des Kurses noch nicht freigeschaltet wurde, nutzt David über die zentrale Provider-Factory (`src/llm/factory.py`) die Google AI Studio API (`LLM_PROVIDER=google`, `LLM_MODEL=gemini-3.8-flash`). Sobald ICC-Zugangsdaten vorliegen, kann ohne Codeänderung per `.env` auf `openai_compatible` umgestellt werden.
+- **Lars:** Qwen 3.5 9B statt des Starter-Modells `qwen3:4b`.
 
 
 # Agentic AI Software Company – Starter Repository

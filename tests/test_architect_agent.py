@@ -60,3 +60,21 @@ def test_architect_run_mocked(tmp_path):
     assert trace_data["task_id"] == "ARCH-TEST-001"
     assert trace_data["agent"] == "architect_agent"
     assert "read_repository_text_file" in trace_data["tools"]
+
+
+def test_architect_missing_file_escalates_without_llm_call(tmp_path):
+    class ShouldNotBeCalledLLM:
+        def invoke(self, messages):
+            raise AssertionError("LLM must not be called when file is missing")
+
+    trace_file = tmp_path / "arch_missing.jsonl"
+    result = run_architect_review(
+        file_path="src/app/missing_file.py",
+        task_id="ARCH-MISSING-001",
+        llm=ShouldNotBeCalledLLM(),
+        trace_file=str(trace_file),
+    )
+    assert result["status_str"] == "escalated"
+    trace_data = json.loads(trace_file.read_text(encoding="utf-8").splitlines()[0])
+    assert trace_data["calls"] == 0
+    assert trace_data["status"] == "escalated"

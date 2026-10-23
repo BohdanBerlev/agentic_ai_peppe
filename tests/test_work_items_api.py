@@ -74,3 +74,61 @@ def test_delete_work_item(mock_pool):
     res = client.delete("/work-items/1")
     assert res.status_code == 200
     assert res.json()["status"] == "deleted"
+
+
+def test_work_items_real_postgres_lifecycle():
+    """Real PostgreSQL CRUD lifecycle test (#6): verifies actual DB persistence when PostgreSQL is reachable."""
+    import os
+    import psycopg
+    from src.app.settings import get_settings
+
+    settings = get_settings()
+    try:
+        with psycopg.connect(settings.database_url, connect_timeout=2) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS work_items (
+                        id SERIAL PRIMARY KEY,
+                        title VARCHAR(255) NOT NULL,
+                        description TEXT,
+                        status VARCHAR(50) DEFAULT 'open',
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """
+                )
+            conn.commit()
+    except Exception as exc:
+        if os.getenv("STARTER_DATABASE_TEST") == "1":
+            pytest.fail(f"PostgreSQL must be reachable in CI, but connection failed: {exc}")
+        pytest.skip(f"Local PostgreSQL not running ({exc}); skipping live DB lifecycle test.")
+
+    with TestClient(app) as live_client:
+        # 1. CREATE
+        create_res = live_client.post(
+            "/work-items",
+            json={"title": "Real DB Persistence Check", "description": "End-to-end PostgreSQL lifecycle"},
+        )
+        assert create_res.status_code == 201
+        created = create_res.json()
+        item_id = created["id"]
+        assert created["status"] == "open"
+
+        # 2. READ / LIST
+        list_res = live_client.get("/work-items")
+        assert list_res.status_code == 200
+        assert any(i["id"] == item_id and i["title"] == "Real DB Persistence Check" for i in list_res.json())
+
+        # 3. UPDATE (PATCH)
+        patch_res = live_client.patch(f"/work-items/{item_id}", json={"status": "in_progress"})
+        assert patch_res.status_code == 200
+        assert patch_res.json()["status"] == "in_progress"
+
+        # 4. DELETE
+        del_res = live_client.delete(f"/work-items/{item_id}")
+        assert del_res.status_code == 200
+        assert del_res.json() == {"status": "deleted", "id": item_id}
+
+        # 5. VERIFY DELETION (404 on second delete)
+        del_again = live_client.delete(f"/work-items/{item_id}")
+        assert del_again.status_code == 404

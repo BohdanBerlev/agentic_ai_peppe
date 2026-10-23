@@ -49,7 +49,7 @@ def get_chat_model(settings: Settings | None = None) -> Any:
             max_bucket_size=1
         )
         return ChatGoogleGenerativeAI(
-            model="gemini-3.8-flash",
+            model=settings.llm_model or "gemini-3.8-flash",
             rate_limiter=rate_limiter,
             temperature=settings.llm_temperature,
             api_key=settings.llm_api_key

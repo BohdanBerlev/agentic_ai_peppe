@@ -1,10 +1,15 @@
 """
-QA & Security Agent (QA & Test and AI Safety & Security Roles)
-Evaluates architecture findings, identifies security risks, and assesses test requirements.
+QA & Security Agent
+Provides two distinct, traceable engineering capabilities:
+1. ai_safety_security_engineer (run_security_audit): Evaluates code & architecture for security risks, guardrails, and secret exposure.
+2. qa_test_engineer (run_qa_test_execution): Actually executes pytest on target test files, records test execution evidence, and evaluates coverage/quality.
+Also maintains run_qa_security_check for backwards-compatibility.
 """
 
 import argparse
 import json
+import subprocess
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -14,6 +19,12 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
+from src.agents.common import (
+    REPO_ROOT,
+    clean_json_block,
+    extract_message_text,
+    read_repository_text_file,
+)
 from src.app.settings import get_settings
 from src.llm.factory import get_chat_model
 from src.observability.tracing import (
@@ -22,62 +33,41 @@ from src.observability.tracing import (
     usage_from_message,
 )
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-
 
 class QASecurityReport(BaseModel):
-    status_str: Literal["approved", "changes_requested", "unparseable"] = "approved"
+    status_str: Literal["approved", "changes_requested", "unparseable", "escalated"] = "approved"
     summary: str
     security_risks: list[str] = Field(default_factory=list)
+
+
+class QATestExecutionReport(BaseModel):
+    status_str: Literal["approved", "changes_requested", "unparseable", "escalated"] = "approved"
+    summary: str
+    tests_executed: bool = False
+    tests_passed: bool = False
+    exit_code: int = -1
+    test_command: str = ""
+    test_output_excerpt: str = ""
+    quality_findings: list[str] = Field(default_factory=list)
 
 
 class QASecurityState(TypedDict, total=False):
     architecture_report: dict[str, Any]
     target_file: str
+    test_targets: list[str]
+    role_mode: str
     source_snippet: str
+    pytest_result: dict[str, Any]
     result: dict[str, Any]
     error: str
 
 
-def read_repository_text_file(relative_path: str) -> str:
-    """Sicherer Dateizugriff zur Verifikation von Quelltext-Sicherheitsrisiken."""
-    requested = (REPO_ROOT / relative_path).resolve()
-    try:
-        requested.relative_to(REPO_ROOT)
-    except ValueError as exc:
-        raise ValueError(f"Path escapes repository root: {relative_path}") from exc
-    if not requested.is_file():
-        raise FileNotFoundError(f"File not found: {relative_path}")
-    return requested.read_text(encoding="utf-8")
-
-
 def _message_text(message: Any) -> str:
-    content = getattr(message, "content", "")
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        parts: list[str] = []
-        for item in content:
-            if isinstance(item, str):
-                parts.append(item)
-            elif isinstance(item, dict) and isinstance(item.get("text"), str):
-                parts.append(item["text"])
-        return "\n".join(parts)
-    return str(content)
+    return extract_message_text(message)
 
 
 def _parse_qa_result(text: str) -> QASecurityReport:
-    cleaned = text.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.strip("`")
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:].lstrip()
-
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
-    if start >= 0 and end > start:
-        cleaned = cleaned[start : end + 1]
-
+    cleaned = clean_json_block(text)
     try:
         data = json.loads(cleaned)
         return QASecurityReport.model_validate(data)
@@ -89,31 +79,106 @@ def _parse_qa_result(text: str) -> QASecurityReport:
         )
 
 
-def build_qa_security_graph(llm: Any | None = None, *, trace_context: dict[str, Any] | None = None):
+def execute_repository_pytest(test_targets: list[str] | None = None, timeout_seconds: int = 30) -> dict[str, Any]:
+    """Safely execute pytest on repository test files and return structured execution evidence."""
+    targets = test_targets or ["tests/test_work_items_api.py"]
+    validated_targets: list[str] = []
+    for t in targets:
+        resolved = (REPO_ROOT / t).resolve()
+        try:
+            resolved.relative_to(REPO_ROOT)
+        except ValueError as exc:
+            raise ValueError(f"Security violation: test path escapes repository root: {t}") from exc
+        if not resolved.exists():
+            raise FileNotFoundError(f"Test target not found: {t}")
+        validated_targets.append(t)
+
+    cmd = [sys.executable, "-m", "pytest", "-q", *validated_targets]
+    try:
+        completed = subprocess.run(
+            cmd,
+            cwd=str(REPO_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+        stdout_excerpt = (completed.stdout + "\n" + completed.stderr).strip()[:1200]
+        return {
+            "tests_executed": True,
+            "tests_passed": completed.returncode == 0,
+            "exit_code": completed.returncode,
+            "command": " ".join(["python", "-m", "pytest", "-q", *validated_targets]),
+            "output_excerpt": stdout_excerpt,
+        }
+    except Exception as exc:
+        return {
+            "tests_executed": False,
+            "tests_passed": False,
+            "exit_code": -1,
+            "command": " ".join(["python", "-m", "pytest", "-q", *validated_targets]),
+            "output_excerpt": f"pytest execution failed: {exc}",
+        }
+
+
+def build_qa_security_graph(
+    llm: Any | None = None,
+    *,
+    trace_context: dict[str, Any] | None = None,
+    run_tests: bool = False,
+):
     llm = llm or get_chat_model()
     trace_ctx = trace_context if trace_context is not None else {"tools": [], "calls": 0}
 
     def inspect_file(state: QASecurityState) -> QASecurityState:
         target = state.get("target_file")
+        updates: QASecurityState = {"source_snippet": ""}
         if target:
             trace_ctx["tools"].append("read_repository_text_file")
             try:
                 snippet = read_repository_text_file(target)
-                return {"source_snippet": snippet[:1500]}
+                updates["source_snippet"] = snippet[:1500]
             except Exception as exc:
                 return {"error": str(exc)}
-        return {"source_snippet": ""}
+
+        if run_tests or state.get("role_mode") == "qa_test_engineer":
+            trace_ctx["tools"].append("execute_repository_pytest")
+            try:
+                pytest_res = execute_repository_pytest(state.get("test_targets"))
+                updates["pytest_result"] = pytest_res
+            except Exception as exc:
+                return {"error": str(exc)}
+
+        return updates
+
+    def route_after_inspect(state: QASecurityState):
+        return END if state.get("error") else "analyze"
 
     def analyze(state: QASecurityState) -> QASecurityState:
-        system = SystemMessage(
-            content=(
-                "You are the QA & Security Engineer. Evaluate the architecture report and source code for "
-                "functional correctness, test coverage, and security risks (e.g. injection, data validation). "
-                "status_str must be 'approved' or 'changes_requested'. Return ONLY valid JSON matching this schema: "
-                '{"status_str": "approved", "summary": "QA evaluation summary", "security_risks": ["risk 1"]}'
+        role_mode = state.get("role_mode", "ai_safety_security_engineer")
+        pytest_res = state.get("pytest_result")
+
+        if role_mode == "qa_test_engineer" and pytest_res is not None:
+            system = SystemMessage(
+                content=(
+                    "You are the QA & Test Engineer. Evaluate the executed pytest results and source code for "
+                    "test coverage and quality. Return ONLY valid JSON matching this schema: "
+                    '{"status_str": "approved", "summary": "QA test evaluation", "security_risks": ["finding 1"]}'
+                )
             )
-        )
+        else:
+            system = SystemMessage(
+                content=(
+                    "You are the AI Safety & Security Engineer. Evaluate the architecture report and source code for "
+                    "security risks (injection, secret exposure, guardrails, data validation). "
+                    "status_str must be 'approved' or 'changes_requested'. Return ONLY valid JSON matching this schema: "
+                    '{"status_str": "approved", "summary": "Security audit summary", "security_risks": ["risk 1"]}'
+                )
+            )
+
         content_prompt = f"Architecture Report:\n{json.dumps(state.get('architecture_report', {}), indent=2)}"
+        if pytest_res is not None:
+            content_prompt += f"\n\nExecuted pytest result:\n{json.dumps(pytest_res, indent=2)}"
         if state.get("source_snippet"):
             content_prompt += f"\n\nSource code sample:\n{state['source_snippet']}"
 
@@ -126,6 +191,17 @@ def build_qa_security_graph(llm: Any | None = None, *, trace_context: dict[str, 
 
         report = _parse_qa_result(_message_text(response))
         report_dict = report.model_dump()
+
+        # Deterministic QA guardrail: if real pytest execution failed, status CANNOT be 'approved'
+        if pytest_res is not None:
+            report_dict["pytest_execution"] = pytest_res
+            if not pytest_res.get("tests_passed", False) and report_dict.get("status_str") == "approved":
+                report_dict["status_str"] = "changes_requested"
+                report_dict["summary"] = (
+                    f"[Guardrail: pytest failed (exit={pytest_res.get('exit_code')})] " + report_dict.get("summary", "")
+                )
+
+        report_dict["role"] = role_mode
         report_dict["_usage"] = (in_tok, out_tok)
         return {"result": report_dict}
 
@@ -133,15 +209,64 @@ def build_qa_security_graph(llm: Any | None = None, *, trace_context: dict[str, 
     builder.add_node("inspect_file", inspect_file)
     builder.add_node("analyze", analyze)
     builder.add_edge(START, "inspect_file")
-    builder.add_edge("inspect_file", "analyze")
+    builder.add_conditional_edges("inspect_file", route_after_inspect, ["analyze", END])
     builder.add_edge("analyze", END)
     return builder.compile()
 
 
-def run_qa_security_check(
+def run_security_audit(
     architecture_report: dict[str, Any],
     target_file: str | None = "src/app/main.py",
     *,
+    task_id: str = "SEC-001",
+    workflow_id: str | None = None,
+    llm: Any | None = None,
+    trace_file: str | None = None,
+) -> dict[str, Any]:
+    """AI Safety & Security Engineer role entry point."""
+    return _run_qa_or_security(
+        architecture_report=architecture_report,
+        target_file=target_file,
+        role_mode="ai_safety_security_engineer",
+        run_tests=False,
+        task_id=task_id,
+        workflow_id=workflow_id,
+        llm=llm,
+        trace_file=trace_file,
+    )
+
+
+def run_qa_test_execution(
+    architecture_report: dict[str, Any],
+    target_file: str | None = "src/app/main.py",
+    test_targets: list[str] | None = None,
+    *,
+    task_id: str = "QA-001",
+    workflow_id: str | None = None,
+    llm: Any | None = None,
+    trace_file: str | None = None,
+) -> dict[str, Any]:
+    """QA & Test Engineer role entry point: executes real pytest suite and evaluates test results."""
+    return _run_qa_or_security(
+        architecture_report=architecture_report,
+        target_file=target_file,
+        test_targets=test_targets,
+        role_mode="qa_test_engineer",
+        run_tests=True,
+        task_id=task_id,
+        workflow_id=workflow_id,
+        llm=llm,
+        trace_file=trace_file,
+    )
+
+
+def _run_qa_or_security(
+    architecture_report: dict[str, Any],
+    target_file: str | None = "src/app/main.py",
+    test_targets: list[str] | None = None,
+    *,
+    role_mode: Literal["qa_test_engineer", "ai_safety_security_engineer"] = "qa_test_engineer",
+    run_tests: bool = False,
     task_id: str = "QA-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -153,56 +278,95 @@ def run_qa_security_check(
     started = time.perf_counter()
     ctx: dict[str, Any] = {"tools": [], "calls": 0, "input_tokens": None, "output_tokens": None}
 
-    graph = build_qa_security_graph(llm=llm, trace_context=ctx)
+    graph = build_qa_security_graph(llm=llm, trace_context=ctx, run_tests=run_tests)
     state = graph.invoke(
-        {"architecture_report": architecture_report, "target_file": target_file or ""},
+        {
+            "architecture_report": architecture_report,
+            "target_file": target_file or "",
+            "test_targets": test_targets or ["tests/test_work_items_api.py"],
+            "role_mode": role_mode,
+        },
         {"recursion_limit": 10},
     )
     duration = time.perf_counter() - started
 
     if state.get("error"):
         report = QASecurityReport(
-            status_str="unparseable",
-            summary=f"Analysis error: {state['error']}",
-            security_risks=["Analysis failed due to runtime error."],
+            status_str="escalated",
+            summary=f"Context file error (escalated before LLM call): {state['error']}",
+            security_risks=["Target file could not be read; escalated without LLM call."],
         ).model_dump()
+        report["role"] = role_mode
+        report["error"] = state["error"]
+        trace_status = "escalated"
     else:
         report = state.get("result", {})
         report.pop("_usage", None)
+        trace_status = "invalid_output" if report.get("status_str") == "unparseable" else "success"
 
-    append_trace(
-        {
-            "run_id": run_id,
-            "workflow_id": actual_wf_id,
-            "task_id": task_id,
-            "agent": "qa_security_agent",
-            "role": "qa_test_engineer",
-            "provider": settings.llm_provider if llm is None else "injected",
-            "model": settings.llm_model if llm is None else getattr(llm, "model", "mock"),
-            "status": "invalid_output" if report.get("status_str") == "unparseable" else "success",
-            "result_status": report.get("status_str"),
-            "tools": ctx["tools"],
-            "calls": ctx["calls"],
-            "duration_seconds": round(duration, 4),
-            "input_tokens": ctx["input_tokens"],
-            "output_tokens": ctx["output_tokens"],
-            "estimated_cost_credits": estimate_cost_credits(
-                duration_seconds=duration,
-                input_tokens=ctx["input_tokens"] or 0,
-                output_tokens=ctx["output_tokens"] or 0,
-                calls=ctx["calls"],
-            ),
-        },
-        trace_file,
-    )
+    trace_payload: dict[str, Any] = {
+        "run_id": run_id,
+        "workflow_id": actual_wf_id,
+        "task_id": task_id,
+        "agent": "qa_security_agent",
+        "role": role_mode,
+        "provider": settings.llm_provider if llm is None else "injected",
+        "model": settings.llm_model if llm is None else getattr(llm, "model", "mock"),
+        "status": trace_status,
+        "result_status": report.get("status_str"),
+        "tools": ctx["tools"],
+        "calls": ctx["calls"],
+        "duration_seconds": round(duration, 4),
+        "input_tokens": ctx["input_tokens"],
+        "output_tokens": ctx["output_tokens"],
+        "estimated_cost_credits": estimate_cost_credits(
+            duration_seconds=duration,
+            input_tokens=ctx["input_tokens"] or 0,
+            output_tokens=ctx["output_tokens"] or 0,
+            calls=ctx["calls"],
+        ),
+    }
+    if "pytest_execution" in report:
+        trace_payload["pytest_execution"] = {
+            "tests_executed": report["pytest_execution"].get("tests_executed"),
+            "tests_passed": report["pytest_execution"].get("tests_passed"),
+            "exit_code": report["pytest_execution"].get("exit_code"),
+            "command": report["pytest_execution"].get("command"),
+        }
+
+    append_trace(trace_payload, trace_file)
     return report
 
 
-if __name__ == "_main_":
+def run_qa_security_check(
+    architecture_report: dict[str, Any],
+    target_file: str | None = "src/app/main.py",
+    *,
+    task_id: str = "QA-001",
+    workflow_id: str | None = None,
+    llm: Any | None = None,
+    trace_file: str | None = None,
+    run_tests: bool = False,
+) -> dict[str, Any]:
+    """Compatible entry point used by existing tests and pipeline."""
+    return _run_qa_or_security(
+        architecture_report=architecture_report,
+        target_file=target_file,
+        role_mode="qa_test_engineer",
+        run_tests=run_tests,
+        task_id=task_id,
+        workflow_id=workflow_id,
+        llm=llm,
+        trace_file=trace_file,
+    )
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", type=str, default="src/app/main.py")
+    parser.add_argument("--run-tests", action="store_true")
     args = parser.parse_args()
 
     sample_arch = {"status_str": "approved", "summary": "Sample architecture", "findings": []}
-    res = run_qa_security_check(sample_arch, target_file=args.file)
+    res = run_qa_security_check(sample_arch, target_file=args.file, run_tests=args.run_tests)
     print(json.dumps(res, indent=2, ensure_ascii=False))

@@ -18,9 +18,13 @@ from src.observability.tracing import append_trace, usage_from_message, estimate
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+ORCHESTRATOR_AGENTS = {"feature_pipeline_workflow"}
+
+
 class CostInsight(BaseModel):
     agent_name: str
     finding: str
+
 
 class CostReport(BaseModel):
     status: Literal["success", "error", "unparseable"]
@@ -30,6 +34,7 @@ class CostReport(BaseModel):
     summary: str
     insights: List[CostInsight] = Field(default_factory=list)
 
+
 class CostState(TypedDict, total=False):
     log_file_path: str
     log_content: str
@@ -38,27 +43,32 @@ class CostState(TypedDict, total=False):
     result: dict[str, Any]
     error: str
 
+
 def read_log_file(directory_path: str = "evidence") -> tuple[str, dict[str, Any]]:
-    """Liest ALLE JSONL-Logdateien im Ordner aus und fasst sie zusammen."""
+    """Liest ALLE JSONL-Logdateien im Ordner aus und fasst sie ohne Orchestrator-Double-Counting zusammen."""
     log_dir = (REPO_ROOT / directory_path).resolve()
-    
+
     allowed_evidence = (REPO_ROOT / "evidence").resolve()
     allowed_logs = (REPO_ROOT / "logs").resolve()
-    
+
     # 1. ZUERST Security: Path Traversal blockieren
     if not (str(log_dir).startswith(str(allowed_evidence)) or str(log_dir).startswith(str(allowed_logs))):
         raise ValueError(f"Security Violation: Pfad '{directory_path}' verlässt die erlaubten Verzeichnisse!")
-    
+
     # 2. DANN auf Existenz prüfen
     if not log_dir.exists():
         raise FileNotFoundError(f"Pfad nicht gefunden: {log_dir}")
-    
+
+    files = [log_dir] if log_dir.is_file() else list(log_dir.rglob("*.jsonl"))
+
     extracted_data = []
     total_runs = 0
     total_cost = 0.0
     total_duration = 0.0
-    
-    for file_path in log_dir.rglob("*.jsonl"):
+    total_human_review_seconds = 0.0
+    skipped_summaries = 0
+
+    for file_path in files:
         with open(file_path, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
@@ -66,36 +76,51 @@ def read_log_file(directory_path: str = "evidence") -> tuple[str, dict[str, Any]
                         data = json.loads(line)
                         if not isinstance(data, dict):
                             continue
-                        
+
+                        # Separate human review time recorded on workflow summary lines
+                        human_sec = data.get("human_review_seconds")
+                        if human_sec is not None:
+                            total_human_review_seconds += float(human_sec)
+
+                        # Prevent double-counting of orchestrator summary lines
+                        agent_name = data.get("agent", "unknown")
+                        record_type = data.get("record_type", "agent_run")
+                        if record_type == "workflow_summary" or agent_name in ORCHESTRATOR_AGENTS:
+                            skipped_summaries += 1
+                            continue
+
                         total_runs += 1
                         cost = data.get("estimated_cost_credits")
                         if cost is not None:
                             total_cost += float(cost)
-                        
+
                         duration = data.get("duration_seconds")
                         if duration is not None:
                             total_duration += float(duration)
-                            
+
                         extracted_data.append({
                             "task_id": data.get("task_id", "unknown"),
                             "run_id": data.get("run_id", "unknown"),
-                            "agent": data.get("agent", "unknown"),
+                            "agent": agent_name,
                             "duration": duration,
-                            "cost": cost
+                            "cost": cost,
                         })
                     except json.JSONDecodeError:
                         continue
-                        
+
     metrics = {
         "total_runs": total_runs,
         "total_cost": round(total_cost, 4),
-        "total_duration": round(total_duration, 4)
+        "total_duration": round(total_duration, 4),
+        "human_review_seconds": round(total_human_review_seconds, 4),
+        "skipped_orchestrator_summaries": skipped_summaries,
     }
-    
+
     if not extracted_data:
         return f"No execution data found in {directory_path}.", metrics
-        
+
     return json.dumps(extracted_data, indent=2), metrics
+
 
 def _message_text(message: Any) -> str:
     content = getattr(message, "content", "")
@@ -110,6 +135,7 @@ def _message_text(message: Any) -> str:
                 parts.append(item["text"])
         return "\n".join(parts)
     return str(content)
+
 
 def _parse_result(text: str, metrics: dict[str, Any]) -> CostReport:
     cleaned = text.strip()
@@ -130,9 +156,7 @@ def _parse_result(text: str, metrics: dict[str, Any]) -> CostReport:
         parsed_json["total_cost_credits"] = metrics["total_cost"]
         parsed_json["total_duration_seconds"] = metrics["total_duration"]
         return CostReport.model_validate(parsed_json)
-    except Exception as e:
-        print(f"\n--- DEBUG: LLM OUTPUT FEHLERHAFT ---\n{text}\n--------------------------------------")
-        print(f"PARSING-FEHLER: {e}\n")
+    except Exception:
         return CostReport(
             status="unparseable",
             total_runs_analyzed=metrics["total_runs"],
@@ -141,6 +165,7 @@ def _parse_result(text: str, metrics: dict[str, Any]) -> CostReport:
             summary="Could not parse LLM output.",
             insights=[],
         )
+
 
 def build_cost_graph(llm: Any | None = None):
     llm = llm or get_chat_model()
@@ -168,7 +193,7 @@ def build_cost_graph(llm: Any | None = None):
         human = HumanMessage(
             content=f"User Request: {query}\n\nExecution logs:\n{state.get('log_content', '')}"
         )
-        
+
         try:
             response = llm.invoke([system, human])
             result = _parse_result(_message_text(response), metrics)
@@ -186,27 +211,29 @@ def build_cost_graph(llm: Any | None = None):
     builder.add_edge("analyze", END)
     return builder.compile()
 
+
 def run_cost_analysis(
     log_directory: str = "evidence",
     user_query: str = "Summarize the overall cost and usage.",
     *,
     task_id: str = "COST-REPORT-001",
     workflow_id: str | None = None,
+    llm: Any | None = None,
     trace_file: str | None = None,
 ) -> CostReport:
     run_id = str(uuid.uuid4())
     actual_workflow_id = workflow_id or run_id
     started = time.perf_counter()
-    graph = build_cost_graph()
-    
+    graph = build_cost_graph(llm=llm)
+
     state = graph.invoke({
         "log_file_path": log_directory,
-        "user_query": user_query
+        "user_query": user_query,
     })
     duration = time.perf_counter() - started
 
-    provider = os.getenv("LLM_PROVIDER", "unknown")
-    model = os.getenv("LLM_MODEL", "unknown")
+    provider = os.getenv("LLM_PROVIDER", "unknown") if llm is None else "injected"
+    model = os.getenv("LLM_MODEL", "unknown") if llm is None else getattr(llm, "model", "mock")
 
     if state.get("error"):
         append_trace(
@@ -215,20 +242,20 @@ def run_cost_analysis(
                 "workflow_id": actual_workflow_id,
                 "task_id": task_id,
                 "agent": "cost_observability_agent",
-                "role": "cost_analyzer",
+                "role": "cost_observability_engineer",
                 "provider": provider,
                 "model": model,
                 "status": "error",
                 "tools": ["read_log_file"],
-                "calls": 1,
+                "calls": 0,
                 "duration_seconds": round(duration, 4),
                 "error": state["error"],
                 "estimated_cost_credits": estimate_cost_credits(
                     duration_seconds=duration,
                     input_tokens=0,
                     output_tokens=0,
-                    calls=1
-                )
+                    calls=0,
+                ),
             },
             trace_file,
         )
@@ -244,7 +271,7 @@ def run_cost_analysis(
             "workflow_id": actual_workflow_id,
             "task_id": task_id,
             "agent": "cost_observability_agent",
-            "role": "cost_analyzer",
+            "role": "cost_observability_engineer",
             "provider": provider,
             "model": model,
             "status": "invalid_output" if result.status == "unparseable" else "success",
@@ -258,22 +285,22 @@ def run_cost_analysis(
                 duration_seconds=duration,
                 input_tokens=input_tokens or 0,
                 output_tokens=output_tokens or 0,
-                calls=1
-            )
+                calls=1,
+            ),
         },
         trace_file,
     )
     return result
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, default="Fasse die generellen Kosten und Dauer aller Logs zusammen.")
-    parser.add_argument("--dir", type=str, default="evidence/session-02") # NEU: Standardmäßig nur Session 2
+    parser.add_argument("--dir", type=str, default="evidence/session-02")
     args = parser.parse_args()
 
     print(f"Running Cost Agent in directory '{args.dir}' with query: '{args.query}'...")
     try:
-        # NEU: Wir übergeben das Verzeichnis an die Analyse-Funktion
         result = run_cost_analysis(log_directory=args.dir, user_query=args.query)
         print(result.model_dump_json(indent=2))
     except Exception as e:

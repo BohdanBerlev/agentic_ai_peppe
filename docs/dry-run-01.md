@@ -10,8 +10,9 @@ Die Backend-Endpunkte (POST, GET, PATCH, DELETE) wurden implementiert und durch 
 ## 2. Iterationen & Human Gate Entscheidungen
 
 **Durchlauf 1 (Trace: `a4c5e5d8-6163-4b0f-a5e1-dcbaaefc0821`)**
-* **Findings:** Die Agenten detektierten fehlendes Connection-Pooling (Gefahr von Resource Exhaustion), ungeschützte Exceptions (Information Disclosure) und fehlende Pydantic-Längenvalidierung.
-* **Entscheidung (Human Gate):** *Changes Requested.* Die Anmerkungen wurden als kritisch bewertet und mit der Notiz *"Bitte die Vorschläge umsetzen"* zur Überarbeitung zurückgewiesen.
+* **Findings:** Die Agenten detektierten fehlendes Connection-Pooling (Gefahr von Resource Exhaustion), ungeschützte Exceptions (Information Disclosure) und fehlende Pydantic-Längenvalidierung (`architect_agent`: `changes_requested`, `qa_security_agent`: `changes_requested`).
+* **Entscheidung (Human Gate):** Fachlich *Changes Requested* mit der Notiz *"Bitte die Vorschläge umsetzen."*, woraufhin der Code für Durchlauf 2 überarbeitet wurde.
+* **Transparenz-Hinweis / Erratum zum Trace `a4c5e5d8-6163-4b0f-a5e1-dcbaaefc0821`:** Im Roh-Trace der Orchestrator-Zeile steht im Feld `human_approval.decision` fälschlicherweise `"approved"`, obwohl die menschliche Freigabe-Notiz (`"Bitte die Vorschläge umsetzen."`) sowie die Sub-Agenten-Reports (`changes_requested`) klar eine Nachbesserung forderten und im Anschluss auch Durchlauf 2 durchgeführt wurde. Ursache war eine Fehleingabe (`a` statt `c`) im interaktiven Terminal-Prompt ohne Rückfrage/Konsistenzprüfung. Um die Integrität der historischen Evidenz zu wahren, wurde die JSONL-Datei nicht nachträglich editiert; stattdessen wurde das Human Gate in `src/workflows/feature_pipeline.py` für Session 3 gehärtet (striktes Eingabeschema, explizite Rückfrage bei Abweichung von Agenten-Findings und kein Auto-Approve im Headless-Modus).
 
 **Durchlauf 2 (Trace: `ec9367ce-8be8-46e3-ab56-8d8132e8ff71`)**
 * **Findings:** Nach Behebung der kritischen Fehler (Einführung von `psycopg_pool`, Fehler-Masking, `max_length`) forderten Architect und QA Agent tiefgreifende Strukturänderungen (Separation of Concerns in Repository-Layer, Pagination für GET-Requests).

@@ -1,15 +1,20 @@
-date,task_id,actor_type,actor,quantity,unit,credits,notes
-2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1577,model=unknown; status=success; 10.7s; in=693; out=918
-2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1417,model=unknown; status=success; 10.0s; in=503; out=792
-2026-10-16,STARTER-DEMO,agent,starter-file-review-agent,1,run,1.0504,model=qwen3:4b; status=error; 5.0s; in=None; out=None
-2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1458,model=unknown; status=success; 9.8s; in=717; out=846
-2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1669,model=unknown; status=success; 11.5s; in=795; out=910
-2026-10-17,COST-REPORT-001,agent,cost_observability_agent,1,run,1.1726,model=unknown; status=success; 11.3s; in=795; out=1082
-2026-10-16,STARTER-DEMO,agent,starter-file-review-agent,1,run,1.1533,model=qwen3:4b; status=success; 12.0s; in=265; out=693
-2026-10-12,TERMIN-1,human,PepeGroup (6),30,hours,3000.0,Termin 1 session 6 members x 5h (estimate)
-2026-10-18,DEV-001,human,human_david,5,hours,500.0,Implementierung der kompletten LangGraph Agenten-Infrastruktur
-2026-10-19,DRYRUN-002,agent,feature_pipeline_workflow,1,run,16.5785,model=gemini-3.8-flash; status=success; 919.5s; calls=7; Bereinigte LLM-Gesamtkosten Dry Run 002
-2026-10-19,SESSION-02,human,human_david,5,hours,500.0,Durchführung Dry Runs und Finalisierung Session 2
-2026-10-19,SESSION-02,human,human_maxim,5,hours,500.0,Code-Review und Finalisierung Session 2
-2026-10-19,SESSION-02,human,human_lars,5,hours,500.0,Code-Review und Finalisierung Session 2
-2026-10-19,SESSION-02,human,human_mehrose,5,hours,500.0,Code-Review und Finalisierung Session 2
+date,task_id,actor_type,actor,activity,quantity,unit,credits,notes
+2026-10-12,TERMIN-1,human,PepeGroup (6),meeting,30,hours,3000.0,Historischer Termin-1-Eintrag: damals 6 Mitglieder x 5h (Leon & Bohdan danach ausgeschieden; ab Termin 2 4 Mitglieder)
+2026-10-16,STARTER-DEMO,agent,starter-file-review-agent,agent_execution,1,run,1.0504,model=qwen3:4b; status=error; 5.0s; in=None; out=None
+2026-10-16,STARTER-DEMO,agent,starter-file-review-agent,agent_execution,1,run,1.1533,model=qwen3:4b; status=success; 12.0s; in=265; out=693
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,agent_execution,1,run,1.1577,model=unknown; status=success; 10.7s; in=693; out=918
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,agent_execution,1,run,1.1417,model=unknown; status=success; 10.0s; in=503; out=792
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,agent_execution,1,run,1.1458,model=unknown; status=success; 9.8s; in=717; out=846
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,agent_execution,1,run,1.1669,model=unknown; status=success; 11.5s; in=795; out=910
+2026-10-17,COST-REPORT-001,agent,cost_observability_agent,agent_execution,1,run,1.1726,model=unknown; status=success; 11.3s; in=795; out=1082
+2026-10-18,DEV-001,human,human_david,implementation,5,hours,500.0,Implementierung der LangGraph Agenten-Infrastruktur und Pipeline
+2026-10-19,DRYRUN-002,agent,feature_pipeline_workflow,agent_execution,1,run,16.5785,model=gemini-3.8-flash; status=success; 919.5s reine Agenten-Laufzeit; calls=7; Bereinigte LLM-Gesamtkosten Dry Run 002 (ohne Orchestrator-Double-Counting und ohne Human-Gate-Wartezeit)
+2026-10-19,SESSION-02,human,human_david,implementation,3.0,hours,300.0,Durchfuehrung Dry Runs und Code-Nachbesserung zwischen Run 1 und Run 2
+2026-10-19,SESSION-02,human,human_david,review,1.5,hours,150.0,Menschliche Prüfung und Human-Gate-Freigaben für Dry Run 1 und 2
+2026-10-19,SESSION-02,human,human_david,waiting,0.5,hours,50.0,Terminal-Wartezeit am Human Gate und während LLM-Rate-Limiting (~24 Min in Run 2)
+2026-10-19,SESSION-02,human,human_maxim,implementation,3.5,hours,350.0,Implementierung Work-Item API Pooling und Cost-Tracking
+2026-10-19,SESSION-02,human,human_maxim,review,1.5,hours,150.0,Code-Review und Kosten-Evidenz-Prüfung (Double-Counting-Analyse)
+2026-10-19,SESSION-02,human,human_lars,implementation,3.0,hours,300.0,QA- und Security-Agent-Tests sowie Test-Suite-Ausbau
+2026-10-19,SESSION-02,human,human_lars,review,2.0,hours,200.0,QA/Security-Review der Dry-Run-Ergebnisse und Architektur-Findings
+2026-10-19,SESSION-02,human,human_mehrose,review,3.0,hours,300.0,Product-Owner-Abnahme der User Stories/Akzeptanzkriterien und Scope-Review
+2026-10-19,SESSION-02,human,human_mehrose,correction,2.0,hours,200.0,Überarbeitung der Dokumentation und Backlog-Abgleich nach Review-Findings

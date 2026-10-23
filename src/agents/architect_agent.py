@@ -7,13 +7,18 @@ import argparse
 import json
 import time
 import uuid
-from pathlib import Path
 from typing import Any, Literal, TypedDict
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
+from src.agents.common import (
+    REPO_ROOT,
+    clean_json_block,
+    extract_message_text,
+    read_repository_text_file,
+)
 from src.app.settings import get_settings
 from src.llm.factory import get_chat_model
 from src.observability.tracing import (
@@ -22,11 +27,9 @@ from src.observability.tracing import (
     usage_from_message,
 )
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-
 
 class ArchitectureReport(BaseModel):
-    status_str: Literal["approved", "changes_requested", "unparseable"] = "approved"
+    status_str: Literal["approved", "changes_requested", "unparseable", "escalated"] = "approved"
     summary: str
     findings: list[str] = Field(default_factory=list)
 
@@ -38,45 +41,12 @@ class ArchitectState(TypedDict, total=False):
     error: str
 
 
-def read_repository_text_file(relative_path: str) -> str:
-    """Liest UTF-8 Quellcode und verhindert Path-Traversal ausserhalb des Repos."""
-    requested = (REPO_ROOT / relative_path).resolve()
-    try:
-        requested.relative_to(REPO_ROOT)
-    except ValueError as exc:
-        raise ValueError(f"Security violation: path escapes repository root: {relative_path}") from exc
-    if not requested.is_file():
-        raise FileNotFoundError(f"Source file not found: {relative_path}")
-    return requested.read_text(encoding="utf-8")
-
-
 def _message_text(message: Any) -> str:
-    content = getattr(message, "content", "")
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        parts: list[str] = []
-        for item in content:
-            if isinstance(item, str):
-                parts.append(item)
-            elif isinstance(item, dict) and isinstance(item.get("text"), str):
-                parts.append(item["text"])
-        return "\n".join(parts)
-    return str(content)
+    return extract_message_text(message)
 
 
 def _parse_architect_result(text: str) -> ArchitectureReport:
-    cleaned = text.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.strip("`")
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:].lstrip()
-
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
-    if start >= 0 and end > start:
-        cleaned = cleaned[start : end + 1]
-
+    cleaned = clean_json_block(text)
     try:
         data = json.loads(cleaned)
         return ArchitectureReport.model_validate(data)
@@ -100,6 +70,9 @@ def build_architect_graph(llm: Any | None = None, *, trace_context: dict[str, An
             return {"code_content": code}
         except Exception as exc:
             return {"error": str(exc)}
+
+    def route_after_load(state: ArchitectState):
+        return END if state.get("error") else "analyze"
 
     def analyze(state: ArchitectState) -> ArchitectState:
         system = SystemMessage(
@@ -128,7 +101,7 @@ def build_architect_graph(llm: Any | None = None, *, trace_context: dict[str, An
     builder.add_node("load_code", load_code)
     builder.add_node("analyze", analyze)
     builder.add_edge(START, "load_code")
-    builder.add_edge("load_code", "analyze")
+    builder.add_conditional_edges("load_code", route_after_load, ["analyze", END])
     builder.add_edge("analyze", END)
     return builder.compile()
 
@@ -153,13 +126,16 @@ def run_architect_review(
 
     if state.get("error"):
         report = ArchitectureReport(
-            status_str="unparseable",
-            summary=f"File error: {state['error']}",
-            findings=["File read failed."],
+            status_str="escalated",
+            summary=f"File error (escalated before LLM call): {state['error']}",
+            findings=["File read failed; escalated without LLM invocation."],
         ).model_dump()
+        report["error"] = state["error"]
+        trace_status = "escalated"
     else:
         report = state.get("result", {})
         report.pop("_usage", None)
+        trace_status = "invalid_output" if report.get("status_str") == "unparseable" else "success"
 
     append_trace(
         {
@@ -170,7 +146,7 @@ def run_architect_review(
             "role": "software_architect",
             "provider": settings.llm_provider if llm is None else "injected",
             "model": settings.llm_model if llm is None else getattr(llm, "model", "mock"),
-            "status": "invalid_output" if report.get("status_str") == "unparseable" else "success",
+            "status": trace_status,
             "result_status": report.get("status_str"),
             "tools": ctx["tools"],
             "calls": ctx["calls"],
@@ -189,7 +165,7 @@ def run_architect_review(
     return report
 
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", type=str, default="src/app/main.py")
     args = parser.parse_args()

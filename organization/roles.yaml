@@ -1,16 +1,10 @@
 # All twelve roles must be covered.
 # A human may be accountable for multiple roles.
 #
-# Session 1:
-# - current_actor_type may still be human while target_actor_type is agent/hybrid.
-# - implementation_status may be planned.
-#
-# End of Session 2:
-# - at least (12 - number_of_human_team_members) roles must be operationally
-#   supported by an agent or hybrid implementation (4 people -> 8 roles).
-# - a role counts only when team-owned executable evidence exists.
-# - one agent may support multiple roles only if role-specific behavior/output
-#   is technically distinguishable and traceable.
+# End of Session 2 / Session 3:
+# - 4 human team members -> at least 8 roles operationally supported by an
+#   agent or hybrid implementation with distinct role-specific behavior,
+#   outputs, tests, and trace role tags.
 
 roles:
   - id: managing_director_customer_lead
@@ -29,7 +23,7 @@ roles:
     title: Product Owner / Requirements Engineer
     responsibility: Requirements, user stories, acceptance criteria, backlog value
     current_actor_type: agent
-    current_actor: requirements_agent
+    current_actor: requirements_agent (run_requirements_analysis)
     target_actor_type: agent
     target_actor: requirements_agent
     supporting_agent: requirements_agent
@@ -39,9 +33,9 @@ roles:
 
   - id: project_manager
     title: Project Manager
-    responsibility: Planning, task allocation, progress, dependencies, delivery risk
-    current_actor_type: human
-    current_actor: Lars Boos
+    responsibility: Planning, task allocation, Work Packages (WPs), dependencies, delivery risk
+    current_actor_type: hybrid
+    current_actor: requirements_agent (run_project_planning)
     target_actor_type: hybrid
     target_actor: requirements_agent
     supporting_agent: requirements_agent
@@ -53,7 +47,7 @@ roles:
     title: Software Architect
     responsibility: System architecture, interfaces, ADRs, technical standards
     current_actor_type: agent
-    current_actor: architect_agent
+    current_actor: architect_agent (run_architect_review)
     target_actor_type: agent
     target_actor: architect_agent
     supporting_agent: architect_agent
@@ -65,10 +59,10 @@ roles:
     title: Backend / API Engineer
     responsibility: FastAPI services, business logic, API contracts
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: agent
+    current_actor: Maxim Bers
+    target_actor_type: hybrid
     target_actor: implementation_agent
-    supporting_agent: implementation_agent
+    supporting_agent: none
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -77,10 +71,10 @@ roles:
     title: Data & RAG Engineer
     responsibility: PostgreSQL, pgvector, ingestion, chunking, retrieval, embeddings
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: agent
+    current_actor: Maxim Bers
+    target_actor_type: hybrid
     target_actor: implementation_agent
-    supporting_agent: implementation_agent
+    supporting_agent: none
     accountable_human: Maxim Bers
     human_approval_required: false
     implementation_status: planned
@@ -88,8 +82,8 @@ roles:
   - id: agent_engineer
     title: Agent Engineer
     responsibility: LangGraph workflows, LangChain integration, agent state and tools
-    current_actor_type: human
-    current_actor: David Pisarkiewicz
+    current_actor_type: hybrid
+    current_actor: requirements_agent (run_agent_engineering_spec)
     target_actor_type: hybrid
     target_actor: requirements_agent
     supporting_agent: requirements_agent
@@ -100,20 +94,20 @@ roles:
   - id: integration_engineer
     title: Integration Engineer
     responsibility: Agent-to-agent and agent-to-system interfaces and handovers
-    current_actor_type: human
-    current_actor: David Pisarkiewicz
+    current_actor_type: hybrid
+    current_actor: integration_agent (run_integration_check)
     target_actor_type: hybrid
-    target_actor: requirements_agent
-    supporting_agent: requirements_agent
+    target_actor: integration_agent
+    supporting_agent: integration_agent
     accountable_human: David Pisarkiewicz
     human_approval_required: false
     implementation_status: operational
 
   - id: qa_test_engineer
     title: QA & Test Engineer
-    responsibility: pytest, regression testing, agent evaluation, quality evidence
+    responsibility: pytest execution, regression testing, agent evaluation, quality evidence
     current_actor_type: agent
-    current_actor: qa_security_agent
+    current_actor: qa_security_agent (run_qa_test_execution)
     target_actor_type: agent
     target_actor: qa_security_agent
     supporting_agent: qa_security_agent
@@ -125,9 +119,9 @@ roles:
     title: DevOps Engineer
     responsibility: Docker, GitHub Actions, build, deployment and reproducibility
     current_actor_type: human
-    current_actor: TBD
-    target_actor_type: hybrid
-    target_actor: TBD
+    current_actor: Maxim Bers
+    target_actor_type: human
+    target_actor: Maxim Bers
     supporting_agent: none
     accountable_human: Maxim Bers
     human_approval_required: true
@@ -137,7 +131,7 @@ roles:
     title: AI Safety & Security Engineer
     responsibility: Tool permissions, guardrails, secrets, prompt and agent risks
     current_actor_type: agent
-    current_actor: qa_security_agent
+    current_actor: qa_security_agent (run_security_audit)
     target_actor_type: agent
     target_actor: qa_security_agent
     supporting_agent: qa_security_agent
@@ -148,8 +142,8 @@ roles:
   - id: cost_observability_engineer
     title: Cost & Observability Engineer
     responsibility: Traces, runtime, token usage, cost model and cost optimization
-    current_actor_type: human
-    current_actor: Maxim Bers
+    current_actor_type: hybrid
+    current_actor: cost_agent (run_cost_analysis)
     target_actor_type: hybrid
     target_actor: cost_agent
     supporting_agent: cost_agent
