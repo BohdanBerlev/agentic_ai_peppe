@@ -227,3 +227,10 @@ repo_komplett.md
 repo_kontext.txt
 repo_scanner.py
 repo_kontext.md
+
+
+# Separate client product checkouts
+client-01-website/
+
+# IDE
+.idea/

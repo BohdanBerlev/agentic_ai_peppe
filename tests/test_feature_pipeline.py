@@ -293,3 +293,64 @@ def test_full_company_mode_and_bounded_backend_retry_loop(tmp_path):
     assert res["result_state"]["agent_design"]["role"] == "agent_engineer"
     assert res["result_state"]["security_audit"]["role"] == "ai_safety_security_engineer"
     assert res["result_state"]["integration"]["role"] == "integration_engineer"
+
+
+def test_pipeline_addresses_client_target_dir(tmp_path):
+    """Session 3 / L3.1: Pipeline addresses client project checkout with target_dir."""
+    client_dir = tmp_path / "client-01-website"
+    client_dir.mkdir(parents=True, exist_ok=True)
+    html_file = client_dir / "index.html"
+    html_file.write_text("<!DOCTYPE html><html><body><h1>Nordwerk Industrie-Service</h1></body></html>", encoding="utf-8")
+
+    trace_file = tmp_path / "client_run.jsonl"
+    task = EngineeringTask(
+        task_id="CUST-001",
+        description="Verify initial customer website release candidate for Nordwerk Industrie-Service.",
+        target_dir=str(client_dir),
+        input_files=["index.html"],
+        project_id="client-01",
+    )
+
+    class ClientMockLLM:
+        def invoke(self, messages):
+            return AIMessage(content=json.dumps({
+                "status_str": "approved",
+                "summary": "Customer HTML verified.",
+                "acceptance_criteria": ["AC-01 passed"],
+                "findings": ["Clean static structure"],
+                "security_risks": [],
+            }))
+
+    res = run_feature_pipeline(
+        task,
+        llm=ClientMockLLM(),
+        trace_file=str(trace_file),
+        interactive=False,
+    )
+
+    assert res["status"] == "success"
+    assert res["project_id"] == "client-01"
+    assert res["task_id"] == "CUST-001"
+    assert trace_file.exists()
+
+
+def test_pipeline_target_dir_path_traversal_protection(tmp_path):
+    """Session 3 Security: Attempting to escape target directory escalates without model call."""
+    trace_file = tmp_path / "traversal_run.jsonl"
+    task = EngineeringTask(
+        task_id="SEC-TRAVERSAL-001",
+        description="Attempt path traversal",
+        target_dir="client-01-website",
+        input_files=["../../etc/passwd"],
+        project_id="client-01",
+    )
+
+    res = run_feature_pipeline(
+        task,
+        trace_file=str(trace_file),
+        interactive=False,
+    )
+
+    assert res["status"] == "escalated"
+    assert "context_error" in res["result_state"]
+    assert res["calls"] == 0

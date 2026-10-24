@@ -6,7 +6,12 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from src.app.settings import Settings, get_settings
 
 
-def get_chat_model(settings: Settings | None = None) -> Any:
+def get_chat_model(
+    settings: Settings | None = None,
+    *,
+    reasoning: bool | None = None,
+    json_mode: bool = False,
+) -> Any:
     """Return the configured LangChain chat-model abstraction.
 
     Team agents should depend on this factory (or an evolved equivalent), not
@@ -15,13 +20,24 @@ def get_chat_model(settings: Settings | None = None) -> Any:
     settings = settings or get_settings()
 
     if settings.llm_provider == "ollama":
-        return ChatOllama(
-            model=settings.llm_model,
-            base_url=settings.llm_base_url,
-            temperature=settings.llm_temperature,
-            client_kwargs={"timeout": settings.llm_timeout_seconds},
-            num_predict=settings.llm_max_output_tokens,
-        )
+        format_param = "json" if json_mode else None
+        reasoning_param = reasoning
+        if json_mode and reasoning is None:
+            reasoning_param = False
+
+        kwargs: dict[str, Any] = {
+            "model": settings.llm_model,
+            "base_url": settings.llm_base_url,
+            "temperature": settings.llm_temperature,
+            "client_kwargs": {"timeout": settings.llm_timeout_seconds},
+            "num_predict": settings.llm_max_output_tokens,
+        }
+        if format_param is not None:
+            kwargs["format"] = format_param
+        if reasoning_param is not None:
+            kwargs["reasoning"] = reasoning_param
+
+        return ChatOllama(**kwargs)
 
     if settings.llm_provider == "openai_compatible":
         # Many self-hosted OpenAI-compatible services support Chat Completions

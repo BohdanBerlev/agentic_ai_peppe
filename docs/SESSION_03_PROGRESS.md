@@ -1,6 +1,6 @@
-# Session 3 Preparation – Umsetzungs- und Test-Checkliste (PepeGroup)
+# Session 3 Preparation & Durchführung – Umsetzungs- und Test-Checkliste (PepeGroup)
 
-Diese Datei dokumentiert alle umgesetzten und getesteten Verbesserungen aus dem Feedback zu Session 2 (`docs/Review/Team_3_Session_2_Feedback.md`), damit das Team und jede weitere Session den Stand sofort nachvollziehen können.
+Diese Datei dokumentiert alle umgesetzten und getesteten Verbesserungen aus dem Feedback zu Session 2 (`docs/Review/Team_3_Session_2_Feedback.md`) sowie die vollständige Lösung von **Termin 3 (Kundenprojekt 01 – Nordwerk Industrie-Service)**.
 
 ## Status-Übersicht nach Phasen
 
@@ -34,6 +34,25 @@ Diese Datei dokumentiert alle umgesetzten und getesteten Verbesserungen aus dem 
 - [x] **Phase 3 – Echter PostgreSQL-Persistenz-Lifecycle-Test (#6)**
   - [x] `test_work_items_real_postgres_lifecycle` in `tests/test_work_items_api.py` ergänzt und gegen die laufende PostgreSQL-Datenbank erfolgreich ausgeführt (`47 passed` inkl. echtem `POST -> GET -> PATCH -> DELETE -> 404` Zyklus).
 
-- [ ] **Phase 4 – Gemeinsamer Session-3-Auftrag (am Montag im Termin)**
-  - [ ] Optional: Backend-Agent des Kollegen über `backend_agent_fn` in `run_feature_pipeline` einhängen.
-  - [ ] Neuen Kundenauftrag aus Session 3 durch die Pipeline laufen lassen und Trace/Kosten dokumentieren.
+- [x] **Phase 4 – Termin 3: Erster Kundenauftrag (Nordwerk Industrie-Service) & Kurs-Revision 5**
+  - [x] **Kurs-Infrastruktur-Update (Revision 5):**
+    - `STARTER_MANIFEST.json` auf Revision 5 aktualisiert.
+    - `tests/starter/test_session_03_infrastructure.py` integriert (Generic 503 DB Health, optionale Ollama JSON/Reasoning Controls, ICC Options Isolation).
+    - `src/app/main.py`: Detail-Meldung bei DB Health auf Kleinbuchstaben `"database unavailable"` vereinheitlicht.
+    - `src/llm/factory.py`: `get_chat_model` um `json_mode` und `reasoning` für Ollama/OpenAI erweitert.
+    - `docs/SESSION_03_TECHNICAL_NOTES.md` und Vorlagen in `docs/templates/session-03/` abgelegt.
+  - [x] **Repo-Trennung (L3.1 / A1 & B5):**
+    - Eigenständiges Kunden-Repository `client-01-website` angelegt mit eigenem Git-Checkout (`a93442b`).
+    - Statischer Start via `python -m http.server 8000` ohne Factory-Dependencies dokumentiert und lauffähig.
+  - [x] **Echte agentische Produktarbeit & Übergabe (L3.2 / A2, A3):**
+    - `src/workflows/feature_pipeline.py` unterstützt `--target-dir` und `--project-id`.
+    - Sicherer Dateizugriff über `write_target_text_file` und `read_repository_text_file` mit Path-Traversal-Guardrail.
+    - Reallauf `website-run-001` mit verknüpftem Trace unter `evidence/session-03/runs/website-run-001.jsonl`.
+  - [x] **Tagesumfang & Produktcheck (L3.3 / B1–B6):**
+    - Pflichtinhalte N-01 (Name), N-02 (Hauptaussage), N-03 (Wartungsplanung), N-08 (Mailto-Link) und N-09 (Übungshinweis) in `index.html` und `styles.css` umgesetzt.
+    - Eigenständiger Produktcheck `client-01-website/test_website.py` (8 von 8 Checks bestanden).
+    - Menschliches Human Gate mit `approved` durch Lars Boos & Mehrose Farooq im Terminal und in `docs/customer-01/review.json` dokumentiert.
+  - [x] **Bilanz, Kosten & Abgabe (L3.4 / C1–C4 & D1–D2):**
+    - Alle Abgabedokumente vollständig ausgefüllt: `docs/customer-01/acceptance.md`, `clarifications.md`, `delivery.md`, `recovery.md`, `manifest.json`.
+    - Planbudget (1.200 Credits T3/T4 + 400 T5-Reserve) und getrennte Aufwände nach Aktivitäten in `costs/usage.csv` erfasst.
+    - Zentrale Abgabedatei `evidence/session-03.md` mit Commit-Verweisen, beobachtetem Engpass und messbarer Lernhypothese fertiggestellt.

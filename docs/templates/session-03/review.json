@@ -1,0 +1,14 @@
+{
+  "task_id": "CUST-001",
+  "workflow_id": "TODO",
+  "decision": "pending_approval",
+  "reviewer": null,
+  "decided_at_utc": null,
+  "tested_source_commit": "TODO",
+  "reviewed_artifact_hashes": {},
+  "test_evidence_paths": [],
+  "accepted_criteria": [],
+  "open_criteria": [],
+  "rationale": "TODO-explicit-human-decision-required",
+  "identity_assurance": "self_declared_course_review"
+}

@@ -51,7 +51,7 @@ def db_health() -> dict:
     try:
         return database_health()
     except Exception:
-        raise HTTPException(status_code=503, detail="Database unavailable")
+        raise HTTPException(status_code=503, detail="database unavailable")
 
 # --- Work Item Endpunkte ---
 

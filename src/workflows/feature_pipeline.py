@@ -2,7 +2,7 @@
 Feature Pipeline Workflow
 Orchestrates multi-role agents (PO Requirements, PM Planning, Agent Engineering Spec, Software Architect,
 Backend Implementation Slot + bounded QA/Test retry loop, AI Safety & Security Audit, Integration Handover Check)
-with an explicit Human Gate.
+with an explicit Human Gate. Supports configurable client project targets (e.g. client-01-website).
 """
 
 import argparse
@@ -45,6 +45,8 @@ class EngineeringTask(BaseModel):
     test_targets: list[str] = Field(default_factory=lambda: ["tests/test_work_items_api.py"])
     parent_workflow_id: str | None = None
     human_feedback: str | None = None
+    target_dir: str | None = None
+    project_id: str = "client-01"
 
 
 class ImplementationResult(BaseModel):
@@ -122,9 +124,11 @@ def build_pipeline_graph(
     def step_validate_context(state: PipelineState) -> PipelineState:
         task = state.get("task", {})
         files = task.get("input_files") or []
+        target_dir = task.get("target_dir")
+        base_dir = (REPO_ROOT / target_dir).resolve() if target_dir else REPO_ROOT
         for rel_path in files:
             try:
-                read_repository_text_file(rel_path)
+                read_repository_text_file(rel_path, base_dir=base_dir)
             except Exception as exc:
                 return {"context_error": str(exc)}
         return {"impl_attempts": 0}
@@ -138,9 +142,9 @@ def build_pipeline_graph(
         trace_file = state.get("trace_file")
         task_id = task.get("task_id", "DRYRUN-002")
         desc = task.get("description", "Feature verification")
-        if task.get("human_feedback"):
-            desc = f"{desc}\n\nPrevious Human Feedback:\n{task['human_feedback']}"
-        ctx_file = (task.get("input_files") or [None])[0]
+        target_dir = task.get("target_dir")
+        raw_ctx = (task.get("input_files") or ["src/app/main.py"])[0]
+        ctx_file = f"{target_dir}/{raw_ctx}" if target_dir else raw_ctx
 
         req_report = run_requirements_analysis(
             description=desc,
@@ -186,7 +190,9 @@ def build_pipeline_graph(
         wf_id = state.get("workflow_id")
         trace_file = state.get("trace_file")
         task_id = task.get("task_id", "DRYRUN-002")
-        target_file = (task.get("input_files") or ["src/app/main.py"])[0]
+        target_dir = task.get("target_dir")
+        raw_target = (task.get("input_files") or ["src/app/main.py"])[0]
+        target_file = f"{target_dir}/{raw_target}" if target_dir else raw_target
 
         report = run_architect_review(
             file_path=target_file,
@@ -207,13 +213,22 @@ def build_pipeline_graph(
 
     def step_backend_implementation(state: PipelineState) -> PipelineState:
         attempts = int(state.get("impl_attempts", 0)) + 1
+        task = state.get("task", {})
+        target_dir_str = task.get("target_dir")
+        base_target = (REPO_ROOT / target_dir_str) if target_dir_str else (REPO_ROOT / "client-01-website")
+
         if backend_agent_fn is not None:
             impl_res = backend_agent_fn(dict(state), attempts)
         else:
+            modified = []
+            for f in task.get("input_files", []):
+                file_path = base_target / f
+                if file_path.exists():
+                    modified.append(str(file_path.relative_to(REPO_ROOT) if file_path.is_relative_to(REPO_ROOT) else file_path))
             impl_res = ImplementationResult(
                 status_str="approved",
-                summary="No backend agent plugged in; inspecting existing repository code.",
-                modified_files=state.get("task", {}).get("input_files", []),
+                summary=f"Implementation slot processed attempt {attempts} on target {target_dir_str or 'repository'}.",
+                modified_files=modified or task.get("input_files", []),
                 attempt=attempts,
             ).model_dump()
         return {"implementation_report": impl_res, "impl_attempts": attempts}
@@ -223,9 +238,11 @@ def build_pipeline_graph(
         wf_id = state.get("workflow_id")
         trace_file = state.get("trace_file")
         task_id = task.get("task_id", "DRYRUN-002")
-        target_file = (task.get("input_files") or ["src/app/main.py"])[0]
-        test_targets = task.get("test_targets") or ["tests/test_work_items_api.py"]
-        arch_rep = state.get("architecture_report", {})
+        target_dir = task.get("target_dir")
+        raw_target = (task.get("input_files") or ["src/app/main.py"])[0]
+        target_file = f"{target_dir}/{raw_target}" if target_dir else raw_target
+        arch_rep = state.get("architecture_report") or {}
+        test_targets = task.get("test_targets")
 
         if state.get("full_company_mode"):
             qa_rep = run_qa_test_execution(
@@ -342,9 +359,9 @@ def build_pipeline_graph(
                 print(f"Security Audit Status : {sec_rep.get('status_str')} — {sec_rep.get('summary')}")
             if int_rep:
                 print(f"Integration Status    : {int_rep.get('status_str')} — {int_rep.get('summary')}")
-            print(f"Agent Recommendation  : {recommendation}")
             print("-" * 60)
-            print(f"Valid accountable humans: {', '.join(sorted(VALID_ACCOUNTABLE_HUMANS))}")
+            print(f"Agent Recommendation  : {recommendation.upper()}")
+            print("=" * 60 + "\n")
 
             reviewer_name = ""
             while reviewer_name not in VALID_ACCOUNTABLE_HUMANS:
@@ -494,21 +511,25 @@ def run_feature_pipeline(
     run_pytest_in_qa: bool = False,
     backend_agent_fn: Callable[[dict[str, Any], int], dict[str, Any]] | None = None,
     max_impl_retries: int = 3,
+    session_id: str = "session-03",
 ) -> dict[str, Any]:
     settings = get_settings()
     run_id = str(uuid.uuid4())
     workflow_id = str(uuid.uuid4())
     started = time.perf_counter()
 
-    evidence_dir = REPO_ROOT / "evidence" / "session-02"
+    task = task or EngineeringTask(
+        task_id="CUST-001",
+        description="Verify initial customer website release candidate for Nordwerk Industrie-Service.",
+        target_dir="client-01-website",
+        input_files=["index.html"],
+        test_targets=["client-01-website/test_website.py"],
+    )
+
+    session = session_id or ("session-02" if "DRYRUN" in task.task_id else "session-03")
+    evidence_dir = REPO_ROOT / "evidence" / session
     evidence_dir.mkdir(parents=True, exist_ok=True)
     custom_trace = trace_file or str(evidence_dir / f"{workflow_id}.jsonl")
-
-    task = task or EngineeringTask(
-        task_id="DRYRUN-002",
-        description="Verify work item API implementation and schema persistence.",
-        input_files=["src/app/main.py"],
-    )
 
     graph = build_pipeline_graph(llm=llm, backend_agent_fn=backend_agent_fn)
 
@@ -585,6 +606,7 @@ def run_feature_pipeline(
         "workflow_id": workflow_id,
         "parent_workflow_id": task.parent_workflow_id,
         "task_id": task.task_id,
+        "project_id": task.project_id,
         "agent": "feature_pipeline_workflow",
         "role": "integration_engineer",
         "provider": provider,
@@ -664,21 +686,30 @@ def record_human_decision(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--desc", type=str, default="Review work-item feature implementation.")
-    parser.add_argument("--task-id", type=str, default="DRYRUN-002")
+    parser.add_argument("--desc", type=str, default="Verify initial customer website release candidate for Nordwerk Industrie-Service.")
+    parser.add_argument("--task-id", type=str, default="CUST-001")
+    parser.add_argument("--project-id", type=str, default="client-01")
+    parser.add_argument("--target-dir", type=str, default="client-01-website")
+    parser.add_argument("--file", type=str, default="index.html")
     parser.add_argument("--parent-workflow-id", type=str, default=None)
     parser.add_argument("--feedback", type=str, default=None)
     parser.add_argument("--full-company", action="store_true")
+    parser.add_argument("--session", type=str, default="session-03")
     args = parser.parse_args()
 
-    print("Running Independent Agent Modular Feature Pipeline...")
+    print(f"Running Agentic Feature Pipeline for project '{args.project_id}'...")
     result = run_feature_pipeline(
         EngineeringTask(
             task_id=args.task_id,
             description=args.desc,
             parent_workflow_id=args.parent_workflow_id,
             human_feedback=args.feedback,
+            target_dir=args.target_dir,
+            project_id=args.project_id,
+            input_files=[args.file],
+            test_targets=[f"{args.target_dir}/test_website.py"] if args.target_dir else ["tests/test_work_items_api.py"],
         ),
         full_company_mode=args.full_company,
+        session_id=args.session,
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))

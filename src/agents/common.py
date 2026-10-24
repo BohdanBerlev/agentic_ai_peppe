@@ -1,6 +1,6 @@
 """
 Shared utilities for PepeGroup agents:
-- Safe repository file access (prevents path traversal)
+- Safe repository and target directory file access (prevents path traversal)
 - Message text normalization across Ollama / OpenAI / Gemini responses
 - Accountable human lookup from organization/roles.yaml
 """
@@ -24,20 +24,38 @@ VALID_ACCOUNTABLE_HUMANS = {
 }
 
 
-def read_repository_text_file(relative_path: str) -> str:
-    """Safely read a UTF-8 text file inside the repository root."""
+def read_repository_text_file(relative_path: str, base_dir: Path | None = None) -> str:
+    """Safely read a UTF-8 text file inside the allowed base directory (default: REPO_ROOT)."""
     if not relative_path or not relative_path.strip():
         raise FileNotFoundError("File not found: empty file path")
-    requested = (REPO_ROOT / relative_path).resolve()
+    root = (base_dir or REPO_ROOT).resolve()
+    requested = (root / relative_path).resolve()
     try:
-        requested.relative_to(REPO_ROOT)
+        requested.relative_to(root)
     except ValueError as exc:
         raise ValueError(
-            f"Security violation: Path escapes repository root: {relative_path}"
+            f"Security violation: Path escapes allowed root: {relative_path}"
         ) from exc
     if not requested.is_file():
         raise FileNotFoundError(f"File not found: {relative_path}")
     return requested.read_text(encoding="utf-8")
+
+
+def write_target_text_file(relative_path: str, content: str, target_dir: Path | None = None) -> Path:
+    """Safely write a UTF-8 text file inside the authorized target directory (prevents path traversal)."""
+    if not relative_path or not relative_path.strip():
+        raise ValueError("File path cannot be empty.")
+    root = (target_dir or (REPO_ROOT / "client-01-website")).resolve()
+    resolved = (root / relative_path).resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(
+            f"Security violation: Target file path escapes authorized target directory: {relative_path}"
+        ) from exc
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    resolved.write_text(content, encoding="utf-8")
+    return resolved
 
 
 def extract_message_text(message: Any) -> str:
