@@ -27,6 +27,8 @@ The repository provides a deliberately small, common technical baseline so that 
 - Project briefing: [English](task%20sheets/01_Project_Briefing_en.md) / [Deutsch](task%20sheets/01_Projektbriefing_de.md)
 - Tasks for Sessions 1 and 2: [English](task%20sheets/Tasks_Session_1_and_2_en.md) / [Deutsch](task%20sheets/Aufgaben_Termin_1_und_2_de.md)
 - Evaluation rubric: [English](task%20sheets/Evaluation_Rubric_Sessions_1_and_2_en.md) / [Deutsch](task%20sheets/03_Bewertungsraster_GitHub_Termin_1_und_2.md)
+- **Session 3 / Termin 3 (26 October):** customer assignment [EN](task%20sheets/session-03/01_Customer_Assignment_en.md) / [DE](task%20sheets/session-03/01_Kundenauftrag_de.md); tasks [EN](task%20sheets/session-03/02_Tasks_Session_3_en.md) / [DE](task%20sheets/session-03/02_Aufgaben_Termin_3_de.md); rubric [EN](task%20sheets/session-03/03_Evaluation_Rubric_Session_3_en.md) / [DE](task%20sheets/session-03/03_Bewertungsraster_Termin_3_de.md)
+- Session 3 technical notes / technische Hinweise: [bilingual](docs/SESSION_03_TECHNICAL_NOTES.md); [evidence templates / Evidenzvorlagen](docs/templates/session-03/)
 - Session 2 guide and update instructions: [English](docs/SESSION_02_EN.md) / [Deutsch](docs/SESSION_02_DE.md)
 - Setup instructions: [English](docs/SETUP_LOCAL_EN.md) / [Deutsch](docs/SETUP_LOCAL_DE.md)
 
