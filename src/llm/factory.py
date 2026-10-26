@@ -9,7 +9,7 @@ from src.app.settings import Settings, get_settings
 
 def resolve_google_model(requested_model: str | None, api_key: str | None) -> str:
     """Resolve an active Google Gemini model for generateContent."""
-    preferred_models = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
+    preferred_models = ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"]
 
     if api_key:
         try:
@@ -37,10 +37,10 @@ def resolve_google_model(requested_model: str | None, api_key: str | None) -> st
         except Exception:
             pass
 
-    if requested_model and requested_model not in ("qwen3:4b", "gemini-3.8-flash", "gemini-1.5-flash"):
+    if requested_model and requested_model not in ("qwen3:4b", "gemini-1.5-flash"):
         return requested_model
 
-    return "gemini-2.5-flash"
+    return "gemini-3.8-flash"
 
 
 def get_chat_model(
