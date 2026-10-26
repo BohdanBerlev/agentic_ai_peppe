@@ -11,7 +11,7 @@
 Nordwerk Industrie-Service erhält einen schnellen, modernen und barrierefreien Webauftritt (Release Candidate), der potenziellen B2B-Kunden sofort Identität, Hauptaussage und die Kernleistung der Wartungsplanung vermittelt. Über einen standardisierten `mailto:`-Link können Interessenten direkt unverbindliche Anfragen stellen, ohne dass ein komplexes oder wartungsintensives CMS/PHP-System erforderlich ist.
 
 ### 2. Commit-Stände & Nachvollziehbarkeit
-- **Geprüfter Produkt-Code-Commit:** `a93442b` (Repository: `client-01-website`)
+- **Geprüfter Produkt-Code-Commit:** `7b1206f` (Repository: `client-01-website`)
 - **Factory-Commit vor Lauf:** `f3b346f` (Repository: `agentic_ai_peppe`)
 - **Liefer-/Evidenz-Commit:** nachgelagert zur Vermeidung zirkulärer Verweise.
 - **Workflow & Run-ID:** Task `CUST-001`, Run `website-run-001` (Trace: `evidence/session-03/runs/website-run-001.jsonl`).

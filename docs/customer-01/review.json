@@ -4,9 +4,9 @@
   "decision": "approved",
   "reviewer": "Lars Boos",
   "decided_at_utc": "2026-10-24T14:30:00Z",
-  "tested_source_commit": "a93442b",
+  "tested_source_commit": "7b1206f",
   "reviewed_artifact_hashes": {
-    "client-01-website/index.html": "e0d37e6f859a11751d384594c77f86f37a54b3d84959db6a4f5cb15949d266e7"
+    "client-01-website/index.html": "8e640335f4c382673be0b4db8976ab3a9b4662b78eb247d7c7d7f78e61f09368"
   },
   "test_evidence_paths": [
     "evidence/session-03/runs/website-run-001.jsonl",

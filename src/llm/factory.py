@@ -74,9 +74,7 @@ def get_chat_model(
         if "GEMINI_API_KEY" not in os.environ and api_key:
             os.environ["GEMINI_API_KEY"] = api_key
 
-        model_name = settings.llm_model
-        if not model_name or model_name in ("qwen3:4b", "gemini-3.8-flash"):
-            model_name = "gemini-1.5-flash"
+        model_name = settings.llm_model or "gemini-3.8-flash"
 
         # Drosselung: max 15 Requests pro Minute für die Free-API (1 Request alle 4 Sekunden)
         rate_limiter = InMemoryRateLimiter(

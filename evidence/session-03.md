@@ -13,8 +13,8 @@ Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollz
 
 | Repository | Zweck | Commit-Stand | Lokaler Pfad |
 |---|---|---|---|
-| **Factory-Repository** | Multi-Agenten-Orchestrierung, Policies, Tracing, Starter-Infrastruktur | `f3b346f` (vor Lauf) / `3aeb069` (nach Evidenz) | `.` (`agentic_ai_peppe`) |
-| **Kundenprodukt-Repository** | Eigenständige statische Website, Produkttests, Kunden-Issue | `a93442b` | `client-01-website` |
+| **Factory-Repository** | Multi-Agenten-Orchestrierung, Policies, Tracing, Starter-Infrastruktur | `f3b346f` (vor Lauf) / `PENDING` (nach Evidenz) | `.` (`agentic_ai_peppe`) |
+| **Kundenprodukt-Repository** | Eigenständige statische Website, Produkttests, Kunden-Issue | `7b1206f` | `client-01-website` |
 
 - **Konfiguration:** Die Factory adressiert das Produkt-Repo modular über `--target-dir client-01-website --project-id client-01`.
 - **Unabhängiger Start (B5):** Das Produkt läuft vollständig ohne Factory, ohne DB und ohne LLM:
