@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 from langchain_ollama import ChatOllama, OllamaEmbeddings
@@ -52,17 +53,42 @@ def get_chat_model(
         from langchain_core.rate_limiters import InMemoryRateLimiter
         from langchain_google_genai import ChatGoogleGenerativeAI
 
-        # Drosselung: max 15 Requests pro Minute für die Free-API
+        # API-Key aus settings oder Umgebung auflösen
+        api_key = (
+            settings.llm_api_key
+            or os.getenv("GEMINI_API_KEY")
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("LLM_API_KEY")
+            or os.getenv("AI_STUDIO_API_KEY")
+            or None
+        )
+        if not api_key:
+            raise ValueError(
+                "Google Gemini API-Key fehlt! Bitte setze GEMINI_API_KEY, GOOGLE_API_KEY oder LLM_API_KEY "
+                "in der .env-Datei oder als GitHub Repository Secret."
+            )
+
+        # Sicherstellen, dass auch der Prozess-Umgebungskontext gesetzt ist
+        if "GOOGLE_API_KEY" not in os.environ and api_key:
+            os.environ["GOOGLE_API_KEY"] = api_key
+        if "GEMINI_API_KEY" not in os.environ and api_key:
+            os.environ["GEMINI_API_KEY"] = api_key
+
+        model_name = settings.llm_model
+        if not model_name or model_name in ("qwen3:4b", "gemini-3.8-flash"):
+            model_name = "gemini-1.5-flash"
+
+        # Drosselung: max 15 Requests pro Minute für die Free-API (1 Request alle 4 Sekunden)
         rate_limiter = InMemoryRateLimiter(
             requests_per_second=0.25, 
             check_every_n_seconds=0.1, 
             max_bucket_size=1
         )
         return ChatGoogleGenerativeAI(
-            model=settings.llm_model or "gemini-3.8-flash",
+            model=model_name,
             rate_limiter=rate_limiter,
             temperature=settings.llm_temperature,
-            api_key=settings.llm_api_key
+            api_key=api_key,
         )
 
     raise ValueError(f"Unsupported LLM provider: {settings.llm_provider}")
@@ -88,9 +114,17 @@ def get_embeddings(settings: Settings | None = None) -> Any:
     if settings.embedding_provider == "google":
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
+        api_key = (
+            settings.embedding_api_key
+            or settings.llm_api_key
+            or os.getenv("GEMINI_API_KEY")
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("LLM_API_KEY")
+            or None
+        )
         return GoogleGenerativeAIEmbeddings(
             model="models/embedding-001",
-            google_api_key=settings.embedding_api_key or settings.llm_api_key
+            google_api_key=api_key,
         )
 
     raise ValueError(

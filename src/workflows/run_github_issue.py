@@ -4,11 +4,14 @@ Does NOT auto-close issues when status is invalid_output, escalated, error,
 changes_requested, or pending_human_review.
 """
 
+import argparse
 import os
 import sys
-import argparse
 from typing import Any
+
 import httpx
+
+from src.app.settings import get_settings
 from src.workflows.feature_pipeline import EngineeringTask, run_feature_pipeline
 
 
@@ -104,9 +107,12 @@ def handle_pipeline_result(repo: str, issue_number: int, result: dict[str, Any])
     reviewed_by = approval.get("reviewed_by")
 
     if status in ("error", "failed", "invalid_output", "escalated"):
+        pipeline_error = result.get("result_state", {}).get("pipeline_error") or result.get("error")
+        error_details = f"- **Fehler:** `{pipeline_error}`\n" if pipeline_error else ""
         error_msg = (
             f"⚠️ **Agentic Pipeline Eskalation / Fehler!**\n\n"
             f"- **Workflow-Status:** `{status}`\n"
+            f"{error_details}"
             f"- **Gate-Entscheidung:** `{decision}`\n"
             f"- **Hinweis:** Issue bleibt offen zur menschlichen Prüfung.\n"
         )
@@ -137,6 +143,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--issue-number", type=int, required=True)
     parser.add_argument("--repo", type=str, default=os.getenv("GITHUB_REPOSITORY"))
+    parser.add_argument("--target-dir", type=str, default=os.getenv("TARGET_DIR", None))
+    parser.add_argument("--project-id", type=str, default=os.getenv("PROJECT_ID", "client-01"))
     args = parser.parse_args()
 
     if not args.repo:
@@ -147,14 +155,35 @@ def main():
         issue_data = fetch_issue_details(args.repo, args.issue_number)
         mark_issue_in_progress(args.repo, args.issue_number)
 
+        settings = get_settings()
+        api_key_found = bool(
+            settings.llm_api_key
+            or os.getenv("GEMINI_API_KEY")
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("LLM_API_KEY")
+            or os.getenv("AI_STUDIO_API_KEY")
+        )
+        print(f"🔧 Pre-flight check: Provider={settings.llm_provider}, Model={settings.llm_model}, API-Key vorhanden={api_key_found}")
+        if settings.llm_provider == "google" and not api_key_found:
+            raise RuntimeError(
+                "Kein Google AI Studio API-Key konfiguriert! Bitte stelle sicher, dass unter Repository Settings -> Secrets and variables -> Actions "
+                "ein Secret namens GEMINI_API_KEY oder GOOGLE_API_KEY hinterlegt ist."
+            )
+
         title = issue_data.get("title", "No Title")
         body = issue_data.get("body", "No Description")
         description = f"GitHub Issue #{args.issue_number}: {title}\n\n{body}"
 
+        input_files = ["index.html"] if args.target_dir else ["src/app/main.py"]
+        test_targets = ["test_website.py"] if args.target_dir else ["tests/test_work_items_api.py"]
+
         task = EngineeringTask(
             task_id=f"ISSUE-{args.issue_number}",
             description=description,
-            input_files=["src/app/main.py"],
+            project_id=args.project_id,
+            target_dir=args.target_dir,
+            input_files=input_files,
+            test_targets=test_targets,
         )
 
         print("Starting Agentic Feature Pipeline Workflow...")
@@ -164,6 +193,20 @@ def main():
 
     except Exception as exc:
         print(f"\nCRITICAL Error executing pipeline: {exc}")
+        try:
+            if args.repo and args.issue_number:
+                error_body = (
+                    f"❌ **Fehler bei der Ausführung der Agentic Pipeline:**\n\n"
+                    f"```text\n{exc}\n```\n\n"
+                    f"**Hinweise zur Fehlerbehebung:**\n"
+                    f"- Prüfe, ob in den GitHub Repository Secrets (`Settings -> Secrets and variables -> Actions`) "
+                    f"das Secret `GEMINI_API_KEY` oder `GOOGLE_API_KEY` angelegt ist.\n"
+                    f"- Stelle sicher, dass der Key in Google AI Studio aktiv und gültig ist.\n"
+                    f"- Detaillierte Laufzeitlogs findest du im Tab **Actions** dieses Repositories."
+                )
+                post_comment_only(args.repo, args.issue_number, error_body)
+        except Exception as post_err:
+            print(f"Failed to post failure comment to issue: {post_err}")
         sys.exit(1)
 
 
