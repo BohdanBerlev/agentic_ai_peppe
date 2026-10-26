@@ -16,28 +16,22 @@ def get_chat_model(
 
     Team agents should depend on this factory (or an evolved equivalent), not
     directly on Ollama or ICC-specific code.
+    Optional JSON/reasoning controls apply to Ollama; defaults are preserved.
+    Models that require thinking may not honour reasoning=False.
+    OpenAI-compatible endpoints keep their existing request contract.
     """
     settings = settings or get_settings()
 
     if settings.llm_provider == "ollama":
-        format_param = "json" if json_mode else None
-        reasoning_param = reasoning
-        if json_mode and reasoning is None:
-            reasoning_param = False
-
-        kwargs: dict[str, Any] = {
-            "model": settings.llm_model,
-            "base_url": settings.llm_base_url,
-            "temperature": settings.llm_temperature,
-            "client_kwargs": {"timeout": settings.llm_timeout_seconds},
-            "num_predict": settings.llm_max_output_tokens,
-        }
-        if format_param is not None:
-            kwargs["format"] = format_param
-        if reasoning_param is not None:
-            kwargs["reasoning"] = reasoning_param
-
-        return ChatOllama(**kwargs)
+        return ChatOllama(
+            model=settings.llm_model,
+            base_url=settings.llm_base_url,
+            temperature=settings.llm_temperature,
+            client_kwargs={"timeout": settings.llm_timeout_seconds},
+            num_predict=settings.llm_max_output_tokens,
+            reasoning=False if json_mode and reasoning is None else reasoning,
+            format="json" if json_mode else None,
+        )
 
     if settings.llm_provider == "openai_compatible":
         # Many self-hosted OpenAI-compatible services support Chat Completions
