@@ -4,7 +4,7 @@
   "customer_task_id": "CUST-001",
   "team_size": 4,
   "tested_source_commit": "2f5e4a5",
-  "submission_commit": "b028daf72fa0515336cdc91c38166bc731a35c6c",
+  "submission_commit": "bb8296a43c52588c8df0b4757a1446b3f68dddf5",
   "working_tree_dirty_at_test": false,
   "workflow_ids": [
     "c129e061-f34b-483d-9d7a-cfb395679901"
