@@ -50,9 +50,9 @@ Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollz
 | **AC-01 (B1)** | Firmenname (`Nordwerk Industrie-Service`) & Hauptaussage (`Praktische Unterstützung für Ihren technischen Betrieb.`) | `test_website.py` + Sichtprüfung Browser (`http://localhost:8000`) | **Bestanden** |
 | **AC-02 Teil (B2)** | Erste Leistung Wartungsplanung (`Wartungsplanung: Wir strukturieren Wartungsaufgaben und dokumentieren Zuständigkeiten für kleine technische Betriebe.`) | `test_website.py` + Sichtprüfung Browser | **Bestanden** |
 | **AC-04 (B3)** | Kontaktlink `mailto:kontakt@nordwerk.example` beschriftet mit `Anfrage stellen` (`N-08`); Übungshinweis (`Fiktives Unternehmen – Lehrprojekt der HAW Hamburg. Keine realen Angebote oder Kontaktaufnahme.`, `N-09`) im Footer sichtbar | `test_website.py` + Klicktest Mailto im Browser | **Bestanden** |
-| **B4** | Eigener automatisierter Produktcheck | `python client-01-website/test_website.py` (`exit_code: 0`) | **Bestanden** |
+| **B4** | Eigener automatisierter Produktcheck (inkl. PHP-RCE-Guardrail `verify_no_php_attack_surface` gegen `CVE-2026-109618` / `CVE-2026-109619`) | `python client-01-website/test_website.py` (`exit_code: 0`) | **Bestanden** |
 | **B5** | Unabhängiger Start dokumentiert | [`client-01-website/README.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/c952e98/README.md) dokumentiert `python -m http.server 8000` | **Bestanden** |
-| **B6** | Kunden-Task ohne erfundene Versprechen | [`client-01-website/issue_t3.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/c952e98/issue_t3.md) referenziert exakte ACs und Annahmen (`A-01`, `A-02`) | **Bestanden** |
+| **B6** | Kunden-Task & Sicherheits-Klärung (`CVE-2026-109618` / `CVE-2026-109619`, PHP `>= 8.2.35`) ohne erfundene Versprechen | [`client-01-website/issue_t3.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/c952e98/issue_t3.md) & [`docs/customer-01/clarifications.md`](../docs/customer-01/clarifications.md) | **Bestanden** |
 
 ---
 
@@ -66,9 +66,10 @@ Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollz
 - **Eigene Factory-Tests:**
   - `tests/test_feature_pipeline.py::test_pipeline_addresses_client_target_dir`
   - `tests/test_feature_pipeline.py::test_pipeline_target_dir_path_traversal_protection`
+  - `tests/test_qa_security_agent.py::test_security_audit_flags_php_rce_surface_cve_2026_109618`
   - `tests/test_work_items_api.py::test_work_items_real_postgres_lifecycle` (gegen echte PostgreSQL-DB)
   - `tests/starter/test_session_03_infrastructure.py`
-  - Alle **62 Tests** laufen im Standardlauf (`python -m pytest`) grün durch (JUnit-Bericht: [`evidence/session-03/pytest.xml`](pytest.xml)).
+  - Alle **67 Tests** laufen im Standardlauf (`python -m pytest`) grün durch (JUnit-Bericht: [`evidence/session-03/pytest.xml`](pytest.xml)).
 
 ---
 

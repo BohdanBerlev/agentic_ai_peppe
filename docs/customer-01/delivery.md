@@ -34,13 +34,16 @@ python -m http.server 8000 --directory client-01-website
 python client-01-website/test_website.py
 ```
 
-### 4. Tests & Prüfungsergebnisse
+### 4. Tests, Prüfungsergebnisse & PHP-Sicherheitsprüfung (`CVE-2026-109618` / `CVE-2026-109619`)
 - **Eigener automatisierter Produktcheck (`client-01-website/test_website.py`):**
   - Ergebnis: **`PASSED` (Exit-Code 0, 0 Fehler)**.
-  - Geprüft: `N-01`, `N-02`, `N-03`, `N-08` (`mailto:kontakt@nordwerk.example`), `N-09` (Lehrprojekt-Hinweis), semantische HTML5-Elemente (`<header>`, `<nav>`, `<main>`, `<h1>`, `<footer>`), `lang="de"`, `:focus-visible` sowie Abwesenheit externer URLs/Tracker/Zertifikate.
+  - Geprüft: `N-01`, `N-02`, `N-03`, `N-08` (`mailto:kontakt@nordwerk.example`), `N-09` (Lehrprojekt-Hinweis), semantische HTML5-Elemente (`<header>`, `<nav>`, `<main>`, `<h1>`, `<footer>`), `lang="de"`, `:focus-visible`, Abwesenheit externer URLs/Tracker/Zertifikate **sowie `verify_no_php_attack_surface()` (0 `.php`/`.phtml`/`.phar`-Dateien, 0 `<?php`-Tags, 0 `.php`-Formular-Endpunkte)**.
+- **PHP-Sicherheitsberatung & Factory-Guardrail (ENISA-Mitteilung vom 21.10.2026 zu `CVE-2026-109618` & `CVE-2026-109619`):**
+  - Im `qa_security_agent.py` (`detect_php_security_risks`) und in `tests/test_qa_security_agent.py::test_security_audit_flags_php_rce_surface_cve_2026_109618` ist ein harter Guardrail aktiv, der jegliche PHP-Skripte oder `.php`-Formular-Actions sofort mit `changes_requested` abweist.
+  - Detaillierte Einschätzung zum alten PHP-8.2-Auftritt des Kunden (erforderlicher Patchstand `>= PHP 8.2.35`, Hoster-Rückfragen, Isolation vs. statischer Ersatz, ehrliche Abgrenzung „statisch ≠ wartungsfrei“) ist in [`docs/customer-01/clarifications.md`](clarifications.md) dokumentiert.
 - **Factory-Tests (`pytest`):**
   - Befehl: `python -m pytest --junitxml=evidence/session-03/pytest.xml -v`
-  - Ergebnis: **62 passed, 1 skipped** (JUnit-Report unter `evidence/session-03/pytest.xml`; eigener PostgreSQL-Persistenztest `test_work_items_real_postgres_lifecycle` gegen echte PostgreSQL-DB bestanden).
+  - Ergebnis: **67 passed, 2 skipped** (JUnit-Report unter `evidence/session-03/pytest.xml`; eigener PostgreSQL-Persistenztest `test_work_items_real_postgres_lifecycle` gegen echte PostgreSQL-DB bestanden).
 
 ### 5. Menschliche vs. Agenten-Arbeit
 - **Agenten-Beitrag (8 Rollen im Lauf `bf81352d-f7cb-4628-ad10-475cad888f73`):**

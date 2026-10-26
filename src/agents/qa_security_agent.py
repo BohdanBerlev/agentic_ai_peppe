@@ -81,6 +81,30 @@ def _parse_qa_result(text: str) -> QASecurityReport:
         )
 
 
+def detect_php_security_risks(source_snippet: str, target_file: str = "") -> list[str]:
+    """Deterministic guardrail against PHP runtime artifacts (CVE-2026-109618 & CVE-2026-109619 / ENISA 2026-10-21)."""
+    risks: list[str] = []
+    lower_file = (target_file or "").lower()
+    lower_code = (source_snippet or "").lower()
+
+    if lower_file.endswith((".php", ".phtml", ".phar", ".inc")):
+        risks.append(
+            f"Target file '{target_file}' uses legacy PHP runtime extension, exposing critical RCE surface "
+            "(CVE-2026-109618 / CVE-2026-109619, ENISA joint statement 2026-10-21)."
+        )
+    if "<?php" in lower_code or "<?=" in lower_code:
+        risks.append(
+            "Embedded PHP execution tag ('<?php' / '<?=') detected in source code; violates static zero-PHP policy "
+            "and introduces CVE-2026-109618 / CVE-2026-109619 RCE risk."
+        )
+    if 'action="' in lower_code and ".php" in lower_code:
+        risks.append(
+            "HTML form action references a '.php' endpoint; unverified PHP 8.2 backends (< 8.2.35) are vulnerable "
+            "to CVE-2026-109618 and CVE-2026-109619 remote code execution."
+        )
+    return risks
+
+
 def execute_repository_pytest(
     test_targets: list[str] | None = None,
     timeout_seconds: int = 30,
@@ -185,7 +209,8 @@ def build_qa_security_graph(
             system = SystemMessage(
                 content=(
                     "You are the AI Safety & Security Engineer. Evaluate the architecture report and source code for "
-                    "security risks (injection, secret exposure, guardrails, data validation). "
+                    "security risks (injection, secret exposure, guardrails, data validation, and legacy PHP runtime "
+                    "vulnerabilities such as CVE-2026-109618 / CVE-2026-109619). "
                     "status_str must be 'approved' or 'changes_requested'. Return ONLY valid JSON matching this schema: "
                     '{"status_str": "approved", "summary": "Security audit summary", "security_risks": ["risk 1"]}'
                 )
@@ -215,6 +240,16 @@ def build_qa_security_graph(
                 report_dict["summary"] = (
                     f"[Guardrail: pytest failed (exit={pytest_res.get('exit_code')})] " + report_dict.get("summary", "")
                 )
+
+        # Deterministic PHP RCE guardrail (CVE-2026-109618 & CVE-2026-109619)
+        php_risks = detect_php_security_risks(state.get("source_snippet", ""), state.get("target_file", ""))
+        if php_risks:
+            report_dict["status_str"] = "changes_requested"
+            existing_risks = list(report_dict.get("security_risks") or [])
+            report_dict["security_risks"] = existing_risks + php_risks
+            report_dict["summary"] = (
+                "[Guardrail: PHP CVE-2026-109618/109619 risk detected] " + report_dict.get("summary", "")
+            )
 
         report_dict["role"] = role_mode
         report_dict["_usage"] = (in_tok, out_tok)

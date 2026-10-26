@@ -110,3 +110,27 @@ def test_qa_executes_real_pytest_and_separates_security_role(tmp_path):
     lines = [json.loads(line) for line in trace_file.read_text(encoding="utf-8").splitlines()]
     assert [r["role"] for r in lines] == ["qa_test_engineer", "ai_safety_security_engineer"]
     assert lines[0]["pytest_execution"]["tests_passed"] is True
+
+
+def test_security_audit_flags_php_rce_surface_cve_2026_109618(tmp_path):
+    """Verifies that embedded PHP tags or legacy .php form endpoints are blocked (CVE-2026-109618 / CVE-2026-109619)."""
+    client_dir = tmp_path / "client-php-check"
+    client_dir.mkdir(parents=True, exist_ok=True)
+    bad_html = client_dir / "index.html"
+    bad_html.write_text(
+        '<!DOCTYPE html><html lang="de"><body><?php echo "legacy"; ?><form action="send.php"></form></body></html>',
+        encoding="utf-8",
+    )
+
+    trace_file = tmp_path / "php_sec_trace.jsonl"
+    sec_res = run_security_audit(
+        architecture_report={"status_str": "approved", "summary": "OK"},
+        target_file="index.html",
+        base_dir=str(client_dir),
+        task_id="SEC-PHP-01",
+        llm=MockLLMQASecurity(),
+        trace_file=str(trace_file),
+    )
+
+    assert sec_res["status_str"] == "changes_requested"
+    assert any("CVE-2026-109618" in r for r in sec_res["security_risks"])
