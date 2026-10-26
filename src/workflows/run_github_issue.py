@@ -15,6 +15,21 @@ from src.app.settings import get_settings
 from src.workflows.feature_pipeline import EngineeringTask, run_feature_pipeline
 
 
+def extract_intended_actor(body: str) -> str | None:
+    """Read the 'Intended actor' value from a GitHub issue-form body."""
+    if not body:
+        return None
+    lines = body.splitlines()
+    for i, line in enumerate(lines):
+        if "intended actor" in line.lower():
+            for nxt in lines[i + 1 :]:
+                value = nxt.strip()
+                if not value or value.startswith("#"):
+                    continue
+                return value
+    return None
+
+
 def fetch_issue_details(repo: str, issue_number: int) -> dict:
     token = os.getenv("GITHUB_TOKEN")
     if not token:
@@ -153,6 +168,18 @@ def main():
 
     try:
         issue_data = fetch_issue_details(args.repo, args.issue_number)
+
+        actor = extract_intended_actor(issue_data.get("body") or "")
+        if actor and actor.lower() != "agent":
+            post_comment_only(
+                args.repo,
+                args.issue_number,
+                f"⏭️ **Übersprungen** – Intended actor: `{actor}`. "
+                "Die Agentic Pipeline läuft nur für Issues mit Intended actor = **Agent**.",
+            )
+            print(f"Skipping issue #{args.issue_number}: intended actor is '{actor}'.")
+            sys.exit(0)
+
         mark_issue_in_progress(args.repo, args.issue_number)
 
         settings = get_settings()
