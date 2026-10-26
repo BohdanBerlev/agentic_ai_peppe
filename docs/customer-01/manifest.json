@@ -3,7 +3,7 @@
   "session": 3,
   "customer_task_id": "CUST-001",
   "team_size": 4,
-  "tested_source_commit": "7b1206f",
+  "tested_source_commit": "2f5e4a5",
   "submission_commit": "b028daf72fa0515336cdc91c38166bc731a35c6c",
   "working_tree_dirty_at_test": false,
   "workflow_ids": [
@@ -16,7 +16,7 @@
   "llm_model": "qwen3:4b",
   "model_tag_or_digest": "qwen3:4b-instruct",
   "test_commands": [
-    "python -m unittest client-01-website/test_website.py -v",
+    "python test_website.py",
     "python -m pytest tests/starter/test_session_03_infrastructure.py"
   ],
   "junit_files": [
@@ -27,11 +27,11 @@
   "mock_runs_are_separate": true,
   "review_file": "docs/customer-01/review.json",
   "artifact_hashes": {
-    "client-01-website/index.html": "8e640335f4c382673be0b4db8976ab3a9b4662b78eb247d7c7d7f78e61f09368",
-    "client-01-website/styles.css": "3d1a33a087188ca31a18851f47fec601be870e4156e66646d39e36d46cb67a92"
+    "Nordwerk-Industrie-Service-Website/index.html": "c7281bdf5011275d3c270412258e2576ba3ee9d20942687339754e82b61fd027",
+    "Nordwerk-Industrie-Service-Website/styles.css": "d3d03859aafd89d5d7722fe0a609b41c9ca70932cc024d459c7150efd469668b"
   },
   "issue_and_pr_references": [
-    "client-01-website/issue_t3.md#TASK-001"
+    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/2f5e4a5/issue_t3.md"
   ],
   "cost_records": "costs/usage.csv",
   "known_limitations": [
@@ -39,5 +39,5 @@
     "Target audience N-06 and work style N-07 deferred to Session 4",
     "Multi-breakpoint responsive matrix deferred to Session 4"
   ],
-  "product_repository": "https://github.com/Vanitas50/client-01-website"
+  "product_repository": "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website"
 }

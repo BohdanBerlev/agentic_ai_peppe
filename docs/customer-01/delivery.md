@@ -11,7 +11,7 @@
 Nordwerk Industrie-Service erhält einen schnellen, modernen und barrierefreien Webauftritt (Release Candidate), der potenziellen B2B-Kunden sofort Identität, Hauptaussage und die Kernleistung der Wartungsplanung vermittelt. Über einen standardisierten `mailto:`-Link können Interessenten direkt unverbindliche Anfragen stellen, ohne dass ein komplexes oder wartungsintensives CMS/PHP-System erforderlich ist.
 
 ### 2. Commit-Stände & Nachvollziehbarkeit
-- **Geprüfter Produkt-Code-Commit:** `7b1206f` (Repository: `client-01-website`)
+- **Geprüfter Produkt-Code-Commit:** `2f5e4a5` (Repository: `client-01-website`)
 - **Factory-Commit vor Lauf:** `f3b346f` (Repository: `agentic_ai_peppe`)
 - **Liefer-/Evidenz-Commit:** nachgelagert zur Vermeidung zirkulärer Verweise.
 - **Workflow & Run-ID:** Task `CUST-001`, Run `website-run-001` (Trace: `evidence/session-03/runs/website-run-001.jsonl`).
@@ -28,7 +28,7 @@ python -m http.server 8000
 ### 4. Tests & Prüfungsergebnisse
 - **Eigener automatisierter Produktcheck (`test_website.py`):**
   - Befehl: `python test_website.py`
-  - Ergebnis: **8 von 8 Checks bestanden (0 Fehler)**.
+  - Ergebnis: **alle Pflichtprüfungen bestanden (0 Fehler)**.
   - Geprüft: Firmenname (N-01), Hauptaussage (N-02), Wartungsplanung (N-03), Kontaktlink `mailto:kontakt@nordwerk.example` (N-08), Übungshinweis Lehrprojekt HAW Hamburg (N-09), UTF-8 / `lang="de"`, keine Tracker/Script-Injections.
 - **Factory-Tests (Pytest):**
   - Befehl: `python -m pytest`
