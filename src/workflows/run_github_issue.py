@@ -109,6 +109,7 @@ def handle_pipeline_result(repo: str, issue_number: int, result: dict[str, Any])
     if status in ("error", "failed", "invalid_output", "escalated"):
         pipeline_error = result.get("result_state", {}).get("pipeline_error") or result.get("error")
         error_details = f"- **Fehler:** `{pipeline_error}`\n" if pipeline_error else ""
+        print(f"\n❌ Pipeline-Fehler aufgetreten:\nStatus: {status}\n{error_details}", flush=True)
         error_msg = (
             f"⚠️ **Agentic Pipeline Eskalation / Fehler!**\n\n"
             f"- **Workflow-Status:** `{status}`\n"

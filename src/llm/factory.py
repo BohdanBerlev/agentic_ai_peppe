@@ -7,6 +7,42 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from src.app.settings import Settings, get_settings
 
 
+def resolve_google_model(requested_model: str | None, api_key: str | None) -> str:
+    """Resolve an active Google Gemini model for generateContent."""
+    preferred_models = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
+
+    if api_key:
+        try:
+            import httpx
+            resp = httpx.get(
+                f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}",
+                timeout=4.0,
+            )
+            if resp.status_code == 200:
+                available = [
+                    m["name"].replace("models/", "")
+                    for m in resp.json().get("models", [])
+                    if "generateContent" in m.get("supportedGenerationMethods", [])
+                ]
+                if requested_model and requested_model in available:
+                    return requested_model
+                for candidate in preferred_models:
+                    if candidate in available:
+                        return candidate
+                flash_candidates = [m for m in available if "flash" in m]
+                if flash_candidates:
+                    return flash_candidates[0]
+                if available:
+                    return available[0]
+        except Exception:
+            pass
+
+    if requested_model and requested_model not in ("qwen3:4b", "gemini-3.8-flash", "gemini-1.5-flash"):
+        return requested_model
+
+    return "gemini-2.5-flash"
+
+
 def get_chat_model(
     settings: Settings | None = None,
     *,
@@ -74,9 +110,8 @@ def get_chat_model(
         if "GEMINI_API_KEY" not in os.environ and api_key:
             os.environ["GEMINI_API_KEY"] = api_key
 
-        model_name = settings.llm_model
-        if not model_name or model_name in ("qwen3:4b", "gemini-3.8-flash"):
-            model_name = "gemini-1.5-flash"
+        model_name = resolve_google_model(settings.llm_model, api_key)
+        print(f"🔧 Google Gemini Modell aufgelöst: '{model_name}'", flush=True)
 
         # Drosselung: max 15 Requests pro Minute für die Free-API (1 Request alle 4 Sekunden)
         rate_limiter = InMemoryRateLimiter(

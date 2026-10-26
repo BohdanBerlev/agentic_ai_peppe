@@ -41,8 +41,8 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY || secrets.GEMINI_API_KEY || secrets.LLM_API_KEY || secrets.AI_STUDIO_API_KEY }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY || secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY || secrets.AI_STUDIO_API_KEY }}
           LLM_PROVIDER: "google"
-          # Modell zentral konfigurierbar; gemini-1.5-flash bietet 15 RPM im Free-Tier
-          LLM_MODEL: ${{ vars.LLM_MODEL || 'gemini-1.5-flash' }}
+          # Modell zentral konfigurierbar; gemini-2.5-flash bietet stabile v1beta generateContent Unterstutzung
+          LLM_MODEL: ${{ vars.LLM_MODEL || 'gemini-2.5-flash' }}
           PYTHONPATH: "."
         run: |
           # Ermittelt die Issue-Nummer entweder aus dem Webhook-Event oder dem manuellen Input

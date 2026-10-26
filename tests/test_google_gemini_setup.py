@@ -46,8 +46,17 @@ def test_get_chat_model_google_provider_success(monkeypatch):
     model = get_chat_model(settings)
 
     assert captured.get("api_key") == "ai-studio-valid-key"
-    assert captured.get("model") == "gemini-1.5-flash"
+    assert captured.get("model") == "gemini-2.5-flash"
     assert "rate_limiter" in captured
+
+
+def test_resolve_google_model_falls_back_when_offline():
+    from src.llm.factory import resolve_google_model
+    # When no API key is provided or offline, falls back to stable gemini-2.5-flash
+    assert resolve_google_model("gemini-1.5-flash", None) == "gemini-2.5-flash"
+    assert resolve_google_model("qwen3:4b", None) == "gemini-2.5-flash"
+    assert resolve_google_model("gemini-3.8-flash", None) == "gemini-2.5-flash"
+    assert resolve_google_model("gemini-2.5-flash", None) == "gemini-2.5-flash"
 
 
 def test_get_chat_model_google_missing_key_raises(monkeypatch):
