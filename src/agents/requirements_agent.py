@@ -62,6 +62,7 @@ class AgentDesignReport(BaseModel):
 class RequirementsState(TypedDict, total=False):
     description: str
     context_file: str
+    base_dir: str
     context_data: str
     role_mode: str
     result: dict[str, Any]
@@ -120,10 +121,11 @@ def build_requirements_graph(llm: Any | None = None, *, trace_context: dict[str,
 
     def load_context(state: RequirementsState) -> RequirementsState:
         ctx_file = state.get("context_file")
+        base_dir = state.get("base_dir")
         if ctx_file:
             trace_ctx["tools"].append("read_repository_text_file")
             try:
-                content = read_repository_text_file(ctx_file)
+                content = read_repository_text_file(ctx_file, base_dir=base_dir)
                 return {"context_data": content}
             except Exception as exc:
                 return {"error": str(exc)}
@@ -202,6 +204,7 @@ def _run_role_analysis(
     description: str,
     context_file: str | None = None,
     *,
+    base_dir: str | None = None,
     role_mode: Literal[
         "product_owner_requirements", "project_manager", "agent_engineer"
     ] = "product_owner_requirements",
@@ -221,6 +224,7 @@ def _run_role_analysis(
         {
             "description": description,
             "context_file": context_file or "",
+            "base_dir": base_dir or "",
             "role_mode": role_mode,
         },
         {"recursion_limit": 10},
@@ -283,6 +287,7 @@ def run_requirements_analysis(
     description: str,
     context_file: str | None = None,
     *,
+    base_dir: str | None = None,
     task_id: str = "REQ-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -292,6 +297,7 @@ def run_requirements_analysis(
     return _run_role_analysis(
         description=description,
         context_file=context_file,
+        base_dir=base_dir,
         role_mode="product_owner_requirements",
         task_id=task_id,
         workflow_id=workflow_id,
@@ -305,6 +311,7 @@ def run_project_planning(
     requirements_report: dict[str, Any] | None = None,
     context_file: str | None = None,
     *,
+    base_dir: str | None = None,
     task_id: str = "PM-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -317,6 +324,7 @@ def run_project_planning(
     return _run_role_analysis(
         description=enriched,
         context_file=context_file,
+        base_dir=base_dir,
         role_mode="project_manager",
         task_id=task_id,
         workflow_id=workflow_id,
@@ -329,6 +337,7 @@ def run_agent_engineering_spec(
     description: str,
     context_file: str | None = None,
     *,
+    base_dir: str | None = None,
     task_id: str = "AE-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -338,6 +347,7 @@ def run_agent_engineering_spec(
     return _run_role_analysis(
         description=description,
         context_file=context_file,
+        base_dir=base_dir,
         role_mode="agent_engineer",
         task_id=task_id,
         workflow_id=workflow_id,

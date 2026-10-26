@@ -24,6 +24,7 @@ from src.agents.common import (
     clean_json_block,
     extract_message_text,
     read_repository_text_file,
+    resolve_authorized_root,
 )
 from src.app.settings import get_settings
 from src.llm.factory import get_chat_model
@@ -54,6 +55,7 @@ class QATestExecutionReport(BaseModel):
 class QASecurityState(TypedDict, total=False):
     architecture_report: dict[str, Any]
     target_file: str
+    base_dir: str
     test_targets: list[str]
     role_mode: str
     source_snippet: str
@@ -79,25 +81,37 @@ def _parse_qa_result(text: str) -> QASecurityReport:
         )
 
 
-def execute_repository_pytest(test_targets: list[str] | None = None, timeout_seconds: int = 30) -> dict[str, Any]:
-    """Safely execute pytest on repository test files and return structured execution evidence."""
-    targets = test_targets or ["tests/test_work_items_api.py"]
+def execute_repository_pytest(
+    test_targets: list[str] | None = None,
+    timeout_seconds: int = 30,
+    base_dir: str | None = None,
+) -> dict[str, Any]:
+    """Safely execute pytest (or standalone product check script) in authorized workspace and return structured evidence."""
+    root = resolve_authorized_root(base_dir)
+    targets = test_targets or (["test_website.py"] if base_dir else ["tests/test_work_items_api.py"])
     validated_targets: list[str] = []
     for t in targets:
-        resolved = (REPO_ROOT / t).resolve()
+        resolved = (root / t).resolve()
         try:
-            resolved.relative_to(REPO_ROOT)
+            resolved.relative_to(root)
         except ValueError as exc:
             raise ValueError(f"Security violation: test path escapes repository root: {t}") from exc
         if not resolved.exists():
             raise FileNotFoundError(f"Test target not found: {t}")
         validated_targets.append(t)
 
-    cmd = [sys.executable, "-m", "pytest", "-q", *validated_targets]
+    # If running inside an external customer checkout with a standalone check script, run python directly or pytest
+    if base_dir and len(validated_targets) == 1 and validated_targets[0].endswith(".py"):
+        cmd = [sys.executable, validated_targets[0]]
+        cmd_label = f"python {validated_targets[0]}"
+    else:
+        cmd = [sys.executable, "-m", "pytest", "-q", *validated_targets]
+        cmd_label = " ".join(["python", "-m", "pytest", "-q", *validated_targets])
+
     try:
         completed = subprocess.run(
             cmd,
-            cwd=str(REPO_ROOT),
+            cwd=str(root),
             capture_output=True,
             text=True,
             timeout=timeout_seconds,
@@ -108,7 +122,7 @@ def execute_repository_pytest(test_targets: list[str] | None = None, timeout_sec
             "tests_executed": True,
             "tests_passed": completed.returncode == 0,
             "exit_code": completed.returncode,
-            "command": " ".join(["python", "-m", "pytest", "-q", *validated_targets]),
+            "command": cmd_label,
             "output_excerpt": stdout_excerpt,
         }
     except Exception as exc:
@@ -116,8 +130,8 @@ def execute_repository_pytest(test_targets: list[str] | None = None, timeout_sec
             "tests_executed": False,
             "tests_passed": False,
             "exit_code": -1,
-            "command": " ".join(["python", "-m", "pytest", "-q", *validated_targets]),
-            "output_excerpt": f"pytest execution failed: {exc}",
+            "command": cmd_label,
+            "output_excerpt": f"test execution failed: {exc}",
         }
 
 
@@ -132,11 +146,12 @@ def build_qa_security_graph(
 
     def inspect_file(state: QASecurityState) -> QASecurityState:
         target = state.get("target_file")
+        base_dir = state.get("base_dir")
         updates: QASecurityState = {"source_snippet": ""}
         if target:
             trace_ctx["tools"].append("read_repository_text_file")
             try:
-                snippet = read_repository_text_file(target)
+                snippet = read_repository_text_file(target, base_dir=base_dir)
                 updates["source_snippet"] = snippet[:1500]
             except Exception as exc:
                 return {"error": str(exc)}
@@ -144,7 +159,7 @@ def build_qa_security_graph(
         if run_tests or state.get("role_mode") == "qa_test_engineer":
             trace_ctx["tools"].append("execute_repository_pytest")
             try:
-                pytest_res = execute_repository_pytest(state.get("test_targets"))
+                pytest_res = execute_repository_pytest(state.get("test_targets"), base_dir=base_dir)
                 updates["pytest_result"] = pytest_res
             except Exception as exc:
                 return {"error": str(exc)}
@@ -218,6 +233,7 @@ def run_security_audit(
     architecture_report: dict[str, Any],
     target_file: str | None = "src/app/main.py",
     *,
+    base_dir: str | None = None,
     task_id: str = "SEC-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -227,6 +243,7 @@ def run_security_audit(
     return _run_qa_or_security(
         architecture_report=architecture_report,
         target_file=target_file,
+        base_dir=base_dir,
         role_mode="ai_safety_security_engineer",
         run_tests=False,
         task_id=task_id,
@@ -241,6 +258,7 @@ def run_qa_test_execution(
     target_file: str | None = "src/app/main.py",
     test_targets: list[str] | None = None,
     *,
+    base_dir: str | None = None,
     task_id: str = "QA-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -251,6 +269,7 @@ def run_qa_test_execution(
         architecture_report=architecture_report,
         target_file=target_file,
         test_targets=test_targets,
+        base_dir=base_dir,
         role_mode="qa_test_engineer",
         run_tests=True,
         task_id=task_id,
@@ -265,6 +284,7 @@ def _run_qa_or_security(
     target_file: str | None = "src/app/main.py",
     test_targets: list[str] | None = None,
     *,
+    base_dir: str | None = None,
     role_mode: Literal["qa_test_engineer", "ai_safety_security_engineer"] = "qa_test_engineer",
     run_tests: bool = False,
     task_id: str = "QA-001",
@@ -283,7 +303,8 @@ def _run_qa_or_security(
         {
             "architecture_report": architecture_report,
             "target_file": target_file or "",
-            "test_targets": test_targets or ["tests/test_work_items_api.py"],
+            "base_dir": base_dir or "",
+            "test_targets": test_targets or (["test_website.py"] if base_dir else ["tests/test_work_items_api.py"]),
             "role_mode": role_mode,
         },
         {"recursion_limit": 10},
@@ -342,6 +363,8 @@ def run_qa_security_check(
     architecture_report: dict[str, Any],
     target_file: str | None = "src/app/main.py",
     *,
+    base_dir: str | None = None,
+    test_targets: list[str] | None = None,
     task_id: str = "QA-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -352,6 +375,8 @@ def run_qa_security_check(
     return _run_qa_or_security(
         architecture_report=architecture_report,
         target_file=target_file,
+        test_targets=test_targets,
+        base_dir=base_dir,
         role_mode="qa_test_engineer",
         run_tests=run_tests,
         task_id=task_id,

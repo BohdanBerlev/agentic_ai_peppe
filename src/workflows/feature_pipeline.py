@@ -40,6 +40,8 @@ from src.observability.tracing import append_trace
 class EngineeringTask(BaseModel):
     task_id: str
     description: str
+    project_id: str = "client-01"
+    target_dir: str | None = None
     assigned_role: str = "integration_engineer"
     input_files: list[str] = Field(default_factory=lambda: ["src/app/main.py"])
     test_targets: list[str] = Field(default_factory=lambda: ["tests/test_work_items_api.py"])
@@ -85,6 +87,7 @@ class PipelineState(TypedDict, total=False):
     run_pytest_in_qa: bool
     max_impl_retries: int
     impl_attempts: int
+    _injected_llm: Any
     requirements_report: dict[str, Any]
     project_plan_report: dict[str, Any]
     agent_design_report: dict[str, Any]
@@ -122,9 +125,10 @@ def build_pipeline_graph(
     def step_validate_context(state: PipelineState) -> PipelineState:
         task = state.get("task", {})
         files = task.get("input_files") or []
+        base_dir = task.get("target_dir")
         for rel_path in files:
             try:
-                read_repository_text_file(rel_path)
+                read_repository_text_file(rel_path, base_dir=base_dir)
             except Exception as exc:
                 return {"context_error": str(exc)}
         return {"impl_attempts": 0}
@@ -141,10 +145,12 @@ def build_pipeline_graph(
         if task.get("human_feedback"):
             desc = f"{desc}\n\nPrevious Human Feedback:\n{task['human_feedback']}"
         ctx_file = (task.get("input_files") or [None])[0]
+        base_dir = task.get("target_dir")
 
         req_report = run_requirements_analysis(
             description=desc,
             context_file=ctx_file,
+            base_dir=base_dir,
             task_id=task_id,
             workflow_id=wf_id,
             trace_file=trace_file,
@@ -157,6 +163,7 @@ def build_pipeline_graph(
                 description=desc,
                 requirements_report=req_report,
                 context_file=ctx_file,
+                base_dir=base_dir,
                 task_id=task_id,
                 workflow_id=wf_id,
                 trace_file=trace_file,
@@ -165,6 +172,7 @@ def build_pipeline_graph(
             ae_report = run_agent_engineering_spec(
                 description=desc,
                 context_file=ctx_file,
+                base_dir=base_dir,
                 task_id=task_id,
                 workflow_id=wf_id,
                 trace_file=trace_file,
@@ -187,9 +195,11 @@ def build_pipeline_graph(
         trace_file = state.get("trace_file")
         task_id = task.get("task_id", "DRYRUN-002")
         target_file = (task.get("input_files") or ["src/app/main.py"])[0]
+        base_dir = task.get("target_dir")
 
         report = run_architect_review(
             file_path=target_file,
+            base_dir=base_dir,
             task_id=task_id,
             workflow_id=wf_id,
             trace_file=trace_file,
@@ -223,8 +233,9 @@ def build_pipeline_graph(
         wf_id = state.get("workflow_id")
         trace_file = state.get("trace_file")
         task_id = task.get("task_id", "DRYRUN-002")
+        base_dir = task.get("target_dir")
         target_file = (task.get("input_files") or ["src/app/main.py"])[0]
-        test_targets = task.get("test_targets") or ["tests/test_work_items_api.py"]
+        test_targets = task.get("test_targets") or (["test_website.py"] if base_dir else ["tests/test_work_items_api.py"])
         arch_rep = state.get("architecture_report", {})
 
         if state.get("full_company_mode"):
@@ -232,6 +243,7 @@ def build_pipeline_graph(
                 architecture_report=arch_rep,
                 target_file=target_file,
                 test_targets=test_targets,
+                base_dir=base_dir,
                 task_id=task_id,
                 workflow_id=wf_id,
                 trace_file=trace_file,
@@ -240,6 +252,7 @@ def build_pipeline_graph(
             sec_rep = run_security_audit(
                 architecture_report=arch_rep,
                 target_file=target_file,
+                base_dir=base_dir,
                 task_id=task_id,
                 workflow_id=wf_id,
                 trace_file=trace_file,
@@ -254,6 +267,7 @@ def build_pipeline_graph(
                     "security": sec_rep,
                 },
                 target_file=target_file,
+                base_dir=base_dir,
                 task_id=task_id,
                 workflow_id=wf_id,
                 trace_file=trace_file,
@@ -268,6 +282,8 @@ def build_pipeline_graph(
         report = run_qa_security_check(
             architecture_report=arch_rep,
             target_file=target_file,
+            test_targets=test_targets,
+            base_dir=base_dir,
             task_id=task_id,
             workflow_id=wf_id,
             trace_file=trace_file,
@@ -494,13 +510,14 @@ def run_feature_pipeline(
     run_pytest_in_qa: bool = False,
     backend_agent_fn: Callable[[dict[str, Any], int], dict[str, Any]] | None = None,
     max_impl_retries: int = 3,
+    session_folder: str = "session-02",
 ) -> dict[str, Any]:
     settings = get_settings()
     run_id = str(uuid.uuid4())
     workflow_id = str(uuid.uuid4())
     started = time.perf_counter()
 
-    evidence_dir = REPO_ROOT / "evidence" / "session-02"
+    evidence_dir = REPO_ROOT / "evidence" / session_folder
     evidence_dir.mkdir(parents=True, exist_ok=True)
     custom_trace = trace_file or str(evidence_dir / f"{workflow_id}.jsonl")
 
@@ -522,6 +539,7 @@ def run_feature_pipeline(
                 "full_company_mode": full_company_mode,
                 "run_pytest_in_qa": run_pytest_in_qa,
                 "max_impl_retries": max_impl_retries,
+                "_injected_llm": llm,
             },
             {"recursion_limit": 30},
         )
@@ -585,6 +603,8 @@ def run_feature_pipeline(
         "workflow_id": workflow_id,
         "parent_workflow_id": task.parent_workflow_id,
         "task_id": task.task_id,
+        "project_id": task.project_id,
+        "target_dir": task.target_dir,
         "agent": "feature_pipeline_workflow",
         "role": "integration_engineer",
         "provider": provider,
@@ -666,19 +686,42 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--desc", type=str, default="Review work-item feature implementation.")
     parser.add_argument("--task-id", type=str, default="DRYRUN-002")
+    parser.add_argument("--project-id", type=str, default="client-01")
+    parser.add_argument("--target-dir", type=str, default=None)
+    parser.add_argument("--input-file", type=str, default=None)
+    parser.add_argument("--test-target", type=str, default=None)
     parser.add_argument("--parent-workflow-id", type=str, default=None)
     parser.add_argument("--feedback", type=str, default=None)
     parser.add_argument("--full-company", action="store_true")
+    parser.add_argument("--use-backend-agent", action="store_true")
+    parser.add_argument("--session", type=str, default="session-03")
     args = parser.parse_args()
+
+    default_input = ["index.html"] if args.target_dir else ["src/app/main.py"]
+    default_test = ["test_website.py"] if args.target_dir else ["tests/test_work_items_api.py"]
+    input_files = [args.input_file] if args.input_file else default_input
+    test_targets = [args.test_target] if args.test_target else default_test
+
+    backend_fn = None
+    if args.use_backend_agent:
+        from src.agents.backend_agent import my_backend_agent
+
+        backend_fn = my_backend_agent
 
     print("Running Independent Agent Modular Feature Pipeline...")
     result = run_feature_pipeline(
         EngineeringTask(
             task_id=args.task_id,
             description=args.desc,
+            project_id=args.project_id,
+            target_dir=args.target_dir,
+            input_files=input_files,
+            test_targets=test_targets,
             parent_workflow_id=args.parent_workflow_id,
             human_feedback=args.feedback,
         ),
         full_company_mode=args.full_company,
+        backend_agent_fn=backend_fn,
+        session_folder=args.session,
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))

@@ -36,6 +36,7 @@ class ArchitectureReport(BaseModel):
 
 class ArchitectState(TypedDict, total=False):
     file_path: str
+    base_dir: str
     code_content: str
     result: dict[str, Any]
     error: str
@@ -64,9 +65,10 @@ def build_architect_graph(llm: Any | None = None, *, trace_context: dict[str, An
 
     def load_code(state: ArchitectState) -> ArchitectState:
         target_file = state.get("file_path", "src/app/main.py")
+        base_dir = state.get("base_dir")
         trace_ctx["tools"].append("read_repository_text_file")
         try:
-            code = read_repository_text_file(target_file)
+            code = read_repository_text_file(target_file, base_dir=base_dir)
             return {"code_content": code}
         except Exception as exc:
             return {"error": str(exc)}
@@ -109,6 +111,7 @@ def build_architect_graph(llm: Any | None = None, *, trace_context: dict[str, An
 def run_architect_review(
     file_path: str = "src/app/main.py",
     *,
+    base_dir: str | None = None,
     task_id: str = "ARCH-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -121,7 +124,7 @@ def run_architect_review(
     ctx: dict[str, Any] = {"tools": [], "calls": 0, "input_tokens": None, "output_tokens": None}
 
     graph = build_architect_graph(llm=llm, trace_context=ctx)
-    state = graph.invoke({"file_path": file_path}, {"recursion_limit": 10})
+    state = graph.invoke({"file_path": file_path, "base_dir": base_dir or ""}, {"recursion_limit": 10})
     duration = time.perf_counter() - started
 
     if state.get("error"):
