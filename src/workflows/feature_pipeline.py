@@ -146,6 +146,12 @@ def build_pipeline_graph(
             desc = f"{desc}\n\nPrevious Human Feedback:\n{task['human_feedback']}"
         ctx_file = (task.get("input_files") or [None])[0]
         base_dir = task.get("target_dir")
+        if base_dir:
+            try:
+                issue_doc = read_repository_text_file("issue_t3.md", base_dir=base_dir)
+                desc = f"{desc}\n\nCustomer Issue Specification (issue_t3.md):\n{issue_doc}"
+            except Exception:
+                pass
 
         req_report = run_requirements_analysis(
             description=desc,

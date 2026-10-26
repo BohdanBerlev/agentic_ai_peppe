@@ -440,6 +440,13 @@ def my_backend_agent(state: dict[str, Any], attempt: int = 1) -> dict[str, Any]:
     arch_rep = state.get("architecture_report", {})
     qa_rep = state.get("qa_security_report", {})
 
+    if target_dir:
+        try:
+            issue_doc = read_repository_text_file("issue_t3.md", base_dir=target_dir)
+            task_desc = f"{task_desc}\n\nCustomer Issue Specification (issue_t3.md):\n{issue_doc}"
+        except Exception:
+            pass
+
     feedback_parts = [
         f"Feature Description:\n{task_desc}",
         f"\nRequirements (PO):\n{json.dumps(req_rep, indent=2)}",
