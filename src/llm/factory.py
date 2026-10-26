@@ -88,6 +88,8 @@ def get_chat_model(
             model=model_name,
             rate_limiter=rate_limiter,
             temperature=settings.llm_temperature,
+            timeout=settings.llm_timeout_seconds,
+            max_retries=2,
             api_key=api_key,
         )
 
