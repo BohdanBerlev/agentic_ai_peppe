@@ -1,6 +1,6 @@
-# Session 3 Preparation & Durchführung – Umsetzungs- und Test-Checkliste (PepeGroup)
+# Session 3 Preparation – Umsetzungs- und Test-Checkliste (PepeGroup)
 
-Diese Datei dokumentiert alle umgesetzten und getesteten Verbesserungen aus dem Feedback zu Session 2 (`docs/Review/Team_3_Session_2_Feedback.md`) sowie die vollständige Lösung von **Termin 3 (Kundenprojekt 01 – Nordwerk Industrie-Service)**.
+Diese Datei dokumentiert alle umgesetzten und getesteten Verbesserungen aus dem Feedback zu Session 2 (`docs/Review/Team_3_Session_2_Feedback.md`), damit das Team und jede weitere Session den Stand sofort nachvollziehen können.
 
 ## Status-Übersicht nach Phasen
 
@@ -34,25 +34,14 @@ Diese Datei dokumentiert alle umgesetzten und getesteten Verbesserungen aus dem 
 - [x] **Phase 3 – Echter PostgreSQL-Persistenz-Lifecycle-Test (#6)**
   - [x] `test_work_items_real_postgres_lifecycle` in `tests/test_work_items_api.py` ergänzt und gegen die laufende PostgreSQL-Datenbank erfolgreich ausgeführt (`47 passed` inkl. echtem `POST -> GET -> PATCH -> DELETE -> 404` Zyklus).
 
-- [x] **Phase 4 – Termin 3: Erster Kundenauftrag (Nordwerk Industrie-Service) & Kurs-Revision 5**
-  - [x] **Kurs-Infrastruktur-Update (Revision 5):**
-    - `STARTER_MANIFEST.json` auf Revision 5 aktualisiert.
-    - `tests/starter/test_session_03_infrastructure.py` integriert (Generic 503 DB Health, optionale Ollama JSON/Reasoning Controls, ICC Options Isolation).
-    - `src/app/main.py`: Detail-Meldung bei DB Health auf Kleinbuchstaben `"database unavailable"` vereinheitlicht.
-    - `src/llm/factory.py`: `get_chat_model` um `json_mode` und `reasoning` für Ollama/OpenAI erweitert.
-    - `docs/SESSION_03_TECHNICAL_NOTES.md` und Vorlagen in `docs/templates/session-03/` abgelegt.
-  - [x] **Repo-Trennung (L3.1 / A1 & B5):**
-    - Eigenständiges Kunden-Repository `client-01-website` angelegt mit eigenem Git-Checkout (`a93442b`).
-    - Statischer Start via `python -m http.server 8000` ohne Factory-Dependencies dokumentiert und lauffähig.
-  - [x] **Echte agentische Produktarbeit & Übergabe (L3.2 / A2, A3):**
-    - `src/workflows/feature_pipeline.py` unterstützt `--target-dir` und `--project-id`.
-    - Sicherer Dateizugriff über `write_target_text_file` und `read_repository_text_file` mit Path-Traversal-Guardrail.
-    - Reallauf `website-run-001` mit verknüpftem Trace unter `evidence/session-03/runs/website-run-001.jsonl`.
-  - [x] **Tagesumfang & Produktcheck (L3.3 / B1–B6):**
-    - Pflichtinhalte N-01 (Name), N-02 (Hauptaussage), N-03 (Wartungsplanung), N-08 (Mailto-Link) und N-09 (Übungshinweis) in `index.html` und `styles.css` umgesetzt.
-    - Eigenständiger Produktcheck `client-01-website/test_website.py` (8 von 8 Checks bestanden).
-    - Menschliches Human Gate mit `approved` durch Lars Boos & Mehrose Farooq im Terminal und in `docs/customer-01/review.json` dokumentiert.
-  - [x] **Bilanz, Kosten & Abgabe (L3.4 / C1–C4 & D1–D2):**
-    - Alle Abgabedokumente vollständig ausgefüllt: `docs/customer-01/acceptance.md`, `clarifications.md`, `delivery.md`, `recovery.md`, `manifest.json`.
-    - Planbudget (1.200 Credits T3/T4 + 400 T5-Reserve) und getrennte Aufwände nach Aktivitäten in `costs/usage.csv` erfasst.
-    - Zentrale Abgabedatei `evidence/session-03.md` mit Commit-Verweisen, beobachtetem Engpass und messbarer Lernhypothese fertiggestellt.
+- [x] **Phase 4 – Integration Course Revision 5, Backend-Agent & Externe Kunden-Repositories (`target_dir`)**
+  - [x] **Course Revision 5 Infrastruktur (`tests/starter/test_session_03_infrastructure.py`):** `/db/health` liefert maskiertes `503 {"detail": "database unavailable"}` (kleingeschrieben); `get_chat_model(reasoning=..., json_mode=...)` in `src/llm/factory.py` integriert.
+  - [x] **Backend-Agent aus `origin/Backend-Agent` integriert (`src/agents/backend_agent.py`, `tests/test_backend_agent.py`):** Cross-Platform `pytest`-Aufruf (`sys.executable -m pytest`) repariert, `base_dir` / `target_dir`-Unterstützung und Trace-Logging (`role: "backend_api_engineer"`) in `my_backend_agent` eingebaut und per `--use-backend-agent` in `feature_pipeline.py` eingehängt.
+  - [x] **Factory für externe Kunden-Repositories (`target_dir` & `project_id`):** `resolve_authorized_root`, `read_repository_text_file(..., base_dir=...)` und `write_target_text_file(..., target_dir=...)` in `src/agents/common.py` mit Path-Traversal- und `.git`-Schutz; alle Agenten und `feature_pipeline.py` unterstützen `target_dir`. Abgesichert durch `test_pipeline_addresses_client_target_dir` und `test_pipeline_target_dir_path_traversal_protection`.
+
+- [ ] **Phase 5 – Live-Durchlauf im Termin ab 10:00 Uhr & Befüllen der Abnahme-Templates**
+  - [x] Lokaler Kunden-Checkout `client-01-website/` vorbereitet (`index.html`, `styles.css`, `test_website.py`, `README.md`, `issue_t3.md`, in Factory `.gitignore` eingetragen).
+  - [ ] `client-01-website` als separates GitHub-Repository der Gruppe pushen (und Dozenten/Team einladen).
+  - [ ] Echten Live-Pipeline-Lauf (`--target-dir client-01-website --use-backend-agent --full-company`) ausführen, sodass ein echter LLM-Call + Dateiänderung/Patch im Kunden-Repo und ein Trace in `evidence/session-03/` entstehen.
+  - [ ] Menschliche Gate-Entscheidung (`record_human_decision` oder interaktives Gate) auf dem echten Run-Trace ausführen.
+  - [ ] Vorlagen aus `docs/templates/session-03/` nach `docs/customer-01/` sowie `evidence/session-03.md` kopieren und mit den **tatsächlichen Run-IDs, Commit-Hashes und Kosten** befüllen.

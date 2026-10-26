@@ -296,61 +296,68 @@ def test_full_company_mode_and_bounded_backend_retry_loop(tmp_path):
 
 
 def test_pipeline_addresses_client_target_dir(tmp_path):
-    """Session 3 / L3.1: Pipeline addresses client project checkout with target_dir."""
+    """Session 3 Factory Test: Pipeline addresses an external customer checkout via target_dir."""
+    from src.agents.common import write_target_text_file
+
     client_dir = tmp_path / "client-01-website"
     client_dir.mkdir(parents=True, exist_ok=True)
-    html_file = client_dir / "index.html"
-    html_file.write_text("<!DOCTYPE html><html><body><h1>Nordwerk Industrie-Service</h1></body></html>", encoding="utf-8")
+    write_target_text_file("index.html", "<!DOCTYPE html><html lang='de'><body>Nordwerk Industrie-Service</body></html>", target_dir=str(client_dir))
+    write_target_text_file("test_website.py", "import sys\nsys.exit(0)\n", target_dir=str(client_dir))
 
-    trace_file = tmp_path / "client_run.jsonl"
+    trace_file = tmp_path / "client_pipeline.jsonl"
     task = EngineeringTask(
-        task_id="CUST-001",
-        description="Verify initial customer website release candidate for Nordwerk Industrie-Service.",
-        target_dir=str(client_dir),
-        input_files=["index.html"],
+        task_id="TASK-001",
         project_id="client-01",
+        target_dir=str(client_dir),
+        description="Nordwerk Industrie-Service B2B static website RC1",
+        input_files=["index.html"],
+        test_targets=["test_website.py"],
     )
-
-    class ClientMockLLM:
-        def invoke(self, messages):
-            return AIMessage(content=json.dumps({
-                "status_str": "approved",
-                "summary": "Customer HTML verified.",
-                "acceptance_criteria": ["AC-01 passed"],
-                "findings": ["Clean static structure"],
-                "security_risks": [],
-            }))
 
     res = run_feature_pipeline(
         task,
-        llm=ClientMockLLM(),
+        llm=ApprovedMockLLM(),
         trace_file=str(trace_file),
         interactive=False,
+        run_pytest_in_qa=True,
+        session_folder="session-03",
     )
 
     assert res["status"] == "success"
     assert res["project_id"] == "client-01"
-    assert res["task_id"] == "CUST-001"
-    assert trace_file.exists()
+    assert res["target_dir"] == str(client_dir)
+    assert res["result_state"]["qa_security"]["pytest_execution"]["tests_passed"] is True
 
 
 def test_pipeline_target_dir_path_traversal_protection(tmp_path):
-    """Session 3 Security: Attempting to escape target directory escalates without model call."""
-    trace_file = tmp_path / "traversal_run.jsonl"
+    """Session 3 Security Guardrail: Path traversal outside target_dir is rejected with 0 LLM calls."""
+    from src.agents.common import write_target_text_file
+
+    client_dir = tmp_path / "client-01-website"
+    client_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError, match="Security violation"):
+        write_target_text_file("../escape.html", "bad", target_dir=str(client_dir))
+
+    with pytest.raises(ValueError, match="Security violation"):
+        write_target_text_file(".git/config", "bad", target_dir=str(client_dir))
+
+    mock_llm = ApprovedMockLLM()
+    trace_file = tmp_path / "traversal_trace.jsonl"
     task = EngineeringTask(
-        task_id="SEC-TRAVERSAL-001",
-        description="Attempt path traversal",
-        target_dir="client-01-website",
-        input_files=["../../etc/passwd"],
+        task_id="TASK-TRAVERSAL",
         project_id="client-01",
+        target_dir=str(client_dir),
+        description="Attempt path traversal",
+        input_files=["../secret.txt"],
     )
 
     res = run_feature_pipeline(
-        task,
-        trace_file=str(trace_file),
-        interactive=False,
+        task, llm=mock_llm, trace_file=str(trace_file), interactive=False
     )
 
+    assert mock_llm.calls == 0
     assert res["status"] == "escalated"
-    assert "context_error" in res["result_state"]
     assert res["calls"] == 0
+    assert "Security violation" in (res["result_state"]["context_error"] or "")
+

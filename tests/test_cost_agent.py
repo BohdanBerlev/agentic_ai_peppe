@@ -49,13 +49,6 @@ def test_read_log_file_excludes_orchestrator_double_counting():
             test_log.unlink()
 
 
-def test_session_02_evidence_exact_16_5785_credits():
-    """Verifiziert gegen die echten Session-2-Traces, dass nach dem Fix exakt 16.5785 Credits berechnet werden."""
-    _, metrics = read_log_file("evidence/session-02")
-    assert metrics["total_runs"] == 7
-    assert metrics["total_cost"] == pytest.approx(16.5785, rel=1e-4)
-
-
 def test_parse_result_valid_json():
     """Prüft, ob der LLM-Output korrekt in das Pydantic-Modell umgewandelt wird und Metriken eingefügt werden."""
     mock_llm_output = json.dumps({

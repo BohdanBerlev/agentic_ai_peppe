@@ -228,9 +228,5 @@ repo_kontext.txt
 repo_scanner.py
 repo_kontext.md
 
-
-# Separate client product checkouts
+# Separate Customer Product Repository (Session 3-5)
 client-01-website/
-
-# IDE
-.idea/

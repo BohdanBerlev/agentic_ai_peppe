@@ -38,6 +38,7 @@ class IntegrationHandoverReport(BaseModel):
 class IntegrationState(TypedDict, total=False):
     upstream_artifacts: dict[str, Any]
     target_file: str
+    base_dir: str
     source_snippet: str
     result: dict[str, Any]
     error: str
@@ -66,7 +67,7 @@ def build_integration_graph(llm: Any | None = None, *, trace_context: dict[str, 
         if target:
             trace_ctx["tools"].append("read_repository_text_file")
             try:
-                snippet = read_repository_text_file(target)
+                snippet = read_repository_text_file(target, base_dir=state.get("base_dir"))
                 return {"source_snippet": snippet[:1500]}
             except Exception as exc:
                 return {"error": str(exc)}
@@ -118,6 +119,7 @@ def run_integration_check(
     upstream_artifacts: dict[str, Any],
     target_file: str | None = "src/app/main.py",
     *,
+    base_dir: str | None = None,
     task_id: str = "INT-001",
     workflow_id: str | None = None,
     llm: Any | None = None,
@@ -135,6 +137,7 @@ def run_integration_check(
         {
             "upstream_artifacts": upstream_artifacts,
             "target_file": target_file or "",
+            "base_dir": base_dir or "",
         },
         {"recursion_limit": 10},
     )
