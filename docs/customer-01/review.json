@@ -4,9 +4,9 @@
   "decision": "approved",
   "reviewer": "Lars Boos",
   "decided_at_utc": "2026-10-24T14:30:00Z",
-  "tested_source_commit": "7b1206f",
+  "tested_source_commit": "2f5e4a5",
   "reviewed_artifact_hashes": {
-    "client-01-website/index.html": "8e640335f4c382673be0b4db8976ab3a9b4662b78eb247d7c7d7f78e61f09368"
+    "Nordwerk-Industrie-Service-Website/index.html": "c7281bdf5011275d3c270412258e2576ba3ee9d20942687339754e82b61fd027"
   },
   "test_evidence_paths": [
     "evidence/session-03/runs/website-run-001.jsonl",

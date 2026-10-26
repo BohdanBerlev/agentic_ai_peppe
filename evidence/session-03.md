@@ -13,8 +13,8 @@ Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollz
 
 | Repository | Zweck | Commit-Stand | Lokaler Pfad |
 |---|---|---|---|
-| **Factory-Repository** | Multi-Agenten-Orchestrierung, Policies, Tracing, Starter-Infrastruktur | `f3b346f` (vor Lauf) / `b028daf` (nach Evidenz) | `.` (`agentic_ai_peppe`) |
-| **Kundenprodukt-Repository** | Eigenständige statische Website, Produkttests, Kunden-Issue | `7b1206f` | `client-01-website` |
+| **Factory-Repository** | Multi-Agenten-Orchestrierung, Policies, Tracing, Starter-Infrastruktur | `f3b346f` (vor Lauf) / `bb8296a` (nach Evidenz) | `.` (`agentic_ai_peppe`) |
+| **Kundenprodukt-Repository** | Eigenständige statische Website, Produkttests, Kunden-Issue | `2f5e4a5` | `client-01-website` |
 
 - **Konfiguration:** Die Factory adressiert das Produkt-Repo modular über `--target-dir client-01-website --project-id client-01`.
 - **Unabhängiger Start (B5):** Das Produkt läuft vollständig ohne Factory, ohne DB und ohne LLM:
@@ -45,7 +45,7 @@ Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollz
 | **AC-01 (B1)** | Firmenname (`Nordwerk Industrie-Service`) & Hauptaussage (`Praktische Unterstützung für Ihren technischen Betrieb.`) | `test_website.py` (Checks 1 & 2) + Sichtprüfung Browser | **Bestanden** |
 | **AC-02 Teil (B2)** | Erste Leistung Wartungsplanung (`Wir strukturieren Wartungsaufgaben und dokumentieren Zuständigkeiten für kleine technische Betriebe.`) | `test_website.py` (Check 3) + Sichtprüfung Browser | **Bestanden** |
 | **AC-04 (B3)** | Kontaktlink `mailto:kontakt@nordwerk.example` beschriftet mit `Anfrage stellen`; Übungshinweis (`Fiktives Unternehmen – Lehrprojekt der HAW Hamburg...`) sichtbar | `test_website.py` (Checks 4, 5, 6) + Klicktest Mailto | **Bestanden** |
-| **B4** | Eigener automatisierter Produktcheck | `python test_website.py` (8 von 8 Checks grün) | **Bestanden** |
+| **B4** | Eigener automatisierter Produktcheck | `python test_website.py` (alle Pflichtprüfungen grün) | **Bestanden** |
 | **B5** | Unabhängiger Start dokumentiert | `README.md` im Produkt-Repo dokumentiert `python -m http.server 8000` | **Bestanden** |
 | **B6** | Kunden-Task ohne erfundene Versprechen | `client-01-website/issue_t3.md` referenziert exakte ACs; keine erfundenen Zertifikate/Logos | **Bestanden** |
 
