@@ -1,28 +1,32 @@
 {
-  "task_id": "CUST-001",
-  "workflow_id": "c129e061-f34b-483d-9d7a-cfb395679901",
+  "task_id": "TASK-001",
+  "project_id": "client-01",
+  "workflow_id": "bf81352d-f7cb-4628-ad10-475cad888f73",
   "decision": "approved",
-  "reviewer": "Lars Boos",
-  "decided_at_utc": "2026-10-24T14:30:00Z",
-  "tested_source_commit": "2f5e4a5",
+  "reviewer": "David Pisarkiewicz",
+  "decided_at_utc": "2026-10-26T11:01:01Z",
+  "input_product_commit": "cbbf7a9",
+  "tested_source_commit": "c952e98",
   "reviewed_artifact_hashes": {
-    "Nordwerk-Industrie-Service-Website/index.html": "c7281bdf5011275d3c270412258e2576ba3ee9d20942687339754e82b61fd027"
+    "client-01-website/index.html": "f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202",
+    "client-01-website/styles.css": "d7ac76b8b3015f6fb9e9bcd648d71bc54ce8cea023935672f8f0005612e85a40"
   },
   "test_evidence_paths": [
-    "evidence/session-03/runs/website-run-001.jsonl",
+    "evidence/session-03/bf81352d-f7cb-4628-ad10-475cad888f73.jsonl",
+    "evidence/session-03/pytest.xml",
     "client-01-website/test_website.py"
   ],
   "accepted_criteria": [
     "AC-01",
     "AC-02 (partial: N-03 Wartungsplanung)",
-    "AC-04"
+    "AC-04 (N-08 mailto:kontakt@nordwerk.example & N-09 mandatory notice)"
   ],
   "open_criteria": [
-    "AC-02 (remaining services N-04, N-05)",
-    "AC-03",
+    "AC-02 (remaining services N-04, N-05 in Session 4)",
+    "AC-03 (N-06, N-07 in Session 4)",
     "AC-05",
     "AC-06"
   ],
-  "rationale": "Sichtprüfung der statischen Website unter http://localhost:8000 erfolgreich durchgeführt. Firmenname Nordwerk Industrie-Service, Hauptaussage, Wartungsplanung und Übungshinweis sind korrekt platziert. Der Kontaktlink öffnet das E-Mail-Programm mit Empfänger kontakt@nordwerk.example wie gefordert.",
+  "rationale": "Approved: Architect reviewed the initial empty skeleton (commit cbbf7a9) before Backend Agent implementation. Backend Agent (run 4e03fcfb-0d12-4a71-bd67-13e3e20a622a) subsequently implemented full semantic HTML5 in index.html (commit c952e98) with all required Nordwerk RC1 blocks (N-01, N-02, N-03, N-08, N-09), verified by QA test_website.py (exit code 0), Security Audit, Integration Engineer, and visual browser inspection at http://localhost:8000.",
   "identity_assurance": "self_declared_course_review"
 }

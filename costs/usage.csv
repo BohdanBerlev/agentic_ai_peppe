@@ -18,13 +18,16 @@ date,task_id,actor_type,actor,activity,quantity,unit,credits,notes
 2026-10-19,SESSION-02,human,human_lars,review,2.0,hours,200.0,QA/Security-Review der Dry-Run-Ergebnisse und Architektur-Findings
 2026-10-19,SESSION-02,human,human_mehrose,review,3.0,hours,300.0,Product-Owner-Abnahme der User Stories/Akzeptanzkriterien und Scope-Review
 2026-10-19,SESSION-02,human,human_mehrose,correction,2.0,hours,200.0,Überarbeitung der Dokumentation und Backlog-Abgleich nach Review-Findings
-2026-10-24,BUDGET-T3-T4,human,PepeGroup (4),meeting,12.0,hours,1200.0,Vereinbartes Planbudget fuer Lieferung T3/T4 (12h a 100 Credits) zzgl. 400 Credits T5-Reserve; getrennt von Factory-Entwicklung
-2026-10-24,CUST-001,agent,feature_pipeline_workflow,agent_execution,1,run,3.4126,model=qwen3:4b; status=success; 37.3s reine Agenten-Laufzeit; calls=3; Run website-run-001 (Requirements, Architect, QA) ohne Double-Counting
-2026-10-24,SESSION-03,human,human_david,implementation,2.0,hours,200.0,Factory-Erweiterung fuer externen Client-Pfad und Revision-5-Update
-2026-10-24,SESSION-03,human,human_david,review,1.0,hours,100.0,Architektur-Review der entkoppelten Produkt-Struktur
-2026-10-24,SESSION-03,human,human_maxim,implementation,2.0,hours,200.0,Einrichtung client-01-website Repository, Server-Setup und Starter-Regressionstests
-2026-10-24,SESSION-03,human,human_maxim,review,1.0,hours,100.0,Kosten- und Tracedaten-Erfassung fuer Session 3
-2026-10-24,SESSION-03,human,human_lars,implementation,1.5,hours,150.0,Implementierung des automatisierten Produktchecks test_website.py und Factory-Tests
-2026-10-24,SESSION-03,human,human_lars,review,1.5,hours,150.0,Visuelle Pruefung der Website im Browser und Human Gate Freigabe
-2026-10-24,SESSION-03,human,human_mehrose,review,2.0,hours,200.0,Product Owner Scope-Pruefung (N-01 bis N-09), Annahmen und Human Gate Freigabe
-2026-10-24,SESSION-03,human,human_mehrose,correction,1.0,hours,100.0,Bereinigung der Kunden-Issues und Dokumentations-Abnahme
+2026-10-26,TASK-001,agent,feature_pipeline_workflow,agent_execution,1,run,30.9069,model=gemini-3.8-flash; workflow_id=bf81352d-f7cb-4628-ad10-475cad888f73; status=success; 2239.75s reine Agenten-Laufzeit (322.45s Human-Gate getrennt); calls=8 (alle 8 Rollen inkl. backend_agent write_repository_text_file und qa test_website.py)
+2026-10-26,SESSION-03,human,human_david,implementation,2.5,hours,250.0,Factory target_dir-Isolation, Backend-Agent-Pipeline-Anbindung und Durchfuehrung Live-Run TASK-001 (5h Gesamtzeit David)
+2026-10-26,SESSION-03,human,human_david,review,1.5,hours,150.0,Interaktives Human Gate Review (322.45s), Code-Diff-Pruefung cbbf7a9..c952e98 und CSS-Abstimmung
+2026-10-26,SESSION-03,human,human_david,waiting,1.0,hours,100.0,Terminal-Wartezeit waehrend 8-Rollen Gemini-API-Durchlauf und Rate-Limit-Backoff
+2026-10-26,SESSION-03,human,human_maxim,implementation,3.0,hours,300.0,Entwicklung Backend-Agent (TDD-Loop), Course-Revision-5-Merge und PostgreSQL-Tests (5h Gesamtzeit Maxim)
+2026-10-26,SESSION-03,human,human_maxim,review,1.0,hours,100.0,Kosten- und Trace-Verifikation fuer Session 3
+2026-10-26,SESSION-03,human,human_maxim,meeting,1.0,hours,100.0,Sprint-Planung und Budget-Allokation T3/T4 (1200 Credits Lieferbudget + 400 Credits T5-Reserve)
+2026-10-26,SESSION-03,human,human_lars,implementation,2.5,hours,250.0,Automatisierter Produktcheck test_website.py, Factory-Tests und Evidenz-Struktur (5h Gesamtzeit Lars)
+2026-10-26,SESSION-03,human,human_lars,review,2.0,hours,200.0,Sichtpruefung der Kunden-Website unter localhost:8000 und Abnahmepruefung AC-01 bis AC-04
+2026-10-26,SESSION-03,human,human_lars,correction,0.5,hours,50.0,Abgleich der Commit-Hashes und Artefakt-Pruefsummen
+2026-10-26,SESSION-03,human,human_mehrose,implementation,1.5,hours,150.0,Aufbereitung Kundenbriefing Nordwerk (N-01 bis N-09) und issue_t3.md (5h Gesamtzeit Mehrose)
+2026-10-26,SESSION-03,human,human_mehrose,review,2.0,hours,200.0,Product-Owner-Abnahme der Pflichtbausteine und expliziten Annahmen (clarifications.md)
+2026-10-26,SESSION-03,human,human_mehrose,correction,1.5,hours,150.0,Dokumentations-Review und Finalisierung der Abnahmeberichte
