@@ -36,10 +36,13 @@ jobs:
       - name: Pipeline mit Google AI Studio ausführen
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Unterstützt alle gebräuchlichen Secret-Namen in GitHub Repository Secrets
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY || secrets.LLM_API_KEY || secrets.AI_STUDIO_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY || secrets.GEMINI_API_KEY || secrets.LLM_API_KEY || secrets.AI_STUDIO_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY || secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY || secrets.AI_STUDIO_API_KEY }}
           LLM_PROVIDER: "google"
-          LLM_MODEL: "gemini-1.5-pro"  # Erzwingt Google Gemini statt lokaler Modelle
+          # Modell zentral konfigurierbar (Repo-Variable LLM_MODEL); Default = Team-Modell
+          LLM_MODEL: ${{ vars.LLM_MODEL || 'gemini-3.8-flash' }}
           PYTHONPATH: "."
         run: |
           # Ermittelt die Issue-Nummer entweder aus dem Webhook-Event oder dem manuellen Input
