@@ -1,0 +1,28 @@
+{
+  "task_id": "CUST-001",
+  "workflow_id": "c129e061-f34b-483d-9d7a-cfb395679901",
+  "decision": "approved",
+  "reviewer": "Lars Boos",
+  "decided_at_utc": "2026-10-24T14:30:00Z",
+  "tested_source_commit": "7b1206f",
+  "reviewed_artifact_hashes": {
+    "client-01-website/index.html": "8e640335f4c382673be0b4db8976ab3a9b4662b78eb247d7c7d7f78e61f09368"
+  },
+  "test_evidence_paths": [
+    "evidence/session-03/runs/website-run-001.jsonl",
+    "client-01-website/test_website.py"
+  ],
+  "accepted_criteria": [
+    "AC-01",
+    "AC-02 (partial: N-03 Wartungsplanung)",
+    "AC-04"
+  ],
+  "open_criteria": [
+    "AC-02 (remaining services N-04, N-05)",
+    "AC-03",
+    "AC-05",
+    "AC-06"
+  ],
+  "rationale": "Sichtprüfung der statischen Website unter http://localhost:8000 erfolgreich durchgeführt. Firmenname Nordwerk Industrie-Service, Hauptaussage, Wartungsplanung und Übungshinweis sind korrekt platziert. Der Kontaktlink öffnet das E-Mail-Programm mit Empfänger kontakt@nordwerk.example wie gefordert.",
+  "identity_assurance": "self_declared_course_review"
+}

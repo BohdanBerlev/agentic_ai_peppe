@@ -596,6 +596,8 @@ def run_feature_pipeline(
         result_state["security_audit"] = sec
     if integ:
         result_state["integration"] = integ
+    if state.get("error"):
+        result_state["pipeline_error"] = state.get("error")
 
     trace_record = {
         "record_type": "workflow_summary",
@@ -617,6 +619,7 @@ def run_feature_pipeline(
         "wall_clock_seconds": round(wall_duration, 4),
         "result_state": result_state,
         "estimated_cost_credits": agg["total_cost_credits"],
+        **({"error": state.get("error")} if state.get("error") else {}),
     }
 
     append_trace(trace_record, custom_trace)
