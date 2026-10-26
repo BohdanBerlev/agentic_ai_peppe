@@ -39,9 +39,9 @@ Diese Datei dokumentiert alle umgesetzten und getesteten Verbesserungen aus dem 
   - [x] **Backend-Agent aus `origin/Backend-Agent` integriert (`src/agents/backend_agent.py`, `tests/test_backend_agent.py`):** Cross-Platform `pytest`-Aufruf (`sys.executable -m pytest`) repariert, `base_dir` / `target_dir`-Unterstützung und Trace-Logging (`role: "backend_api_engineer"`) in `my_backend_agent` eingebaut und per `--use-backend-agent` in `feature_pipeline.py` eingehängt.
   - [x] **Factory für externe Kunden-Repositories (`target_dir` & `project_id`):** `resolve_authorized_root`, `read_repository_text_file(..., base_dir=...)` und `write_target_text_file(..., target_dir=...)` in `src/agents/common.py` mit Path-Traversal- und `.git`-Schutz; alle Agenten und `feature_pipeline.py` unterstützen `target_dir`. Abgesichert durch `test_pipeline_addresses_client_target_dir` und `test_pipeline_target_dir_path_traversal_protection`.
 
-- [ ] **Phase 5 – Live-Durchlauf im Termin ab 10:00 Uhr & Befüllen der Abnahme-Templates**
+- [x] **Phase 5 – Live-Durchlauf im Termin ab 10:00 Uhr & Befüllen der Abnahme-Templates**
   - [x] Lokaler Kunden-Checkout `client-01-website/` vorbereitet (`index.html`, `styles.css`, `test_website.py`, `README.md`, `issue_t3.md`, in Factory `.gitignore` eingetragen).
-  - [ ] `client-01-website` als separates GitHub-Repository der Gruppe pushen (und Dozenten/Team einladen).
-  - [ ] Echten Live-Pipeline-Lauf (`--target-dir client-01-website --use-backend-agent --full-company`) ausführen, sodass ein echter LLM-Call + Dateiänderung/Patch im Kunden-Repo und ein Trace in `evidence/session-03/` entstehen.
-  - [ ] Menschliche Gate-Entscheidung (`record_human_decision` oder interaktives Gate) auf dem echten Run-Trace ausführen.
-  - [ ] Vorlagen aus `docs/templates/session-03/` nach `docs/customer-01/` sowie `evidence/session-03.md` kopieren und mit den **tatsächlichen Run-IDs, Commit-Hashes und Kosten** befüllen.
+  - [x] `client-01-website` als separates GitHub-Repository der Gruppe gepusht (`https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website`).
+  - [x] Echten Live-Pipeline-Lauf (`--target-dir client-01-website --use-backend-agent --full-company`) ausgeführt (`workflow_id: bf81352d-f7cb-4628-ad10-475cad888f73`), bei dem der Backend-Agent `index.html` vom leeren Starter-Skeleton (`cbbf7a9`) zur fertigen RC1-Website (`c952e98`) implementiert und der QA-Agent `test_website.py` (`exit_code: 0`) ausgeführt hat.
+  - [x] Menschliche Gate-Entscheidung (`David Pisarkiewicz`, `approved`, `322.45s`) im echten Run-Trace aufgezeichnet.
+  - [x] Vorlagen unter `docs/customer-01/` sowie `evidence/session-03.md` und `costs/usage.csv` (4 × 5h = 20h + 30,9069 Agenten-Credits) mit den tatsächlichen Run-IDs, Commit-Hashes und SHA-256-Prüfsummen befüllt.

@@ -1,9 +1,9 @@
 # Evidence Session 3 – Erster Kundenauftrag durch die Software Factory
 
-**Team:** PepeGroup (Team 3)  
-**Datum:** 24. Oktober 2026  
+**Team:** PepeGroup (Team 3: David Pisarkiewicz, Maxim Bers, Lars Boos, Mehrose Farooq)  
+**Datum:** 26. Oktober 2026  
 **Kunde:** Nordwerk Industrie-Service (Hamburg)  
-**Auftrag:** `CUST-001` – Initialer Release Candidate Webauftritt (Termin 3 Scope)
+**Auftrag:** `TASK-001` (`project_id: "client-01"`) – Initialer Release Candidate 1 Webauftritt (Termin 3 Scope)
 
 ---
 
@@ -11,31 +11,35 @@
 
 Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollzogen:
 
-| Repository | Zweck | Commit-Stand | Lokaler Pfad |
+| Repository | GitHub-URL / Lokaler Pfad | Eingabe-Commit (vor Lauf) | Ergebnis-Commit (nach Lauf) |
 |---|---|---|---|
-| **Factory-Repository** | Multi-Agenten-Orchestrierung, Policies, Tracing, Starter-Infrastruktur | `f3b346f` (vor Lauf) / `bb8296a` (nach Evidenz) | `.` (`agentic_ai_peppe`) |
-| **Kundenprodukt-Repository** | Eigenständige statische Website, Produkttests, Kunden-Issue | `2f5e4a5` | `client-01-website` |
+| **Factory-Repository** | `https://github.com/BohdanBerlev/agentic_ai_peppe` (`.`) | `7351867` | Aktueller `HEAD` auf `main` |
+| **Kundenprodukt-Repository** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` (`client-01-website`) | `cbbf7a9` (Starter-Placeholder in `index.html`) | `c952e98` (Vom Agenten implementierte `index.html` + abgestimmte `styles.css`) |
 
-
-- **Konfiguration:** Die Factory adressiert das Produkt-Repo modular über `--target-dir client-01-website --project-id client-01`.
-- **Unabhängiger Start (B5):** Das Produkt läuft vollständig ohne Factory, ohne DB und ohne LLM:
-  ```bash
-  cd client-01-website
-  python -m http.server 8000
+- **Konfiguration & Adressierung:** Die Factory adressiert das externe Produkt-Repository modular über `--target-dir client-01-website --project-id client-01 --task-id TASK-001`.
+- **Unabhängiger Start ohne Factory (B5):** Das Produkt läuft vollständig isoliert ohne Factory, ohne DB und ohne LLM:
+  ```powershell
+  python -m http.server 8000 --directory client-01-website
+  python client-01-website/test_website.py
   ```
 
 ---
 
 ## 2. Realer Factory-Durchlauf & Agenten-Kooperation (L3.2 / A2, A3)
 
-* **Eindeutige Run-ID:** `website-run-001`
-* **Workflow-ID:** `c129e061-f34b-483d-9d7a-cfb395679901`
-* **Trace-Ablage:** [`evidence/session-03/runs/website-run-001.jsonl`](runs/website-run-001.jsonl)
-* **Zusammenarbeit zweier Agentenfähigkeiten:**
-  1. `requirements_agent` (`product_owner_requirements`): Liest den Task aus `issue_t3.md` und erzeugt strukturierte Akzeptanzkriterien für N-01 bis N-09 (`RequirementsReport`).
-  2. `architect_agent` (`software_architect`): Prüft semantische Struktur, Barrierefreiheit und lokale Asset-Pfade (`ArchitectureReport`).
-  3. `qa_security_agent` (`qa_test_engineer` & `ai_safety_security_engineer`): Führt den automatisierten Produktcheck aus und verifiziert Sicherheit gegen Path Traversals und externe Scripts.
-* **Reale Tool-Aktion auf Produkt-Checkout:** `write_target_text_file` / `read_repository_text_file` mit strikter Path-Traversal-Absicherung auf `client-01-website`.
+- **Workflow-ID:** `bf81352d-f7cb-4628-ad10-475cad888f73`
+- **Summary Run-ID:** `a1fefdef-eb4e-4c75-bb0b-41674d060079`
+- **Trace-Datei:** [`evidence/session-03/bf81352d-f7cb-4628-ad10-475cad888f73.jsonl`](bf81352d-f7cb-4628-ad10-475cad888f73.jsonl)
+- **Provider & Modell:** `google` / `gemini-3.8-flash` (8 reale LLM-Aufrufe, 0 Mocks)
+- **Nachgewiesene Zusammenarbeit der 8 Rollen am echten Produktartefakt (`client-01-website/index.html`):**
+  1. **`product_owner_requirements`** (`run_id: 0df93389-29be-49bf-a8ff-7b9e0fde1f14`): Liest `issue_t3.md` und `index.html` im `client-01-website`-Checkout und extrahiert 9 strukturierte Akzeptanzkriterien (`RequirementsReport`).
+  2. **`project_manager`** (`run_id: 5bd39ce0-3619-4ef4-b274-82ffdc51cd28`): Erzeugt aus dem `RequirementsReport` 5 strukturierte Work Packages (`WP-1` bis `WP-5`) inkl. Abhängigkeiten und Lieferrisiken (`ProjectPlanReport`).
+  3. **`agent_engineer`** (`run_id: a2e0de14-58ea-4ec8-8fa1-a8c48192a0f9`): Spezifiziert die Graph-Knoten und Tool-Verträge (`AgentDesignReport`).
+  4. **`software_architect`** (`run_id: a45845d6-aaad-47fe-a122-fc5d77ad934d`): Prüft das initiale Placeholder-Skeleton (`cbbf7a9`) und meldet fehlende semantische HTML5-Landmarken (`changes_requested`).
+  5. **`backend_api_engineer`** (`run_id: 4e03fcfb-0d12-4a71-bd67-13e3e20a622a`): Übernimmt die Berichte von PO, PM und Architect und **schreibt per `write_repository_text_file` die vollständige semantische `client-01-website/index.html`** (sichtbar im Git-Diff `cbbf7a9..c952e98`).
+  6. **`qa_test_engineer`** (`run_id: aa24b936-9994-40a7-b14e-2f4f8c12a705`): Führt per `execute_repository_pytest` das reale Prüfskript `python test_website.py` im Kunden-Checkout aus (`tests_passed: true`, `exit_code: 0`).
+  7. **`ai_safety_security_engineer`** (`run_id: 1e62f54e-686a-4900-b6bd-132ccaa77b88`): Prüft die neu geschriebene `index.html` auf Script-Injections, externe Abhängigkeiten und Secrets (`approved`).
+  8. **`integration_engineer`** (`run_id: 1ef37bd8-ef39-4032-9618-457d82745189`): Prüft alle Upstream-Handover (`PO->PM`, `PM->SA`, `SA->Implementation`, `Implementation->QA`, `Implementation->Security`) und bestätigt, dass die anfänglichen Architektur-Befunde durch den Backend-Agenten vollständig aufgelöst wurden (`approved`).
 
 ---
 
@@ -43,54 +47,54 @@ Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollz
 
 | Kriterium | Beschreibung | Prüfmethode | Status |
 |---|---|---|---|
-| **AC-01 (B1)** | Firmenname (`Nordwerk Industrie-Service`) & Hauptaussage (`Praktische Unterstützung für Ihren technischen Betrieb.`) | `test_website.py` (Checks 1 & 2) + Sichtprüfung Browser | **Bestanden** |
-| **AC-02 Teil (B2)** | Erste Leistung Wartungsplanung (`Wir strukturieren Wartungsaufgaben und dokumentieren Zuständigkeiten für kleine technische Betriebe.`) | `test_website.py` (Check 3) + Sichtprüfung Browser | **Bestanden** |
-| **AC-04 (B3)** | Kontaktlink `mailto:kontakt@nordwerk.example` beschriftet mit `Anfrage stellen`; Übungshinweis (`Fiktives Unternehmen – Lehrprojekt der HAW Hamburg...`) sichtbar | `test_website.py` (Checks 4, 5, 6) + Klicktest Mailto | **Bestanden** |
-| **B4** | Eigener automatisierter Produktcheck | `python test_website.py` (alle Pflichtprüfungen grün) | **Bestanden** |
-
-| **B5** | Unabhängiger Start dokumentiert | `README.md` im Produkt-Repo dokumentiert `python -m http.server 8000` | **Bestanden** |
-| **B6** | Kunden-Task ohne erfundene Versprechen | `client-01-website/issue_t3.md` referenziert exakte ACs; keine erfundenen Zertifikate/Logos | **Bestanden** |
+| **AC-01 (B1)** | Firmenname (`Nordwerk Industrie-Service`) & Hauptaussage (`Praktische Unterstützung für Ihren technischen Betrieb.`) | `test_website.py` + Sichtprüfung Browser (`http://localhost:8000`) | **Bestanden** |
+| **AC-02 Teil (B2)** | Erste Leistung Wartungsplanung (`Wartungsplanung: Wir strukturieren Wartungsaufgaben und dokumentieren Zuständigkeiten für kleine technische Betriebe.`) | `test_website.py` + Sichtprüfung Browser | **Bestanden** |
+| **AC-04 (B3)** | Kontaktlink `mailto:kontakt@nordwerk.example` beschriftet mit `Anfrage stellen` (`N-08`); Übungshinweis (`Fiktives Unternehmen – Lehrprojekt der HAW Hamburg. Keine realen Angebote oder Kontaktaufnahme.`, `N-09`) im Footer sichtbar | `test_website.py` + Klicktest Mailto im Browser | **Bestanden** |
+| **B4** | Eigener automatisierter Produktcheck | `python client-01-website/test_website.py` (`exit_code: 0`) | **Bestanden** |
+| **B5** | Unabhängiger Start dokumentiert | [`client-01-website/README.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/c952e98/README.md) dokumentiert `python -m http.server 8000` | **Bestanden** |
+| **B6** | Kunden-Task ohne erfundene Versprechen | [`client-01-website/issue_t3.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/c952e98/issue_t3.md) referenziert exakte ACs und Annahmen (`A-01`, `A-02`) | **Bestanden** |
 
 ---
 
-## 4. Menschliches Approval Gate & Rollen (D1)
+## 4. Menschliches Approval Gate & Eigene Factory-Prüfung (A4 / D1)
 
-* **Accountable Humans:**
-  - *Auftrag & Scope:* Mehrose Farooq
-  - *Technische Lieferung:* Maxim Bers & David Pisarkiewicz
-  - *Prüfung (QA):* Lars Boos
-  - *Freigabeentscheidung:* Lars Boos & Mehrose Farooq
-* **Gate-Entscheidung:** **`approved`** (dokumentiert in [`docs/customer-01/review.json`](../docs/customer-01/review.json)).
-* **Sichtprüfung:** Lars Boos öffnete die Website unter `http://localhost:8000`, prüfte die Lesbarkeit bei 375 px und 1280 px und klickte den Kontaktlink zur Verifikation des Mailto-Entwurfs.
-* **Eigener Factory-Test:** `tests/test_feature_pipeline.py::test_pipeline_addresses_client_target_dir` und `test_session_03_infrastructure.py` laufen im regulären `pytest`-Lauf der Factory fehlerfrei durch.
+- **Accountable Humans:**
+  - *Auftrag & Scope:* Mehrose Farooq & Lars Boos
+  - *Technische Lieferung & Agenten-Orchestrierung:* David Pisarkiewicz & Maxim Bers
+  - *Prüfung (QA) & Sichtprüfung:* David Pisarkiewicz & Lars Boos
+  - *Interaktive Gate-Freigabe im Lauf `bf81352d-f7cb-4628-ad10-475cad888f73`:* **David Pisarkiewicz** (`decision: "approved"`, `human_review_seconds: 322.45`, dokumentiert in Trace Zeile 9 und [`docs/customer-01/review.json`](../docs/customer-01/review.json)).
+- **Eigene Factory-Tests:**
+  - `tests/test_feature_pipeline.py::test_pipeline_addresses_client_target_dir`
+  - `tests/test_feature_pipeline.py::test_pipeline_target_dir_path_traversal_protection`
+  - `tests/test_work_items_api.py::test_work_items_real_postgres_lifecycle` (gegen echte PostgreSQL-DB)
+  - `tests/starter/test_session_03_infrastructure.py`
+  - Alle **62 Tests** laufen im Standardlauf (`python -m pytest`) grün durch (JUnit-Bericht: [`evidence/session-03/pytest.xml`](pytest.xml)).
 
 ---
 
 ## 5. Kosten, Aufwand und Planbudget (L3.4 / C1–C3)
 
-* **Planbudget Lieferung T3/T4:** 1.200 Credits (12 Personenstunden) zzgl. 400 Credits Reserve für T5 (dokumentiert in `costs/usage.csv`).
-* **Factory-Entwicklung:** Getrennt erfasst (Revision-5-Infrastruktur-Update und Pipeline-Target-Dir-Erweiterung).
-* **Menschlicher Gesamtaufwand Termin 3:**
-  - `implementation`: 5,5 h (550 Credits)
-  - `review`: 5,5 h (550 Credits)
-  - `correction`: 1,0 h (100 Credits)
-  - `meeting`: 12,0 h (Budgetvereinbarung T3/T4)
-* **Agenten-Kosten Lauf `website-run-001`:** 3,4126 Credits (3 Calls, 37,3s Agenten-Laufzeit, 180s menschliche Review-Zeit getrennt erfasst; kein Double-Counting).
+- **Planbudget Lieferung T3/T4:** 1.200 Credits (12 Personenstunden) zzgl. 400 Credits Reserve für T5 (getrennt von den gemeinsamen Factory-Ausbaukosten erfasst in [`costs/usage.csv`](../costs/usage.csv)).
+- **Menschlicher Gesamtaufwand Termin 3 (4 Teammitglieder × 5,0 h = 20,0 h = 2.000,0 Credits):**
+  - `human_david` (5,0 h = 500 Credits): 2,5 h `implementation`, 1,5 h `review`, 1,0 h `waiting`
+  - `human_maxim` (5,0 h = 500 Credits): 3,0 h `implementation`, 1,0 h `review`, 1,0 h `meeting`
+  - `human_lars` (5,0 h = 500 Credits): 2,5 h `implementation`, 2,0 h `review`, 0,5 h `correction`
+  - `human_mehrose` (5,0 h = 500 Credits): 1,5 h `implementation`, 2,0 h `review`, 1,5 h `correction`
+- **Agenten-Kosten Lauf `bf81352d-f7cb-4628-ad10-475cad888f73`:** **30,9069 Credits** (8 reale LLM-Aufrufe über `gemini-3.8-flash`, `2239.7507s` reine Agenten-Laufzeit, `322.45s` menschliche Review-Zeit getrennt ausgewiesen; kein Double-Counting der `workflow_summary`-Zeile).
 
 ---
 
 ## 6. Konkreter Engpass & Überprüfbare Lernhypothese (C4)
 
-* **Beobachteter Engpass (mit Beleg):**  
-  Im initialen Modell-Entwurf versuchte der Agent, für das Kontaktformular ein JavaScript-Snippet mit einem externen CDN-Script einzubinden. Dies führte zu einer Abweisung durch den Sicherheits-Guardrail und erforderte einen internen Korrekturlauf auf reines semantisches HTML mit `mailto:`.
-* **Überprüfbare Verbesserungshypothese für Termin 4:**  
-  *Wenn* wir dem Agenten für Termin 4 eine explizite Pydantic-Komponenten-Grammatik (z. B. `ServiceCard`- und `ContactSection`-Datenmodelle) als In-Context-Constraint vorgeben,  
-  *dann* sinkt die Wahrscheinlichkeit unzulässiger Script-Injections auf 0 % und die für die Generierung benötigten Tokens sinken um mindestens **20 %** (Messgröße: `input_tokens` + `output_tokens` in `usage.csv` für `CUST-002`).
+- **Beobachteter Engpass (belegt durch Trace `bf81352d-f7cb-4628-ad10-475cad888f73.jsonl`, Zeilen 4, 5 & 9):**
+  Im echten Durchlauf trat ein struktureller Reihenfolge-Engpass auf: Da `architect_agent` (`a45845d6...`, Zeile 4) die Zieldatei `index.html` *vor* dem `backend_agent` (`4e03fcfb...`, Zeile 5) inspiziert, bewertete er das initiale leere Starter-Skeleton (`cbbf7a9`) richtigerweise mit `changes_requested`. Obwohl der `backend_agent` die Datei anschließend vollständig implementierte und `qa_test_engineer` (`exit_code: 0`), `ai_safety_security_engineer` sowie `integration_engineer` alle `approved` meldeten, berechnete `_compute_agent_recommendation` wegen des historischen Pre-Implementation-Architekturstatus am Human Gate `agent_recommendation: "changes_requested"`. Das erforderte `322.45s` manuellen Prüfaufwand am Gate zur Verifikation des Override.
+- **Überprüfbare Verbesserungshypothese für Termin 4:**
+  *Wenn* wir in `src/workflows/feature_pipeline.py` die Empfehlungslogik (`_compute_agent_recommendation`) so anpassen, dass ein Pre-Implementation-`changes_requested` des `architect_agent` als aufgelöst gilt, sobald `backend_agent`, `qa_test_engineer` (`exit_code == 0`) und `integration_engineer` nach der Implementierung alle `approved` liefern (und zusätzlich nach jedem Graph-Knoten eine Fortschrittszeile in der Konsole ausgeben), *dann* sinkt die Rate falscher `changes_requested`-Empfehlungen nach erfolgreicher Code-Generierung auf **0 %** und die menschliche Gate-Prüfzeit (`human_review_seconds`) reduziert sich in Termin 4 von **322,45 s auf unter 120 s**.
 
 ---
 
 ## 7. Höchstens drei nächste Schritte für Termin 4 (D2)
 
-1. **Ergänzung der verbleibenden Leistungen:** Integration von N-04 (Ersatzteilkoordination) und N-05 (Betriebsdokumentation) in `client-01-website/index.html`.
-2. **Zielgruppen & Arbeitsweise:** Einarbeitung von N-06 (Zielgruppen) und N-07 (Arbeitsweise) mit zugehörigen Sprungmarken in der Navigation (AC-03, AC-05).
-3. **Responsive Matrix-Automatisierung:** Automatisierter Headless-Test für die Viewports 375 px und 1280 px zur formalen Erfüllung von AC-06.
+1. **Ausbau der Leistungsbereiche & Sektionen (AC-02, AC-03, AC-05):** Integration von `N-04` (Ersatzteilkoordination), `N-05` (Betriebsdokumentation), `N-06` (Zielgruppen) und `N-07` (Arbeitsweise) inkl. Navigations-Sprungmarken durch die Pipeline.
+2. **Pipeline-Empfehlungslogik & Fortschritts-Logging (Hypothese C4):** Anpassung von `_compute_agent_recommendation` in `feature_pipeline.py` nach erfolgreicher Backend-Implementierung sowie Konsolen-Fortschrittsanzeige pro Agenten-Schritt.
+3. **Multi-File-Support im Backend-Agenten & Responsive-Test (AC-06):** Erweiterung von `my_backend_agent` zur koordinierten Bearbeitung von `index.html` und `styles.css` in einem Lauf sowie automatisierter Viewport-Check (375 px / 1280 px).

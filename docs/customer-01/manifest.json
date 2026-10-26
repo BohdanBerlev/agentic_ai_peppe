@@ -1,25 +1,35 @@
 {
   "company": "PepeGroup",
   "session": 3,
-  "customer_task_id": "CUST-001",
+  "customer_task_id": "TASK-001",
+  "project_id": "client-01",
+  "target_dir": "client-01-website",
   "team_size": 4,
-  "tested_source_commit": "2f5e4a5",
-  "submission_commit": "bb8296a43c52588c8df0b4757a1446b3f68dddf5",
+  "input_product_commit": "cbbf7a9",
+  "tested_source_commit": "c952e98",
+  "factory_commit_at_run": "7351867",
+  "submission_commit": "recorded-on-push",
   "working_tree_dirty_at_test": false,
   "workflow_ids": [
-    "c129e061-f34b-483d-9d7a-cfb395679901"
+    "bf81352d-f7cb-4628-ad10-475cad888f73"
   ],
   "run_ids": [
-    "website-run-001"
+    "0df93389-29be-49bf-a8ff-7b9e0fde1f14",
+    "5bd39ce0-3619-4ef4-b274-82ffdc51cd28",
+    "a2e0de14-58ea-4ec8-8fa1-a8c48192a0f9",
+    "a45845d6-aaad-47fe-a122-fc5d77ad934d",
+    "4e03fcfb-0d12-4a71-bd67-13e3e20a622a",
+    "aa24b936-9994-40a7-b14e-2f4f8c12a705",
+    "1e62f54e-686a-4900-b6bd-132ccaa77b88",
+    "1ef37bd8-ef39-4032-9618-457d82745189",
+    "a1fefdef-eb4e-4c75-bb0b-41674d060079"
   ],
-
-  "llm_provider": "ollama",
-  "llm_model": "qwen3:4b",
-  "model_tag_or_digest": "qwen3:4b-instruct",
+  "llm_provider": "google",
+  "llm_model": "gemini-3.8-flash",
+  "model_tag_or_digest": "gemini-3.8-flash",
   "test_commands": [
-    "python test_website.py",
-
-    "python -m pytest tests/starter/test_session_03_infrastructure.py"
+    "python client-01-website/test_website.py",
+    "python -m pytest -v"
   ],
   "junit_files": [
     "evidence/session-03/pytest.xml"
@@ -29,18 +39,19 @@
   "mock_runs_are_separate": true,
   "review_file": "docs/customer-01/review.json",
   "artifact_hashes": {
-    "Nordwerk-Industrie-Service-Website/index.html": "c7281bdf5011275d3c270412258e2576ba3ee9d20942687339754e82b61fd027",
-    "Nordwerk-Industrie-Service-Website/styles.css": "d3d03859aafd89d5d7722fe0a609b41c9ca70932cc024d459c7150efd469668b"
+    "client-01-website/index.html": "f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202",
+    "client-01-website/styles.css": "d7ac76b8b3015f6fb9e9bcd648d71bc54ce8cea023935672f8f0005612e85a40"
   },
   "issue_and_pr_references": [
-    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/2f5e4a5/issue_t3.md"
-
+    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/c952e98/issue_t3.md",
+    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/cbbf7a9",
+    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/c952e98"
   ],
   "cost_records": "costs/usage.csv",
   "known_limitations": [
     "Services N-04 and N-05 deferred to Session 4 as scheduled",
     "Target audience N-06 and work style N-07 deferred to Session 4",
-    "Multi-breakpoint responsive matrix deferred to Session 4"
+    "Interactive contact form (AC-03 Option B) deferred to Session 4"
   ],
   "product_repository": "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website"
 
