@@ -68,16 +68,12 @@ def read_repository_text_file(relative_path: str, base_dir: str | Path | None = 
 
 
 def write_repository_text_file(relative_path: str, content: str, base_dir: str | Path | None = None) -> None:
-    """Sicheres Schreiben von Quellcode innerhalb des Repositorys bzw. autorisierten Kunden-Checkouts mit Path-Traversal-Schutz."""
-    root = REPO_ROOT if not base_dir else (Path(base_dir).resolve() if Path(base_dir).is_absolute() else (REPO_ROOT / base_dir).resolve())
-    requested = (root / relative_path).resolve()
+    """Sicheres Schreiben von Quellcode innerhalb des Repositorys bzw. autorisierten Kunden-Checkouts mit Path-Traversal- und .git-Schutz."""
+    from src.agents.common import write_target_text_file
     try:
-        requested.relative_to(root)
+        write_target_text_file(relative_path, content, target_dir=base_dir)
     except ValueError as exc:
-        raise ValueError(f"Security Violation: Pfad '{relative_path}' verlässt das Repository-Verzeichnis!") from exc
-
-    requested.parent.mkdir(parents=True, exist_ok=True)
-    requested.write_text(content, encoding="utf-8")
+        raise ValueError(f"Security Violation: {exc}") from exc
 
 
 def run_pytest(test_files: list[str]) -> tuple[bool, str]:

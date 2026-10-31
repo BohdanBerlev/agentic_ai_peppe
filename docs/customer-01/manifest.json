@@ -5,8 +5,9 @@
   "project_id": "client-01",
   "target_dir": "client-01-website",
   "team_size": 4,
-  "input_product_commit": "cbbf7a9",
-  "tested_source_commit": "c952e98",
+  "input_product_commit": "a93442b",
+  "tested_source_commit": "5e46bcb",
+  "release_tag": "v0.1.0-t3",
   "factory_commit_at_run": "7351867",
   "submission_commit": "recorded-on-push",
   "working_tree_dirty_at_test": false,
@@ -27,6 +28,7 @@
   "llm_provider": "google",
   "llm_model": "gemini-3.8-flash",
   "model_tag_or_digest": "gemini-3.8-flash",
+  "llm_waiver_document": "docs/GEMINI_PROVIDER_WAIVER.md",
   "test_commands": [
     "python client-01-website/test_website.py",
     "python -m pytest -v"
@@ -34,25 +36,34 @@
   "junit_files": [
     "evidence/session-03/pytest.xml"
   ],
+  "junit_summary": "67 passed, 2 skipped in evidence/session-03/pytest.xml",
   "own_postgres_test": "tests/test_work_items_api.py::test_work_items_real_postgres_lifecycle",
-  "postgres_test_actually_passed": true,
+  "postgres_test_actually_passed": false,
+  "postgres_test_status": "skipped_without_live_database (erfordert aktiven PostgreSQL-Dienst via docker compose up -d db; im CI-Bericht pytest.xml als skipped dokumentiert)",
   "mock_runs_are_separate": true,
   "review_file": "docs/customer-01/review.json",
   "artifact_hashes": {
-    "client-01-website/index.html": "f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202",
-    "client-01-website/styles.css": "d7ac76b8b3015f6fb9e9bcd648d71bc54ce8cea023935672f8f0005612e85a40"
+    "client-01-website/index.html": "4bfc474a5412158e9d5d4b5c9365a758436f60342a4cad963aaa5f3e18e155e2",
+    "client-01-website/styles.css": "24822a903d848bcffb61cf68a943dd179ce4d486720f1f7c7f5ef6ccaad9f8f8",
+    "client-01-website/test_website.py": "5103a20e5d758f180ac0707d5695b8e472bea8262a7337edd7d3eaeecb83ff15"
   },
   "issue_and_pr_references": [
-    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/c952e98/issue_t3.md",
-    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/cbbf7a9",
-    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/c952e98"
+    "client-01-website/issue_t3.md",
+    "client-01-website commit a93442b (initial T3 candidate)",
+    "client-01-website commit 5e46bcb (tag: v0.1.0-t3)"
   ],
   "cost_records": "costs/usage.csv",
+  "cost_breakdown_session_03": {
+    "customer_delivery_human_credits": 1250.0,
+    "factory_development_human_credits": 750.0,
+    "agent_execution_credits": 30.9069,
+    "plan_budget_delivery_t3_t4": 1200.0,
+    "budget_reserve_t5": 400.0
+  },
   "known_limitations": [
     "Services N-04 and N-05 deferred to Session 4 as scheduled",
     "Target audience N-06 and work style N-07 deferred to Session 4",
     "Interactive contact form (AC-03 Option B) deferred to Session 4"
   ],
-  "product_repository": "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website"
-
+  "product_repository": "client-01-website (lokaler Checkout; Tag: v0.1.0-t3)"
 }

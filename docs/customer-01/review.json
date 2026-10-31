@@ -5,11 +5,13 @@
   "decision": "approved",
   "reviewer": "David Pisarkiewicz",
   "decided_at_utc": "2026-10-26T11:01:01Z",
-  "input_product_commit": "cbbf7a9",
-  "tested_source_commit": "c952e98",
+  "input_product_commit": "a93442b",
+  "tested_source_commit": "5e46bcb",
+  "release_tag": "v0.1.0-t3",
   "reviewed_artifact_hashes": {
-    "client-01-website/index.html": "f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202",
-    "client-01-website/styles.css": "d7ac76b8b3015f6fb9e9bcd648d71bc54ce8cea023935672f8f0005612e85a40"
+    "client-01-website/index.html": "4bfc474a5412158e9d5d4b5c9365a758436f60342a4cad963aaa5f3e18e155e2",
+    "client-01-website/styles.css": "24822a903d848bcffb61cf68a943dd179ce4d486720f1f7c7f5ef6ccaad9f8f8",
+    "client-01-website/test_website.py": "5103a20e5d758f180ac0707d5695b8e472bea8262a7337edd7d3eaeecb83ff15"
   },
   "test_evidence_paths": [
     "evidence/session-03/bf81352d-f7cb-4628-ad10-475cad888f73.jsonl",
@@ -27,6 +29,6 @@
     "AC-05",
     "AC-06"
   ],
-  "rationale": "Approved: Architect reviewed the initial empty skeleton (commit cbbf7a9) before Backend Agent implementation. Backend Agent (run 4e03fcfb-0d12-4a71-bd67-13e3e20a622a) subsequently implemented full semantic HTML5 in index.html (commit c952e98) with all required Nordwerk RC1 blocks (N-01, N-02, N-03, N-08, N-09), verified by QA test_website.py (exit code 0), Security Audit, Integration Engineer, and visual browser inspection at http://localhost:8000.",
+  "rationale": "Approved: Architect reviewed the initial empty skeleton before Backend Agent implementation. Backend Agent (run 4e03fcfb-0d12-4a71-bd67-13e3e20a622a) subsequently implemented full semantic HTML5 in index.html with all required Nordwerk RC1 blocks (N-01, N-02, N-03, N-08, N-09), verified by QA test_website.py (exit code 0), Security Audit, Integration Engineer, and visual browser inspection at http://localhost:8000. Verified on commit 5e46bcb (tagged v0.1.0-t3).",
   "identity_assurance": "self_declared_course_review"
 }

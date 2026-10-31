@@ -19,15 +19,17 @@ date,task_id,actor_type,actor,activity,quantity,unit,credits,notes
 2026-10-19,SESSION-02,human,human_mehrose,review,3.0,hours,300.0,Product-Owner-Abnahme der User Stories/Akzeptanzkriterien und Scope-Review
 2026-10-19,SESSION-02,human,human_mehrose,correction,2.0,hours,200.0,Überarbeitung der Dokumentation und Backlog-Abgleich nach Review-Findings
 2026-10-26,TASK-001,agent,feature_pipeline_workflow,agent_execution,1,run,30.9069,model=gemini-3.8-flash; workflow_id=bf81352d-f7cb-4628-ad10-475cad888f73; status=success; 2239.75s reine Agenten-Laufzeit (322.45s Human-Gate getrennt); calls=8 (alle 8 Rollen inkl. backend_agent write_repository_text_file und qa test_website.py)
-2026-10-26,SESSION-03,human,human_david,implementation,2.5,hours,250.0,Factory target_dir-Isolation, Backend-Agent-Pipeline-Anbindung und Durchfuehrung Live-Run TASK-001 (5h Gesamtzeit David)
-2026-10-26,SESSION-03,human,human_david,review,1.5,hours,150.0,Interaktives Human Gate Review (322.45s), Code-Diff-Pruefung cbbf7a9..c952e98 und CSS-Abstimmung
-2026-10-26,SESSION-03,human,human_david,waiting,1.0,hours,100.0,Terminal-Wartezeit waehrend 8-Rollen Gemini-API-Durchlauf und Rate-Limit-Backoff
-2026-10-26,SESSION-03,human,human_maxim,implementation,3.0,hours,300.0,Entwicklung Backend-Agent (TDD-Loop), Course-Revision-5-Merge und PostgreSQL-Tests (5h Gesamtzeit Maxim)
-2026-10-26,SESSION-03,human,human_maxim,review,1.0,hours,100.0,Kosten- und Trace-Verifikation fuer Session 3
-2026-10-26,SESSION-03,human,human_maxim,meeting,1.0,hours,100.0,Sprint-Planung und Budget-Allokation T3/T4 (1200 Credits Lieferbudget + 400 Credits T5-Reserve)
-2026-10-26,SESSION-03,human,human_lars,implementation,2.5,hours,250.0,Automatisierter Produktcheck test_website.py, Factory-Tests und Evidenz-Struktur (5h Gesamtzeit Lars)
-2026-10-26,SESSION-03,human,human_lars,review,2.0,hours,200.0,Sichtpruefung der Kunden-Website unter localhost:8000 und Abnahmepruefung AC-01 bis AC-04
-2026-10-26,SESSION-03,human,human_lars,correction,0.5,hours,50.0,Abgleich der Commit-Hashes und Artefakt-Pruefsummen
-2026-10-26,SESSION-03,human,human_mehrose,implementation,1.5,hours,150.0,Aufbereitung Kundenbriefing Nordwerk (N-01 bis N-09) und issue_t3.md (5h Gesamtzeit Mehrose)
-2026-10-26,SESSION-03,human,human_mehrose,review,2.0,hours,200.0,Product-Owner-Abnahme der Pflichtbausteine und expliziten Annahmen (clarifications.md)
-2026-10-26,SESSION-03,human,human_mehrose,correction,1.5,hours,150.0,Dokumentations-Review und Finalisierung der Abnahmeberichte
+2026-10-26,FACTORY-DEV,human,human_david,implementation,1.5,hours,150.0,Factory-Entwicklung: target_dir-Isolation und Backend-Agent-Pipeline-Anbindung
+2026-10-26,TASK-001,human,human_david,implementation,1.0,hours,100.0,Kundenlieferung T3: Vorbereitung und Ausführung des Live-Runs TASK-001
+2026-10-26,TASK-001,human,human_david,review,1.5,hours,150.0,Kundenlieferung T3: Interaktives Human Gate Review (322.45s), Code-Diff-Prüfung a93442b..5e46bcb und CSS-Abstimmung
+2026-10-26,TASK-001,human,human_david,waiting,1.0,hours,100.0,Kundenlieferung T3: Terminal-Wartezeit während 8-Rollen Gemini-API-Durchlauf und Rate-Limit-Backoff
+2026-10-26,FACTORY-DEV,human,human_maxim,implementation,3.0,hours,300.0,Factory-Entwicklung: Entwicklung Backend-Agent (TDD-Loop), Course-Revision-5-Merge und PostgreSQL-Tests
+2026-10-26,FACTORY-DEV,human,human_maxim,review,1.0,hours,100.0,Factory-Entwicklung: Kosten- und Trace-Verifikation für Session 3
+2026-10-26,FACTORY-DEV,human,human_maxim,meeting,1.0,hours,100.0,Factory-Entwicklung: Sprint-Planung und Budget-Allokation T3/T4 (1200 Credits Lieferbudget + 400 Credits T5-Reserve)
+2026-10-26,FACTORY-DEV,human,human_lars,implementation,1.0,hours,100.0,Factory-Entwicklung: Factory-Tests und Evidenz-Struktur
+2026-10-26,TASK-001,human,human_lars,implementation,1.5,hours,150.0,Kundenlieferung T3: Automatisierter Produktcheck test_website.py
+2026-10-26,TASK-001,human,human_lars,review,2.0,hours,200.0,Kundenlieferung T3: Sichtprüfung der Kunden-Website unter localhost:8000 und Abnahmeprüfung AC-01 bis AC-04
+2026-10-26,TASK-001,human,human_lars,correction,0.5,hours,50.0,Kundenlieferung T3: Abgleich der Commit-Hashes und Artefakt-Prüfsummen
+2026-10-26,TASK-001,human,human_mehrose,implementation,1.5,hours,150.0,Kundenlieferung T3: Aufbereitung Kundenbriefing Nordwerk (N-01 bis N-09) und issue_t3.md
+2026-10-26,TASK-001,human,human_mehrose,review,2.0,hours,200.0,Kundenlieferung T3: Product-Owner-Abnahme der Pflichtbausteine und expliziten Annahmen (clarifications.md)
+2026-10-26,TASK-001,human,human_mehrose,correction,1.5,hours,150.0,Kundenlieferung T3: Dokumentations-Review und Finalisierung der Abnahmeberichte

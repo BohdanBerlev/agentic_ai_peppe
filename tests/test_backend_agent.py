@@ -25,6 +25,16 @@ def test_write_repository_text_file_path_traversal():
     with pytest.raises(ValueError, match="Security Violation"):
         write_repository_text_file("../../tmp/malicious.py", "malicious_code = True")
 
+
+def test_write_repository_text_file_git_protection():
+    """Sicherheitstest: Schreibversuche in .git internals werden strikt blockiert."""
+    with pytest.raises(ValueError, match="Security Violation"):
+        write_repository_text_file(".git/config", "[malicious]\\nkey=val")
+
+def test_write_repository_text_file_target_dir_git_protection(tmp_path):
+    """Sicherheitstest: Schreibversuche in .git eines Kunden-Zielverzeichnisses werden blockiert."""
+    with pytest.raises(ValueError, match="Security Violation"):
+        write_repository_text_file(".git/hooks/pre-commit", "#!/bin/sh\\nevil", base_dir=tmp_path)
 def test_run_pytest_empty_list():
     """Prüft, dass leere Testlisten als bestanden gewertet werden."""
     passed, output = run_pytest([])
