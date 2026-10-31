@@ -101,21 +101,44 @@ class PipelineState(TypedDict, total=False):
     error: str
 
 
-def _compute_agent_recommendation(reports: list[dict[str, Any]]) -> Literal[
-    "approved", "changes_requested", "escalate_to_human_review"
-]:
+def _compute_agent_recommendation(
+    reports: list[dict[str, Any]],
+    *,
+    arch_rep: dict[str, Any] | None = None,
+    impl_rep: dict[str, Any] | None = None,
+    qa_rep: dict[str, Any] | None = None,
+    int_rep: dict[str, Any] | None = None,
+) -> Literal["approved", "changes_requested", "escalate_to_human_review"]:
+    """Aggregiert die Agenten-Empfehlungen für das Human Approval Gate.
+    Termin 4 Verbesserung (Hypothese C4): Löst False-Negative changes_requested des Pre-Implementation-Architects
+    auf, wenn Backend, QA (mit Exit-Code 0) und Integration nach der Code-Generierung alle approved melden.
+    """
     active_reports = [r for r in reports if r]
     if not active_reports:
         return "escalate_to_human_review"
     statuses = [r.get("status_str") for r in active_reports]
     if any(s in ("unparseable", "escalated") for s in statuses):
         return "escalate_to_human_review"
+
+    # Hypothese C4: Pre-Implementation Architecture-Befund auflösen
+    if arch_rep and arch_rep.get("status_str") == "changes_requested":
+        impl_approved = bool(impl_rep and impl_rep.get("status_str") == "approved")
+        qa_approved = bool(qa_rep and qa_rep.get("status_str") == "approved")
+        int_approved = bool(int_rep and int_rep.get("status_str") == "approved")
+        qa_tests_passed = True
+        if qa_rep and "pytest_execution" in qa_rep:
+            qa_tests_passed = qa_rep["pytest_execution"].get("tests_passed", True)
+
+        if impl_approved and qa_approved and int_approved and qa_tests_passed:
+            non_arch_statuses = [r.get("status_str") for r in active_reports if r is not arch_rep]
+            if all(s == "approved" for s in non_arch_statuses):
+                return "approved"
+
     if any(s == "changes_requested" for s in statuses):
         return "changes_requested"
     if all(s == "approved" for s in statuses):
         return "approved"
     return "changes_requested"
-
 
 def build_pipeline_graph(
     llm: Any | None = None,
@@ -328,7 +351,14 @@ def build_pipeline_graph(
                 "approved", "changes_requested", "escalate_to_human_review"
             ] = "escalate_to_human_review"
         else:
-            recommendation = _compute_agent_recommendation(all_reports)
+            impl_rep = state.get("implementation_report") or {}
+            recommendation = _compute_agent_recommendation(
+                all_reports,
+                arch_rep=arch_rep,
+                impl_rep=impl_rep,
+                qa_rep=qa_rep,
+                int_rep=int_rep,
+            )
 
         reviewed_artifacts = [
             name

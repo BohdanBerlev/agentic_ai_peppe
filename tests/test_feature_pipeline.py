@@ -361,3 +361,25 @@ def test_pipeline_target_dir_path_traversal_protection(tmp_path):
     assert res["calls"] == 0
     assert "Security violation" in (res["result_state"]["context_error"] or "")
 
+
+def test_compute_agent_recommendation_resolves_pre_implementation_architect_finding():
+    """Hypothese C4: Pre-implementation architect changes_requested is resolved when backend, QA and integration approve."""
+    from src.workflows.feature_pipeline import _compute_agent_recommendation
+
+    arch_rep = {"status_str": "changes_requested", "role": "software_architect"}
+    impl_rep = {"status_str": "approved", "role": "backend_api_engineer"}
+    qa_rep = {"status_str": "approved", "role": "qa_test_engineer", "pytest_execution": {"tests_passed": True}}
+    int_rep = {"status_str": "approved", "role": "integration_engineer"}
+    req_rep = {"status_str": "approved", "role": "product_owner_requirements"}
+    pm_rep = {"status_str": "approved", "role": "project_manager"}
+    sec_rep = {"status_str": "approved", "role": "ai_safety_security_engineer"}
+
+    all_reports = [req_rep, pm_rep, arch_rep, qa_rep, sec_rep, int_rep]
+    rec = _compute_agent_recommendation(
+        all_reports,
+        arch_rep=arch_rep,
+        impl_rep=impl_rep,
+        qa_rep=qa_rep,
+        int_rep=int_rep,
+    )
+    assert rec == "approved"
