@@ -49,6 +49,8 @@
   },
   "issue_and_pr_references": [
     "client-01-website/issue_t3.md",
+    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/cbbf7a9",
+    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/c952e98",
     "client-01-website commit a93442b (initial T3 candidate)",
     "client-01-website commit 5e46bcb (tag: v0.1.0-t3)"
   ],
@@ -65,5 +67,5 @@
     "Target audience N-06 and work style N-07 deferred to Session 4",
     "Interactive contact form (AC-03 Option B) deferred to Session 4"
   ],
-  "product_repository": "client-01-website (lokaler Checkout; Tag: v0.1.0-t3)"
+  "product_repository": "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website (lokaler Checkout: client-01-website; Tag: v0.1.0-t3)"
 }

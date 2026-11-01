@@ -47,6 +47,48 @@ class EngineeringTask(BaseModel):
     test_targets: list[str] = Field(default_factory=lambda: ["tests/test_work_items_api.py"])
     parent_workflow_id: str | None = None
     human_feedback: str | None = None
+    # Termin 4: Kunden-Issue-Datei im Produkt-Checkout (z. B. issue_t4.md); Fallback issue_t3.md.
+    issue_file: str | None = None
+
+
+DEFAULT_ISSUE_FILE = "issue_t3.md"
+
+
+def load_issue_specification(task: dict[str, Any]) -> tuple[str, str] | None:
+    """Load the customer issue specification (issue_file or fallback issue_t3.md) from the product checkout."""
+    base_dir = task.get("target_dir")
+    if not base_dir:
+        return None
+    issue_name = task.get("issue_file") or DEFAULT_ISSUE_FILE
+    try:
+        return issue_name, read_repository_text_file(issue_name, base_dir=base_dir)
+    except Exception:
+        return None
+
+
+def _progress(message: str) -> None:
+    """Termin 4: Live-Fortschrittsanzeige je Pipeline-Schritt (stderr, JSON-Ausgabe auf stdout bleibt sauber)."""
+    print(f"[pipeline {time.strftime('%H:%M:%S')}] {message}", file=sys.stderr, flush=True)
+
+
+def product_tests_failed(qa_rep: dict[str, Any] | None) -> bool:
+    """True, wenn der QA-Agent die Produkttests real ausgefuehrt hat und diese fehlgeschlagen sind."""
+    if not qa_rep:
+        return False
+    execution = qa_rep.get("pytest_execution")
+    if not isinstance(execution, dict):
+        return False
+    return execution.get("tests_passed") is False
+
+
+def enforce_quality_gate(decision: str, qa_rep: dict[str, Any] | None) -> tuple[str, bool]:
+    """Termin 4 Qualitaetsgate: 'approved' ist technisch unmoeglich, solange Produkttests fehlschlagen.
+
+    Returns (effective_decision, blocked_by_quality_gate).
+    """
+    if decision == "approved" and product_tests_failed(qa_rep):
+        return "changes_requested", True
+    return decision, False
 
 
 class ImplementationResult(BaseModel):
@@ -76,6 +118,8 @@ class HumanApprovalRecord(BaseModel):
     timestamp: str
     human_review_seconds: float = 0.0
     note: str
+    quality_gate_blocked: bool = False
+    product_tests_passed: bool | None = None
 
 
 class PipelineState(TypedDict, total=False):
@@ -120,6 +164,11 @@ def _compute_agent_recommendation(
     if any(s in ("unparseable", "escalated") for s in statuses):
         return "escalate_to_human_review"
 
+    # Termin 4 Qualitaetsgate: real ausgefuehrte, fehlgeschlagene Produkttests blockieren deterministisch,
+    # unabhaengig davon, welchen Status ein LLM-Agent meldet.
+    if product_tests_failed(qa_rep):
+        return "changes_requested"
+
     # Hypothese C4: Pre-Implementation Architecture-Befund auflösen
     if arch_rep and arch_rep.get("status_str") == "changes_requested":
         impl_approved = bool(impl_rep and impl_rep.get("status_str") == "approved")
@@ -149,6 +198,7 @@ def build_pipeline_graph(
         task = state.get("task", {})
         files = task.get("input_files") or []
         base_dir = task.get("target_dir")
+        _progress(f"Schritt 0/6: Kontext validieren (task={task.get('task_id')}, target_dir={base_dir})")
         for rel_path in files:
             try:
                 read_repository_text_file(rel_path, base_dir=base_dir)
@@ -169,13 +219,12 @@ def build_pipeline_graph(
             desc = f"{desc}\n\nPrevious Human Feedback:\n{task['human_feedback']}"
         ctx_file = (task.get("input_files") or [None])[0]
         base_dir = task.get("target_dir")
-        if base_dir:
-            try:
-                issue_doc = read_repository_text_file("issue_t3.md", base_dir=base_dir)
-                desc = f"{desc}\n\nCustomer Issue Specification (issue_t3.md):\n{issue_doc}"
-            except Exception:
-                pass
+        issue = load_issue_specification(task)
+        if issue:
+            issue_name, issue_doc = issue
+            desc = f"{desc}\n\nCustomer Issue Specification ({issue_name}):\n{issue_doc}"
 
+        _progress("Schritt 1/6: Requirements (PO) [+ PM + Agent Engineering im Full-Company-Modus]")
         req_report = run_requirements_analysis(
             description=desc,
             context_file=ctx_file,
@@ -226,6 +275,7 @@ def build_pipeline_graph(
         target_file = (task.get("input_files") or ["src/app/main.py"])[0]
         base_dir = task.get("target_dir")
 
+        _progress(f"Schritt 2/6: Software Architect prueft {target_file}")
         report = run_architect_review(
             file_path=target_file,
             base_dir=base_dir,
@@ -246,6 +296,7 @@ def build_pipeline_graph(
 
     def step_backend_implementation(state: PipelineState) -> PipelineState:
         attempts = int(state.get("impl_attempts", 0)) + 1
+        _progress(f"Schritt 3/6: Backend-Agent Implementierung (Versuch {attempts}/{state.get('max_impl_retries', 3)})")
         if backend_agent_fn is not None:
             impl_res = backend_agent_fn(dict(state), attempts)
         else:
@@ -267,6 +318,7 @@ def build_pipeline_graph(
         test_targets = task.get("test_targets") or (["test_website.py"] if base_dir else ["tests/test_work_items_api.py"])
         arch_rep = state.get("architecture_report", {})
 
+        _progress(f"Schritt 4/6: QA fuehrt Produkttests aus ({', '.join(test_targets)}) + Security + Integration")
         if state.get("full_company_mode"):
             qa_rep = run_qa_test_execution(
                 architecture_report=arch_rep,
@@ -344,6 +396,11 @@ def build_pipeline_graph(
         task = state.get("task", {})
         task_id = task.get("task_id", "UNKNOWN")
         ctx_err = state.get("context_error")
+        _progress("Schritt 5/6: Human Approval Gate")
+        tests_failed = product_tests_failed(qa_rep)
+        tests_passed_flag: bool | None = None
+        if isinstance(qa_rep.get("pytest_execution"), dict):
+            tests_passed_flag = bool(qa_rep["pytest_execution"].get("tests_passed"))
 
         all_reports = [req_rep, pm_rep, ae_rep, arch_rep, qa_rep, sec_rep, int_rep]
         if ctx_err:
@@ -395,6 +452,8 @@ def build_pipeline_graph(
             if int_rep:
                 print(f"Integration Status    : {int_rep.get('status_str')} — {int_rep.get('summary')}")
             print(f"Agent Recommendation  : {recommendation}")
+            if tests_failed:
+                print("QUALITY GATE          : BLOCKIERT - Produkttests fehlgeschlagen; 'approved' ist nicht moeglich.")
             print("-" * 60)
             print(f"Valid accountable humans: {', '.join(sorted(VALID_ACCOUNTABLE_HUMANS))}")
 
@@ -432,6 +491,13 @@ def build_pipeline_graph(
                 if confirm not in ("yes", "y", "ja", "j"):
                     decision = "changes_requested"
 
+            decision, gate_blocked = enforce_quality_gate(decision, qa_rep)
+            if gate_blocked:
+                print(
+                    "QUALITY GATE BLOCK: Produkttests sind fehlgeschlagen. Freigabe wurde technisch verweigert "
+                    "und als 'changes_requested' protokolliert."
+                )
+
             note = input("Begründung / Notiz zur Entscheidung (Pflicht bei Abweichung): ").strip()
             if not note:
                 note = f"Manuelle Entscheidung ({decision}) durch {reviewer_name}."
@@ -446,6 +512,8 @@ def build_pipeline_graph(
                 timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
                 human_review_seconds=human_duration,
                 note=note,
+                quality_gate_blocked=gate_blocked,
+                product_tests_passed=tests_passed_flag,
             )
             return {"human_approval": record.model_dump()}
 
@@ -477,6 +545,8 @@ def build_pipeline_graph(
             timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
             human_review_seconds=0.0,
             note=note,
+            quality_gate_blocked=tests_failed,
+            product_tests_passed=tests_passed_flag,
         )
         return {"human_approval": record.model_dump()}
 
@@ -689,6 +759,10 @@ def record_human_decision(
         raise ValueError("No feature_pipeline_workflow record found in trace file.")
 
     prev_human = summary_rec.get("result_state", {}).get("human_approval", {})
+    qa_state = summary_rec.get("result_state", {}).get("qa_security") or {}
+    decision, gate_blocked = enforce_quality_gate(decision, qa_state)
+    if gate_blocked:
+        note = f"[QUALITY GATE BLOCK: Produkttests fehlgeschlagen, Freigabe verweigert] {note}"
     approval = HumanApprovalRecord(
         reviewed_by=reviewer_name,
         decision=decision,
@@ -701,6 +775,7 @@ def record_human_decision(
         timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
         human_review_seconds=round(review_seconds, 4),
         note=note,
+        quality_gate_blocked=gate_blocked,
     ).model_dump()
 
     decision_event = {
@@ -734,6 +809,8 @@ if __name__ == "__main__":
     parser.add_argument("--full-company", action="store_true")
     parser.add_argument("--use-backend-agent", action="store_true")
     parser.add_argument("--session", type=str, default="session-03")
+    parser.add_argument("--issue-file", type=str, default=None, help="Kunden-Issue im Produkt-Checkout, z. B. issue_t4.md")
+    parser.add_argument("--max-impl-retries", type=int, default=3, help="Obergrenze Backend<->QA-Reparaturschleife")
     args = parser.parse_args()
 
     default_input = ["index.html"] if args.target_dir else ["src/app/main.py"]
@@ -758,9 +835,11 @@ if __name__ == "__main__":
             test_targets=test_targets,
             parent_workflow_id=args.parent_workflow_id,
             human_feedback=args.feedback,
+            issue_file=args.issue_file,
         ),
         full_company_mode=args.full_company,
         backend_agent_fn=backend_fn,
+        max_impl_retries=args.max_impl_retries,
         session_folder=args.session,
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))

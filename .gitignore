@@ -232,3 +232,6 @@ client-01-website/
 
 # Local opencode project config (planner/worker models)
 .opencode/
+
+# Isolated temporary fault-injection working copies (Session 4)
+runs/

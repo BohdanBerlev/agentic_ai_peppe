@@ -437,9 +437,10 @@ def my_backend_agent(state: dict[str, Any], attempt: int = 1) -> dict[str, Any]:
     qa_rep = state.get("qa_security_report", {})
 
     if target_dir:
+        issue_name = task.get("issue_file") or "issue_t3.md"
         try:
-            issue_doc = read_repository_text_file("issue_t3.md", base_dir=target_dir)
-            task_desc = f"{task_desc}\n\nCustomer Issue Specification (issue_t3.md):\n{issue_doc}"
+            issue_doc = read_repository_text_file(issue_name, base_dir=target_dir)
+            task_desc = f"{task_desc}\n\nCustomer Issue Specification ({issue_name}):\n{issue_doc}"
         except Exception:
             pass
 
