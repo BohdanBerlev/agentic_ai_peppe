@@ -111,11 +111,11 @@ def get_chat_model(
             os.environ["GEMINI_API_KEY"] = api_key
 
         model_name = resolve_google_model(settings.llm_model, api_key)
-        print(f"🔧 Google Gemini Modell aufgelöst: '{model_name}'", flush=True)
+        print(f"[llm] Google Gemini Modell aufgeloest: '{model_name}'", flush=True)
 
         # Drosselung: max 15 Requests pro Minute für die Free-API (1 Request alle 4 Sekunden)
         rate_limiter = InMemoryRateLimiter(
-            requests_per_second=0.25, 
+            requests_per_second=0.08, 
             check_every_n_seconds=0.1, 
             max_bucket_size=1
         )
@@ -124,7 +124,7 @@ def get_chat_model(
             rate_limiter=rate_limiter,
             temperature=settings.llm_temperature,
             timeout=settings.llm_timeout_seconds,
-            max_retries=2,
+            max_retries=6,
             api_key=api_key,
         )
 

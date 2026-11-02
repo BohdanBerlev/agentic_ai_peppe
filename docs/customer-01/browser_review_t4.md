@@ -1,7 +1,7 @@
 # Browser- & Bedienbarkeits-Review Termin 4 (AC-05, AC-06, AC-07 / Kriterien B3, B4)
 
 **Kunde:** Nordwerk Industrie-Service (`client-01-website`)  
-**Geprüfter Release-Candidate Commit / Tag:** `<CANDIDATE_COMMIT>` (Tag: `v0.2.0-rc1` / `R-BASE`)  
+**Geprüfter Release-Candidate Commit / Tag:** `18d222b` (Tag: `v0.2.0-rc1` / `R-BASE`)  
 **Lokaler Startbefehl (ohne Factory):** `python -m http.server 8000 --directory client-01-website`  
 **Geprüfte URL:** `http://localhost:8000`  
 **Prüfer (benannter Mensch):** `David Pisarkiewicz` / `Lars Boos`  

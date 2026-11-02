@@ -15,12 +15,12 @@ Die Trennung zwischen Factory und Kundenprodukt ist technisch vollständig vollz
 | Repository | GitHub-URL / Lokaler Pfad | Eingabe-Commit (vor Lauf) | Ergebnis-Commit (nach Lauf) | Release-Tag / Status |
 |---|---|---|---|---|
 | **Factory-Repository** | `https://github.com/BohdanBerlev/agentic_ai_peppe` (`.`) | `7351867` | Aktueller `HEAD` auf `main` | Bereitgestellt für Evaluation |
-| **Kundenprodukt-Repository** | `client-01-website` | `a93442b` (Initialer RC1-Stand) | `5e46bcb` (Validierter Stand mit UTF-8-Terminal-Kompatibilität) | `v0.1.0-t3` |
+| **Kundenprodukt-Repository** | `client-01-website` | `cbbf7a9` (Initialer RC1-Stand vor Agenten-Lauf) | `3e6121b` (Agent-Output `c952e98` + PHP-RCE-Guardrail `3e6121b`) | `v0.1.0-t3` |
 
 - **Verifizierte SHA-256 Prüfsummen (Release Candidate v0.1.0-t3):**
-  - `client-01-website/index.html`: `4bfc474a5412158e9d5d4b5c9365a758436f60342a4cad963aaa5f3e18e155e2`
-  - `client-01-website/styles.css`: `24822a903d848bcffb61cf68a943dd179ce4d486720f1f7c7f5ef6ccaad9f8f8`
-  - `client-01-website/test_website.py`: `5103a20e5d758f180ac0707d5695b8e472bea8262a7337edd7d3eaeecb83ff15`
+  - `client-01-website/index.html`: `f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202`
+  - `client-01-website/styles.css`: `d7c2e41c5314726d680e28957a4667e0c1a45c9bffb319d329902eaaaa4d1aa0`
+  - `client-01-website/test_website.py`: `41a920b54603ae70f1eefc47d58ff9018315216b3af05313db73280461b910cb`
 - **Konfiguration & Adressierung:** Die Factory adressiert das Produkt-Repository modular über `--target-dir client-01-website --project-id client-01 --task-id TASK-001`.
 - **Unabhängiger Start ohne Factory (B5):** Das Produkt läuft vollständig isoliert ohne Factory, ohne DB und ohne LLM:
   ```powershell

@@ -5,8 +5,8 @@
   "project_id": "client-01",
   "target_dir": "client-01-website",
   "team_size": 4,
-  "input_product_commit": "a93442b",
-  "tested_source_commit": "5e46bcb",
+  "input_product_commit": "cbbf7a9",
+  "tested_source_commit": "3e6121b",
   "release_tag": "v0.1.0-t3",
   "factory_commit_at_run": "7351867",
   "submission_commit": "recorded-on-push",
@@ -43,16 +43,15 @@
   "mock_runs_are_separate": true,
   "review_file": "docs/customer-01/review.json",
   "artifact_hashes": {
-    "client-01-website/index.html": "4bfc474a5412158e9d5d4b5c9365a758436f60342a4cad963aaa5f3e18e155e2",
-    "client-01-website/styles.css": "24822a903d848bcffb61cf68a943dd179ce4d486720f1f7c7f5ef6ccaad9f8f8",
-    "client-01-website/test_website.py": "5103a20e5d758f180ac0707d5695b8e472bea8262a7337edd7d3eaeecb83ff15"
+    "client-01-website/index.html": "f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202",
+    "client-01-website/styles.css": "d7c2e41c5314726d680e28957a4667e0c1a45c9bffb319d329902eaaaa4d1aa0",
+    "client-01-website/test_website.py": "41a920b54603ae70f1eefc47d58ff9018315216b3af05313db73280461b910cb"
   },
   "issue_and_pr_references": [
     "client-01-website/issue_t3.md",
     "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/cbbf7a9",
     "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/c952e98",
-    "client-01-website commit a93442b (initial T3 candidate)",
-    "client-01-website commit 5e46bcb (tag: v0.1.0-t3)"
+    "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/commit/3e6121b (tag: v0.1.0-t3)"
   ],
   "cost_records": "costs/usage.csv",
   "cost_breakdown_session_03": {
@@ -67,5 +66,5 @@
     "Target audience N-06 and work style N-07 deferred to Session 4",
     "Interactive contact form (AC-03 Option B) deferred to Session 4"
   ],
-  "product_repository": "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website (lokaler Checkout: client-01-website; Tag: v0.1.0-t3)"
+  "product_repository": "https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website (lokaler Checkout: client-01-website / Nordwerk-Industrie-Service; Tag: v0.1.0-t3)"
 }

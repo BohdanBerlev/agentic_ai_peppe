@@ -1,0 +1,55 @@
+{
+  "record_type": "controlled_fault_experiment",
+  "run_id": "557714eb-efba-4260-af95-46ee17d95e22",
+  "session": "session-04",
+  "fault": "contact",
+  "started_at": "2026-11-02T09:16:17",
+  "isolated_copy": "runs\\session-04\\fault-test\\557714eb-efba-4260-af95-46ee17d95e22\\product",
+  "source_dir": "c:\\Users\\Lars_Boos\\Documents\\Entwicklung\\Nordwerk-Industrie-Service",
+  "fault_diff": [
+    "--- index.html (candidate)",
+    "+++ index.html (fault)",
+    "@@ -28 +28 @@",
+    "-      <a class=\"cta-button\" href=\"mailto:kontakt@nordwerk.example\">Anfrage stellen</a>",
+    "+      <a class=\"cta-button\" href=\"mailto:kontakt@nordwerk-falsch.example\">Anfrage stellen</a>"
+  ],
+  "baseline_check": {
+    "tests_passed": true,
+    "exit_code": 0,
+    "command": "python test_website.py"
+  },
+  "negative_run": {
+    "tests_executed": true,
+    "tests_passed": false,
+    "exit_code": 1,
+    "command": "python test_website.py",
+    "output_excerpt": "PASSED       F1 Pflichtinhalt (AC-01..AC-04)\nFAILED (1)   F2 Kontakt & Navigation (AC-04, AC-05)\n             - [F2] Falsches Kontaktziel: 'mailto:kontakt@nordwerk-falsch.example' (erwartet mailto:kontakt@nordwerk.example)\nPASSED       F3 Lokale Verweise & Assets / PHP-frei (AC-05, AC-08)\nPASSED       F4 Bedienbarkeit statisch (AC-06/AC-07)\nERGEBNIS: FEHLGESCHLAGEN",
+    "gate": {
+      "llm_status_assumed": "approved",
+      "human_decision_attempted": "approved",
+      "agent_recommendation": "changes_requested",
+      "effective_decision": "changes_requested",
+      "quality_gate_blocked": true,
+      "released": false
+    }
+  },
+  "corrected_run": {
+    "tests_executed": true,
+    "tests_passed": true,
+    "exit_code": 0,
+    "command": "python test_website.py",
+    "output_excerpt": "PASSED       F1 Pflichtinhalt (AC-01..AC-04)\nPASSED       F2 Kontakt & Navigation (AC-04, AC-05)\nPASSED       F3 Lokale Verweise & Assets / PHP-frei (AC-05, AC-08)\nPASSED       F4 Bedienbarkeit statisch (AC-06/AC-07)\nERGEBNIS: ALLE PRUEFFAMILIEN BESTANDEN",
+    "gate": {
+      "llm_status_assumed": "approved",
+      "human_decision_attempted": "approved",
+      "agent_recommendation": "approved",
+      "effective_decision": "approved",
+      "quality_gate_blocked": false,
+      "released": true
+    }
+  },
+  "expected_behaviour_observed": true,
+  "status": "passed",
+  "llm_used": false,
+  "note": "Deterministischer Gate-Nachweis; realer LLM-Lauf auf der Fehlerkopie separat ausgewiesen."
+}

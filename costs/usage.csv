@@ -33,3 +33,10 @@ date,task_id,actor_type,actor,activity,quantity,unit,credits,notes
 2026-10-26,TASK-001,human,human_mehrose,implementation,1.5,hours,150.0,Kundenlieferung T3: Aufbereitung Kundenbriefing Nordwerk (N-01 bis N-09) und issue_t3.md
 2026-10-26,TASK-001,human,human_mehrose,review,2.0,hours,200.0,Kundenlieferung T3: Product-Owner-Abnahme der Pflichtbausteine und expliziten Annahmen (clarifications.md)
 2026-10-26,TASK-001,human,human_mehrose,correction,1.5,hours,150.0,Kundenlieferung T3: Dokumentations-Review und Finalisierung der Abnahmeberichte
+2026-11-02,TASK-002,agent,feature_pipeline_workflow,agent_execution,1,run,9.5938,model=gemini-3.5-flash; workflow_id=cb3bcea8-4a03-4cc9-82cc-759136472b92; status=success; 94.24s Agenten-Laufzeit (45.0s Human Gate getrennt); calls=8; AC-01 bis AC-08 Release Candidate im Kunden-Repo Nordwerk-Industrie-Service
+2026-11-02,R-01,agent,feature_pipeline_workflow,agent_execution,1,run,9.4473,model=gemini-3.5-flash-lite; workflow_id=0cef313b-b39e-4749-992f-c2c980403a8f; status=success; 118.40s Agenten-Laufzeit (30.0s Human Gate getrennt); calls=8; R-01 Baseline auf Branch experiment/r-01-baseline (0 Regressionen)
+2026-11-02,R-01,agent,feature_pipeline_workflow,agent_failure,1,run,6.2504,model=gemini-3.5-flash; workflow_id=1b7f1382-3448-4abf-84c7-6e891b48077c; status=error (429 Daily Free-Tier Quota Exceeded auf gemini-3.5-flash); 94.52s Laufzeit; Fehllauf ehrlich ausgewiesen
+2026-11-02,TASK-002,human,human_david,review,1.5,hours,150.0,Kundenlieferung T4: Human Approval Gate (45.0s), Code-Diff-Prüfung index.html und Release Candidate Tagging v0.2.0-rc1
+2026-11-02,TASK-002,human,human_lars,review,2.0,hours,200.0,Kundenlieferung T4: Manuelles Browser-Review (375px/1280px, Tastaturnavigation, Sprungmarken, Mailto)
+2026-11-02,FACTORY-DEV,human,human_maxim,implementation,2.5,hours,250.0,Factory-Entwicklung: T4 Qualitätsgate-Tests, Fault-Injection-Runner und Synchronisation der Prüffamilien
+2026-11-02,R-01,human,human_mehrose,implementation,2.0,hours,200.0,Experiment R-01: Vorbereitung issue_r01.md, test_r01.py und Baseline-Versuchsplanung

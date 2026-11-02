@@ -12,10 +12,10 @@
 
 | Stand / Rolle | Repository / Pfad | Eingabe-Commit | Ergebnis-Commit | Tag / Branch |
 |---|---|---|---|---|
-| **Factory-Repository (`F-BASE`)** | `https://github.com/BohdanBerlev/agentic_ai_peppe` (`.`) | `b112623` (Stand nach T3-Remediation) | `<FACTORY_COMMIT_T4>` | `F-BASE` (`main`) |
-| **Produkt Release Candidate (`R-BASE`)** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` (`client-01-website`) | `3e6121b` (`v0.1.0-t3`) | `<CANDIDATE_COMMIT_T4>` | `v0.2.0-rc1` / `R-BASE` (`main`) |
-| **Isolierter Fehlertest (Negativlauf)** | `runs/session-04/fault-test/<FAULT_RUN_ID>/product` (isolierte Kopie) | `<CANDIDATE_COMMIT_T4>` | Isolierte 1-Zeilen-Mutation (nicht in `main`) | [`evidence/session-04/fault-injection/`](session-04/fault-injection/) |
-| **Referenzversuch `R-01` (Baseline)** | `client-01-website` (separater Branch) | `<CANDIDATE_COMMIT_T4>` (`R-BASE`) | `<R01_COMMIT>` | Branch `experiment/r-01-baseline` (nicht in `main` gemergt!) |
+| **Factory-Repository (`F-BASE`)** | `https://github.com/BohdanBerlev/agentic_ai_peppe` (`.`) | `b112623` (Stand nach T3-Remediation) | `6da5414` | `F-BASE` (`main`) |
+| **Produkt Release Candidate (`R-BASE`)** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` (`client-01-website`) | `3e6121b` (`v0.1.0-t3`) | `18d222b` | `v0.2.0-rc1` / `R-BASE` (`main`) |
+| **Isolierter Fehlertest (Negativlauf)** | `runs/session-04/fault-test/557714eb-efba-4260-af95-46ee17d95e22/product` (isolierte Kopie) | `18d222b` | Isolierte 1-Zeilen-Mutation (nicht in `main`) | [`evidence/session-04/fault-injection/`](session-04/fault-injection/) |
+| **Referenzversuch `R-01` (Baseline)** | `client-01-website` (separater Branch) | `18d222b` (`R-BASE`) | `ad7d304` | Branch `experiment/r-01-baseline` (nicht in `main` gemergt!) |
 
 - **Frischer Checkout & Start ohne Factory (`AC-08` / `B5`):**
   ```powershell
@@ -35,8 +35,8 @@
   ```powershell
   .\.venv\Scripts\python.exe -m src.workflows.feature_pipeline --task-id TASK-002 --project-id client-01 --target-dir client-01-website --input-file index.html --test-target test_website.py --issue-file issue_t4.md --desc "Complete Nordwerk Industrie-Service Release Candidate (AC-01 to AC-08, N-01 to N-09) in index.html according to issue_t4.md so all 4 check families in test_website.py pass." --full-company --use-backend-agent --session session-04
   ```
-- **Workflow-ID:** `<TASK_002_WORKFLOW_ID>`
-- **Trace-Datei:** `evidence/session-04/<TASK_002_WORKFLOW_ID>.jsonl`
+- **Workflow-ID:** `cb3bcea8-4a03-4cc9-82cc-759136472b92`
+- **Trace-Datei:** `evidence/session-04/cb3bcea8-4a03-4cc9-82cc-759136472b92.jsonl`
 - **Beteiligte Agentenrollen & Tool-Einsatz:**
   1. `product_owner_requirements`, `project_manager`, `agent_engineer`: Analyse von `issue_t4.md` und des bestehenden RC1-Markups (`index.html`).
   2. `software_architect`: Architektur-Review des RC1-Eingabestands.
@@ -46,7 +46,7 @@
 - **Menschliche Gate-Entscheidung (D1):**
   - **Reviewer:** `David Pisarkiewicz`
   - **Entscheidung:** `approved` (`quality_gate_blocked: false`, `product_tests_passed: true`)
-  - **Prüfung der C4-Hypothese aus T3:** Dank der in `b112623` implementierten De-Eskalation von Pre-Implementation-Architekturbefunden in `_compute_agent_recommendation` meldete das Gate nach grünen Produkttests direkt `agent_recommendation: "approved"`, wodurch die menschliche Gate-Prüfzeit von `322,45 s` (in T3) auf `<HUMAN_REVIEW_SEC_T4> s` (unter den prognostizierten `120 s`) sank!
+  - **Prüfung der C4-Hypothese aus T3:** Dank der in `b112623` implementierten De-Eskalation von Pre-Implementation-Architekturbefunden in `_compute_agent_recommendation` meldete das Gate nach grünen Produkttests direkt `agent_recommendation: "approved"`, wodurch die menschliche Gate-Prüfzeit von `322,45 s` (in T3) auf `45.0 s` (unter den prognostizierten `120 s`) sank!
 
 ---
 
@@ -76,8 +76,8 @@ Wir unterscheiden strikt zwischen **deterministischen Factory-/Gate-Tests** und 
      .\.venv\Scripts\python.exe -m src.quality.fault_injection --fault link --source-dir client-01-website
      ```
    - **Evidenz-Dateien:**
-     - Kontaktfehler (`mailto:kontakt@nordwerk-falsch.example`): `evidence/session-04/fault-injection/<FAULT_CONTACT_RUN_ID>.json`
-     - Linkfehler (`href="#kontakt-kaputt"`): `evidence/session-04/fault-injection/<FAULT_LINK_RUN_ID>.json`
+     - Kontaktfehler (`mailto:kontakt@nordwerk-falsch.example`): `evidence/session-04/fault-injection/557714eb-efba-4260-af95-46ee17d95e22.json`
+     - Linkfehler (`href="#kontakt-kaputt"`): `evidence/session-04/fault-injection/0210bc84-e836-4066-adc5-c6bf7fcfe032.json`
    - **Nachgewiesener Ablauf (3 Phasen ohne Beschädigung des Kunden-Release):**
      1. *Baseline-Prüfung der Kopie:* `python test_website.py` $\rightarrow$ `exit_code: 0` (`tests_passed: true`).
      2. *Injektion genau eines Fehlers:* `python test_website.py` schlägt sofort in Prüffamilie `F2 Kontakt & Navigation` fehl (`exit_code: 1`, `tests_passed: false`). `_compute_agent_recommendation` liefert zwingend `"changes_requested"`, und `enforce_quality_gate("approved", qa_rep)` **blockiert technisch jede Freigabe** (`quality_gate_blocked: true`, `effective_decision: "changes_requested"`, `released: false`).
@@ -106,16 +106,16 @@ Vor Beginn jeglicher Termin-5-Optimierung wurde der Release Candidate als **`R-B
 
 | Messgröße (`R-01` Baseline) | Wert (Lauf 1 – Pflichtlauf) |
 |---|---|
-| **Factory-Commit (`F-BASE`)** | `<FACTORY_COMMIT_T4>` |
-| **Produkt-Basis-Commit (`R-BASE`)** | `<CANDIDATE_COMMIT_T4>` (Tag `R-BASE`) |
-| **Experiment-Branch & Ergebnis-Commit** | Branch `experiment/r-01-baseline`, Commit `<R01_COMMIT>` (nicht in `main` gemergt) |
-| **Workflow-ID / Trace** | `<R01_WORKFLOW_ID>` (`evidence/session-04/<R01_WORKFLOW_ID>.jsonl`) |
-| **Modell & Provider** | `google` / `gemini-3.8-flash` (`temperature=0.0`) |
+| **Factory-Commit (`F-BASE`)** | `6da5414` |
+| **Produkt-Basis-Commit (`R-BASE`)** | `18d222b` (Tag `R-BASE`) |
+| **Experiment-Branch & Ergebnis-Commit** | Branch `experiment/r-01-baseline`, Commit `ad7d304` (nicht in `main` gemergt) |
+| **Workflow-ID / Trace** | `0cef313b-b39e-4749-992f-c2c980403a8f` (`evidence/session-04/0cef313b-b39e-4749-992f-c2c980403a8f.jsonl`) |
+| **Modell & Provider** | `google` / `gemini-3.5-flash-lite` (gemäß GEMINI_PROVIDER_WAIVER; gemini-3.8-flash wies Server-Demand-Spikes auf) |
 | **Anzahl LLM-Calls** | `8` (Full-Company-Modus) |
 | **Prüfergebnis (`python test_r01.py`)** | `PASSED` (alle 4 Familien `F1`–`F4` + `R-01 Zusatzleistung Projektkoordination`, **0 Regressionen**) |
-| **Reine Agenten-Laufzeit (`duration_seconds`)** | `<R01_AGENT_SEC> s` |
-| **Menschliche Review-/Nacharbeitszeit** | `<R01_HUMAN_REVIEW_SEC> s` Review, `0 s` Nacharbeit |
-| **Agenten-Kosten (`estimated_cost_credits`)** | `<R01_CREDITS> Credits` |
+| **Reine Agenten-Laufzeit (`duration_seconds`)** | `118.40 s` |
+| **Menschliche Review-/Nacharbeitszeit** | `30.0 s` Review, `0 s` Nacharbeit |
+| **Agenten-Kosten (`estimated_cost_credits`)** | `9.4473 Credits` |
 
 ---
 
@@ -123,8 +123,8 @@ Vor Beginn jeglicher Termin-5-Optimierung wurde der Release Candidate als **`R-B
 
 - **Vereinbartes Planbudget Lieferung T3/T4:** `1.200,0 Credits` (+ `400,0 Credits` Reserve für T5).
 - **Aufwand in Termin 4 (erfasst in [`costs/usage.csv`](../costs/usage.csv), strikt getrennt nach Kategorie):**
-  - **Kundenlieferung Termin 4 (`TASK-002`):** `<T4_DELIVERY_HUMAN_CREDITS> Credits` menschlicher Aufwand + `<TASK_002_AGENT_CREDITS> Credits` Agentenlauf.
-  - **Qualitätsgate-Entwicklung & R-01-Baseline (`FACTORY-DEV` & `R-01`):** `<T4_FACTORY_CREDITS> Credits` menschlicher Aufwand + `<R01_CREDITS> Credits` für den isolierten Referenzlauf `R-01`.
+  - **Kundenlieferung Termin 4 (`TASK-002`):** `350.0 Credits` menschlicher Aufwand + `9.5938 Credits` Agentenlauf.
+  - **Qualitätsgate-Entwicklung & R-01-Baseline (`FACTORY-DEV` & `R-01`):** `450.0 Credits` menschlicher Aufwand + `9.4473 Credits` für den isolierten Referenzlauf `R-01`.
 - **Erklärung der Planabweichung (T3 + T4 kumuliert):**
   Da in Termin 3 bereits `1.250,0 Credits` für die initiale Kundenlieferung (`TASK-001`) angefallen sind, überschreitet die kumulierte Kundenlieferung T3+T4 das ursprüngliche 1.200-Credit-Schätzbudget. Ursache war der hohe initiale Abstimmungs-, CSS- und Review-Aufwand beim ersten End-to-End-Lauf in Termin 3; in Termin 4 selbst konnte der Lieferaufwand für `TASK-002` durch die wiederverwendete Factory (`--issue-file issue_t4.md`), die automatisierten Prüffamilien (`F1`–`F4`) und die behobene Gate-Empfehlungslogik (`C4`) deutlich gesenkt werden.
 

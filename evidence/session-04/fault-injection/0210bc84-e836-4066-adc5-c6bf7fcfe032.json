@@ -1,0 +1,55 @@
+{
+  "record_type": "controlled_fault_experiment",
+  "run_id": "0210bc84-e836-4066-adc5-c6bf7fcfe032",
+  "session": "session-04",
+  "fault": "link",
+  "started_at": "2026-11-02T09:16:31",
+  "isolated_copy": "runs\\session-04\\fault-test\\0210bc84-e836-4066-adc5-c6bf7fcfe032\\product",
+  "source_dir": "c:\\Users\\Lars_Boos\\Documents\\Entwicklung\\Nordwerk-Industrie-Service",
+  "fault_diff": [
+    "--- index.html (candidate)",
+    "+++ index.html (fault)",
+    "@@ -18 +18 @@",
+    "-          <li><a href=\"#kontakt\">Kontakt</a></li>",
+    "+          <li><a href=\"#kontakt-kaputt\">Kontakt</a></li>"
+  ],
+  "baseline_check": {
+    "tests_passed": true,
+    "exit_code": 0,
+    "command": "python test_website.py"
+  },
+  "negative_run": {
+    "tests_executed": true,
+    "tests_passed": false,
+    "exit_code": 1,
+    "command": "python test_website.py",
+    "output_excerpt": "PASSED       F1 Pflichtinhalt (AC-01..AC-04)\nFAILED (2)   F2 Kontakt & Navigation (AC-04, AC-05)\n             - [F2] Navigation (<nav>) enthaelt keinen Link auf #kontakt\n             - [F2] Interner Link '#kontakt-kaputt' hat kein Ziel (id fehlt)\nPASSED       F3 Lokale Verweise & Assets / PHP-frei (AC-05, AC-08)\nPASSED       F4 Bedienbarkeit statisch (AC-06/AC-07)\nERGEBNIS: FEHLGESCHLAGEN",
+    "gate": {
+      "llm_status_assumed": "approved",
+      "human_decision_attempted": "approved",
+      "agent_recommendation": "changes_requested",
+      "effective_decision": "changes_requested",
+      "quality_gate_blocked": true,
+      "released": false
+    }
+  },
+  "corrected_run": {
+    "tests_executed": true,
+    "tests_passed": true,
+    "exit_code": 0,
+    "command": "python test_website.py",
+    "output_excerpt": "PASSED       F1 Pflichtinhalt (AC-01..AC-04)\nPASSED       F2 Kontakt & Navigation (AC-04, AC-05)\nPASSED       F3 Lokale Verweise & Assets / PHP-frei (AC-05, AC-08)\nPASSED       F4 Bedienbarkeit statisch (AC-06/AC-07)\nERGEBNIS: ALLE PRUEFFAMILIEN BESTANDEN",
+    "gate": {
+      "llm_status_assumed": "approved",
+      "human_decision_attempted": "approved",
+      "agent_recommendation": "approved",
+      "effective_decision": "approved",
+      "quality_gate_blocked": false,
+      "released": true
+    }
+  },
+  "expected_behaviour_observed": true,
+  "status": "passed",
+  "llm_used": false,
+  "note": "Deterministischer Gate-Nachweis; realer LLM-Lauf auf der Fehlerkopie separat ausgewiesen."
+}

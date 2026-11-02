@@ -226,7 +226,8 @@ def build_backend_graph(llm: Any | None = None):
             target_file = state.get("target_file", "src/app/main.py")
 
             if new_code:
-                write_repository_text_file(target_file, new_code)
+                base_dir = state.get("target_dir") or state.get("base_dir")
+                write_repository_text_file(target_file, new_code, base_dir=base_dir)
                 code_to_keep = new_code
             else:
                 code_to_keep = state.get("current_code", "")

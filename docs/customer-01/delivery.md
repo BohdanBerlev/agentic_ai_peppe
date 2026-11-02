@@ -13,13 +13,13 @@ Nordwerk Industrie-Service erhält einen schnellen, modernen und barrierearmen W
 
 ### 2. Commit-Stände, Hashes & Nachvollziehbarkeit
 - **Produkt-Repository (`client-01-website`):**
-  - **Eingabe-Commit vor Agenten-Lauf:** `a93442b` (enthielt das initiale HTML-Skeleton und Spezifikation `issue_t3.md`)
-  - **Geprüfter Ergebnis-Commit nach Agenten-Lauf & UTF-8-Härtung:** `5e46bcb`
+  - **Eingabe-Commit vor Agenten-Lauf:** `cbbf7a9` (enthielt das initiale HTML-Skeleton und Spezifikation `issue_t3.md`)
+  - **Geprüfter Ergebnis-Commit nach Agenten-Lauf & UTF-8-Härtung:** `3e6121b` (Agent-Output `c952e98` + PHP-RCE-Guardrail)
   - **Release-Tag:** `v0.1.0-t3`
   - **Verifizierte SHA-256 Prüfsummen:**
-    - `client-01-website/index.html`: `4bfc474a5412158e9d5d4b5c9365a758436f60342a4cad963aaa5f3e18e155e2`
-    - `client-01-website/styles.css`: `24822a903d848bcffb61cf68a943dd179ce4d486720f1f7c7f5ef6ccaad9f8f8`
-    - `client-01-website/test_website.py`: `5103a20e5d758f180ac0707d5695b8e472bea8262a7337edd7d3eaeecb83ff15`
+    - `client-01-website/index.html`: `f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202`
+    - `client-01-website/styles.css`: `d7c2e41c5314726d680e28957a4667e0c1a45c9bffb319d329902eaaaa4d1aa0`
+    - `client-01-website/test_website.py`: `41a920b54603ae70f1eefc47d58ff9018315216b3af05313db73280461b910cb`
 - **Factory-Repository (`agentic_ai_peppe`):**
   - **Factory-Commit beim Lauf:** `7351867`
   - **Liefer-/Evidenz-Commit:** Auf `main`.
