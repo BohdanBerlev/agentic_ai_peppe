@@ -42,7 +42,7 @@
 
 ## Schritt-für-Schritt To-do-Liste für Termin 4
 
-### [ ] Schritt 0 (10:00–10:15 Uhr): Git-Stand im Team synchronisieren
+### [x] Schritt 0 (10:00–10:15 Uhr): Git-Stand im Team synchronisieren (ERLEDIGT)
 Alle Teammitglieder holen sich den aktuellen Stand von `main` in beiden Repositories:
 
 ```powershell
@@ -59,7 +59,7 @@ git -C client-01-website rev-parse --short HEAD
 
 ---
 
-### [ ] Schritt 1 (10:20–11:15 Uhr): Echten Agenten-Lauf für `TASK-002` ausführen (Kriterien A1, A2, B1, B2, L4.1)
+### [x] Schritt 1 (10:20–11:15 Uhr): Echten Agenten-Lauf für `TASK-002` ausführen (Kriterien A1, A2, B1, B2, L4.1) (ERLEDIGT: `cb3bcea8-4a03-4cc9-82cc-759136472b92`)
 
 1. **Pipeline-Befehl im Hauptverzeichnis (`agentic_ai_peppe`) starten:**
    ```powershell
@@ -87,7 +87,7 @@ git -C client-01-website rev-parse --short HEAD
 
 ---
 
-### [ ] Schritt 2 (11:15–11:50 Uhr): Browser-Prüfung (375 px / 1280 px & Tastaturfokus) + Release Candidate taggen (`v0.2.0-rc1` & `R-BASE`) (Kriterien B3, B4, B5, D1)
+### [x] Schritt 2 (11:15–11:50 Uhr): Browser-Prüfung (375 px / 1280 px & Tastaturfokus) + Release Candidate taggen (`v0.2.0-rc1` & `R-BASE`) (Kriterien B3, B4, B5, D1) (ERLEDIGT: `18d222b`)
 
 1. **Lokalen Webserver ohne Factory starten:**
    ```powershell
@@ -112,7 +112,7 @@ git -C client-01-website rev-parse --short HEAD
 
 ---
 
-### [ ] Schritt 3 (12:30–13:15 Uhr): Kontrollierte Fehlersituation am Qualitätsgate durchführen (Kriterien A3, A4, L4.2, L4.3)
+### [x] Schritt 3 (12:30–13:15 Uhr): Kontrollierte Fehlersituation am Qualitätsgate durchführen (Kriterien A3, A4, L4.2, L4.3) (ERLEDIGT: `557714eb` & `0210bc84`)
 
 Jetzt weist ihr nach, dass ein gezielter Kontakt- bzw. Linkfehler in einer isolierten Testkopie von `test_website.py` erkannt wird, das Gate die Freigabe verhindert (`quality_gate_blocked: true`, `released: false`) und nach der Reparatur wieder besteht:
 
@@ -130,7 +130,7 @@ Jetzt weist ihr nach, dass ein gezielter Kontakt- bzw. Linkfehler in einer isoli
 
 ---
 
-### [ ] Schritt 4 (13:30–14:15 Uhr): Ausgangsversuch `R-01` auf `R-BASE` mit `F-BASE` sichern (Kriterien C1, C3, C4, L4.4)
+### [x] Schritt 4 (13:30–14:15 Uhr): Ausgangsversuch `R-01` auf `R-BASE` mit `F-BASE` sichern (Kriterien C1, C3, C4, L4.4) (ERLEDIGT: `0cef313b-b39e-4749-992f-c2c980403a8f`, Commit `ad7d304`)
 
 > **WICHTIG:** `R-01` ist eine isolierte Referenzaufgabe für den Vergleich mit Termin 5. Das Ergebnis von `R-01` gehört auf den separaten Branch `experiment/r-01-baseline` und darf **nicht** in den Kunden-Release (`main`) gemergt werden!
 
@@ -161,7 +161,7 @@ Jetzt weist ihr nach, dass ein gezielter Kontakt- bzw. Linkfehler in einer isoli
 
 ---
 
-### [ ] Schritt 5 (14:35–15:00 Uhr): Evidenz, Browser-Review & Kosten finalisieren und pushen (Kriterien C2, D1, D2)
+### [x] Schritt 5 (14:35–15:00 Uhr): Evidenz, Browser-Review & Kosten finalisieren und pushen (Kriterien C2, D1, D2) (ERLEDIGT)
 
 *(Tipp: Ihr könnt an dieser Stelle einfach euren KI-Assistenten bitten: „Lies die neuen Traces in `evidence/session-04/` und die Git-Commits aus und fülle alle Platzhalter in `evidence/session-04.md`, `docs/customer-01/browser_review_t4.md` und `costs/usage.csv` aus!“)*
 
