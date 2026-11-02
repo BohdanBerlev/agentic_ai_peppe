@@ -17,9 +17,10 @@ Nordwerk Industrie-Service erhält einen schnellen, modernen und barrierearmen W
   - **Geprüfter Ergebnis-Commit nach Agenten-Lauf & UTF-8-Härtung:** `3e6121b` (Agent-Output `c952e98` + PHP-RCE-Guardrail)
   - **Release-Tag:** `v0.1.0-t3`
   - **Verifizierte SHA-256 Prüfsummen:**
-    - `client-01-website/index.html`: `f65fe5984f3bc185e0979660334f766b7578fc9ad288b7703fcb3504c1e58202`
-    - `client-01-website/styles.css`: `d7c2e41c5314726d680e28957a4667e0c1a45c9bffb319d329902eaaaa4d1aa0`
+    - `client-01-website/index.html`: `b3cf793ce3a1ee7b3eda042f4a9a17e5abde88c1abb7336d962f8e3fb3bfb7cf`
+    - `client-01-website/styles.css`: `d7ac76b8b3015f6fb9e9bcd648d71bc54ce8cea023935672f8f0005612e85a40`
     - `client-01-website/test_website.py`: `41a920b54603ae70f1eefc47d58ff9018315216b3af05313db73280461b910cb`
+    - Nachrechnen im Produkt-Repo: `git show v0.1.0-t3:index.html | shasum -a 256` (Werte aus dem Git-Objekt, LF-Zeilenenden; ein Windows-Checkout mit CRLF ergibt andere Werte)
 - **Factory-Repository (`agentic_ai_peppe`):**
   - **Factory-Commit beim Lauf:** `7351867`
   - **Liefer-/Evidenz-Commit:** Auf `main`.
