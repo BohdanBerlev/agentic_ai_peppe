@@ -70,51 +70,50 @@ git diff --stat 6da5414 5a146a3 -- src
 | **Factory F-BASE** | `https://github.com/BohdanBerlev/agentic_ai_peppe` | `6da5414` | Tag `F-BASE` → `5a146a3` |
 | **Factory F-NEW-v1.0** | `https://github.com/BohdanBerlev/agentic_ai_peppe` | `5a146a3` (F-BASE) | `8859e1d` (R-NEW-Lauf) – Tag `F-NEW-v1.0` noch nicht gesetzt |
 | **Produkt R-BASE** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` | `18d222b` | Tag `v0.2.0-rc1` / `R-BASE` |
-| **Produkt CR-01** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` | `18d222b` (Basis) | `c4fbdba` – Tag `CR-01-v1.0` |
+| **Produkt CR-01** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` Branch `cr-01-factory` | `7805e3b` (= `v0.2.0-rc1` + README) | `263d007` – Tag `CR-01-v1.0` noch nicht gesetzt |
 | **R-01 Baseline** | `client-01-website` Branch `experiment/r-01-baseline` | `18d222b` | Commit `ad7d304` |
 
 ---
 
-## 2. Kundenänderung CR-01: Englische Landing-Page (A1, A2, B1–B6)
+## 2. Kundenänderung CR-01: Englische Ansicht und zusätzliche Zielgruppe (A1, A2, A3, B1–B3)
 
-### Issue & Impact-Analyse
+### Issue, Basis und Auswirkungsanalyse
 
-- **Issue-Datei:** [`client-01-website/issue_cr01.md`](../client-01-website/issue_cr01.md)
-- **Geänderte Dateien:**
-  - `client-01-website/index.html` – Zielgruppe „Technische Einkaufsabteilungen" + EN-Sprachschalter hinzugefügt
-  - `client-01-website/index_en.html` – **neu** – vollständige englische Landing-Page
-  - `client-01-website/test_cr01.py` – **neu** – CR-01-spezifische Testfälle EN-01..DE-11
+- **Issue mit Auswirkungsanalyse:** `issue_cr01.md` im Produkt-Repo (Branch `cr-01-factory`), mit den wörtlichen Pflichtinhalten aus dem Aufgabenblatt Termin 5.
+- **Basis:** `7805e3b` = Release Candidate T4 `v0.2.0-rc1` (`18d222b`) + README-Doku. Gleiche zentrale Factory wie R-NEW: `94ed092` (Code = F-NEW `8859e1d`), Modell `gemini-3.5-flash-lite`.
+- **Prüfskripte:** `test_cr01_en.py` (Lauf A), `test_cr01.py` (Lauf B und Endabnahme), `test_website.py` (Regression AC-01..AC-08).
+- Die frühere manuell erstellte Fassung (`c4fbdba` auf Branch `Vorbereitung-Termin-5`) wurde nicht verwendet. Sie wich bei mehreren Pflichttexten ab („Send request“ statt „Request information“, „Technical procurement“ statt „Technical purchasing departments“, Hinweis „Fictional company …“ fehlte).
 
-### Akzeptanzprüfung CR-01
+### Factory-Läufe (echte LLM-Läufe, Full-Company-Modus mit Backend-Agent)
 
-| AC | Anforderung | Prüfskript | Status |
-|----|------------|------------|--------|
-| **AC-01..08** | Regressionsschutz (deutsche View, N-01..N-09) | `test_website.py` F1–F4 | ✅ PASSED |
-| **EN-01** | `lang="en"` in `index_en.html` | `test_cr01.py` | ✅ PASSED |
-| **EN-02** | Titel „Nordwerk Industrie-Service" | `test_cr01.py` | ✅ PASSED |
-| **EN-03** | Englischer Hero-Text vorhanden | `test_cr01.py` | ✅ PASSED |
-| **EN-04** | „Project Coordination" Karte (R-01 auf EN) | `test_cr01.py` | ✅ PASSED |
-| **EN-05** | „Technical procurement departments" in EN-View | `test_cr01.py` | ✅ PASSED |
-| **EN-06** | `mailto:kontakt@nordwerk.example` + „Send request" | `test_cr01.py` | ✅ PASSED |
-| **EN-07** | Link zur deutschen View (`href="index.html"`) | `test_cr01.py` | ✅ PASSED |
-| **EN-08** | Viewport-Meta vorhanden | `test_cr01.py` | ✅ PASSED |
-| **EN-09** | `styles.css` eingebunden | `test_cr01.py` | ✅ PASSED |
-| **DE-10** | „Technische Einkaufsabteilungen" in `index.html` | `test_cr01.py` | ✅ PASSED |
-| **DE-11** | Link zur EN-View (`href="index_en.html"`) in DE-Nav | `test_cr01.py` | ✅ PASSED |
+| Lauf | Zieldatei | Workflow / Trace | Agenten-Laufzeit | Kosten | Tests | Freigabe |
+|---|---|---|---|---|---|---|
+| A | `index_en.html` | [`52b69365-3d49-4bcd-9c4d-f51ab8c136e7`](session-05/52b69365-3d49-4bcd-9c4d-f51ab8c136e7.jsonl) | 43,53 s | 8,6905 Credits | `test_cr01_en.py` Exit 0 | Mehrose Farooq, `approved` |
+| B | `index.html` | [`c0ee2cc3-4031-4ce9-8188-d37da99a1583`](session-05/c0ee2cc3-4031-4ce9-8188-d37da99a1583.jsonl) | 42,45 s | 8,7329 Credits | `test_cr01.py` + `test_website.py` Exit 0 | Mehrose Farooq, `approved` |
 
-### Browser-Review Anforderungen (375 × 1280 px & Tastatur-Navigation)
+### Produkt-Commits (Branch `cr-01-factory`)
 
-- **375 px Breite:** `viewport` meta vorhanden, CSS responsive via `max-width` / `flex-wrap` (wie deutsche View)
-- **1280 px Breite:** Gleiche CSS-Datei (`styles.css`) wie deutsche View – bereits in T4 validiert
-- **Tastatur-Navigation:** `:focus-visible` Styles aus `styles.css` gelten für beide Views
+| Commit | Inhalt | Urheber |
+|---|---|---|
+| `316b5d4` | Issue, Tests, leeres Starter-Gerüst `index_en.html` | Mensch (Vorbereitung) |
+| `5227307` | englische Ansicht `index_en.html` | Factory-Lauf A |
+| `263d007` | `index.html`: Zielgruppe „Technische Einkaufsabteilungen“ + Sprachlink „English“ (2 Zeilen) | Factory-Lauf B |
 
-### Release-Tag CR-01
+### Menschliche Eingriffe
 
-```bash
-# Im client-01-website Repo (nach Push):
-git tag CR-01-v1.0
-git push origin CR-01-v1.0
-```
+- Issue, Prüfskripte und Starter-Gerüst wurden von Menschen vorbereitet (Commit `316b5d4`).
+- Beide Läufe wurden am Human Gate geprüft und freigegeben (Mehrose Farooq).
+- Am Agenten-Ergebnis wurde nichts von Hand geändert.
+
+### Akzeptanz
+
+| Prüfung | Ergebnis |
+|---|---|
+| F1–F4 Regression (AC-01..AC-08) | ✅ PASSED |
+| CR-01 EN: alle Pflichttexte, `lang="en"`, `<title>`, Viewport, Kontakt „Request information“, Sprachwechsel, lokale Verweise | ✅ PASSED |
+| CR-01 DE: „Technische Einkaufsabteilungen“ + Link auf `index_en.html` | ✅ PASSED |
+| Browser-Review 375 px / 1280 px und Tastatur, beide Ansichten | ⬜ offen (Mensch, Termin 5) |
+| Tag `CR-01-v1.0` | ⬜ offen |
 
 ---
 
