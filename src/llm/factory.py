@@ -1,4 +1,7 @@
+# Factory version: F-NEW-v1.0 (2026-11-08)
+import logging
 import os
+from functools import lru_cache
 from typing import Any
 
 from langchain_ollama import ChatOllama, OllamaEmbeddings
@@ -6,7 +9,11 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from src.app.settings import Settings, get_settings
 
+_logger = logging.getLogger(__name__)
 
+
+@lru_cache(maxsize=4)
+# F-NEW: Ergebnis wird gecacht – spart HTTP-Roundtrip bei mehreren Agents im selben Lauf
 def resolve_google_model(requested_model: str | None, api_key: str | None) -> str:
     """Resolve an active Google Gemini model for generateContent."""
     preferred_models = ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"]
@@ -111,11 +118,12 @@ def get_chat_model(
             os.environ["GEMINI_API_KEY"] = api_key
 
         model_name = resolve_google_model(settings.llm_model, api_key)
-        print(f"[llm] Google Gemini Modell aufgeloest: '{model_name}'", flush=True)
+        _logger.info("[factory] Google Gemini model resolved: %s (cached=%s)", model_name, resolve_google_model.cache_info().currsize > 0 if hasattr(resolve_google_model, 'cache_info') else False)
+        print(f"🔧 [F-NEW] Google Gemini Modell aufgelöst: '{model_name}'", flush=True)
 
         # Drosselung: max 15 Requests pro Minute für die Free-API (1 Request alle 4 Sekunden)
         rate_limiter = InMemoryRateLimiter(
-            requests_per_second=0.08, 
+            requests_per_second=0.25, 
             check_every_n_seconds=0.1, 
             max_bucket_size=1
         )
@@ -124,7 +132,7 @@ def get_chat_model(
             rate_limiter=rate_limiter,
             temperature=settings.llm_temperature,
             timeout=settings.llm_timeout_seconds,
-            max_retries=6,
+            max_retries=2,
             api_key=api_key,
         )
 
