@@ -70,9 +70,9 @@ git show 5a146a3..6da5414 --stat
 | Stand / Rolle | Repository / Pfad | Eingabe-Commit | Ergebnis-Commit / Tag |
 |---|---|---|---|
 | **Factory F-BASE** | `https://github.com/BohdanBerlev/agentic_ai_peppe` | `6da5414` | Tag `F-BASE` → `5a146a3` |
-| **Factory F-NEW-v1.0** | `https://github.com/BohdanBerlev/agentic_ai_peppe` | `6da5414` (Basis) | Tag `F-NEW-v1.0` (Session-5-Commit) |
+| **Factory F-NEW-v1.0** | `https://github.com/BohdanBerlev/agentic_ai_peppe` | `6da5414` (Basis) | `f803ece` – Tag `F-NEW-v1.0` |
 | **Produkt R-BASE** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` | `18d222b` | Tag `v0.2.0-rc1` / `R-BASE` |
-| **Produkt CR-01** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` | `18d222b` (Basis) | Tag `CR-01-v1.0` (Session-5-Commit) |
+| **Produkt CR-01** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` | `18d222b` (Basis) | `c4fbdba` – Tag `CR-01-v1.0` |
 | **R-01 Baseline** | `client-01-website` Branch `experiment/r-01-baseline` | `18d222b` | Commit `ad7d304` |
 
 ---

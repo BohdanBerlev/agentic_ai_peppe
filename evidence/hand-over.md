@@ -54,8 +54,8 @@
 
 | Repo | Tag | Commit | Beschreibung |
 |------|-----|--------|-------------|
-| Factory | `F-NEW-v1.0` | *(wird nach Commit gesetzt)* | lru_cache + Logging |
-| Produkt | `CR-01-v1.0` | *(wird nach Commit gesetzt)* | EN-Page + DE-Erweiterung |
+| Factory | `F-NEW-v1.0` | `f803ece` | lru_cache + Logging |
+| Produkt | `CR-01-v1.0` | `c4fbdba` | EN-Page + DE-Erweiterung |
 
 ---
 
