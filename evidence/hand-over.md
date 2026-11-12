@@ -25,7 +25,7 @@
 | Prüfung / Nachweis | Ergebnis | Beleg / Artefakt |
 | :--- | :--- | :--- |
 | **`@lru_cache(maxsize=4)` auf `resolve_google_model()` & Rate-Limiter-Tuning** | ✅ Implementiert & getestet | [`src/llm/factory.py`](../src/llm/factory.py), Unit-Test [`tests/test_factory_fnew_t5.py`](../tests/test_factory_fnew_t5.py) (`76 passed, 2 skipped` in [`evidence/session-05/pytest.xml`](session-05/pytest.xml)) |
-| **Live-Vergleichslauf `R-NEW` auf `R-BASE` (`18d222b`)** | ✅ `PASSED` (`44,48 s` vs. `118,40 s` = **−62,4 %** Laufzeit, 0 Regressionen) | Trace [`24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl`](session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl), Auswertung [`evidence/R01-comparison.md`](R01-comparison.md), Freigabe: **Mehrose Farooq** |
+| **Live-Vergleichslauf `R-NEW` auf `R-BASE` (`18d222b`)** | ✅ `PASSED` (`44,48 s` vs. `118,40 s` = **−62,4 %** Laufzeit, 0 Regressionen) | Trace [`24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl`](session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl), Auswertung [`evidence/R01-comparison.md`](R01-comparison.md), Freigabe: **Mehrose Farooq** · Isolierter Produkt-Commit [`e301375`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew) (Branch `experiment/r-01-fnew`) & Patch [`evidence/r01-fnew.patch`](r01-fnew.patch) |
 
 ---
 
@@ -55,17 +55,24 @@
 
 | Repository | Release-Tag | Ziel-Commit | Inhalt |
 | :--- | :--- | :--- | :--- |
-| **Produkt-Repo** (`client-01-website`) | **`CR-01-v1.0`** & **`v0.3.0`** | `main` (inkl. Factory-Commits `5227307` & `263d007`) | Deutsche & englische Website (`index.html`, `index_en.html`, `styles.css`), Produkttests (`test_website.py`, `test_cr01.py`), `SR-01`-Antwort & Übergabe-Doku |
-| **Factory-Repo** (`agentic_ai_peppe`) | **`F-NEW-v1.0`** | `main` (inkl. `src/llm/factory.py` & `tests/test_factory_fnew_t5.py`) | Factory mit `@lru_cache` & Rate-Limiter-Optimierung, `R-01`-Vergleich, `SR-01`-Analyse, `pytest.xml` & Gesamtkostenbilanz T3–T5 |
+| **Produkt-Repo** ([`Nordwerk-Industrie-Service-Website`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website)) | **`CR-01-v1.0`** & **`v0.3.0`** | `main` (inkl. Factory-Commits `5227307` & `263d007`) | Deutsche & englische Website ([`index.html`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/index.html), [`index_en.html`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/index_en.html), [`styles.css`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/styles.css)), Produkttests ([`test_website.py`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/test_website.py), [`test_cr01.py`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/test_cr01.py)), `SR-01`-Antwort & Übergabe-Doku |
+| **Produkt-Repo (R-01 Nachher)** | Branch [`experiment/r-01-fnew`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew) | Commit **`e301375`** | Isoliertes R-01-Ergebnis mit Factory `F-NEW-v1.0` auf Basis `R-BASE` (`18d222b`) |
+| **Factory-Repo** ([`agentic_ai_peppe`](https://github.com/BohdanBerlev/agentic_ai_peppe)) | **`F-NEW-v1.0`** | `main` (inkl. `src/llm/factory.py` & `tests/test_factory_fnew_t5.py`) | Factory mit `@lru_cache` & Rate-Limiter-Optimierung, `R-01`-Vergleich, `SR-01`-Analyse, `pytest.xml`, Patch [`evidence/r01-fnew.patch`](r01-fnew.patch) & Gesamtkostenbilanz T3–T5 (inkl. 111 CI-Läufe) |
 
 ---
 
-## 5. Übergabe, Start-/Test-Anleitung & Wartungsverantwortung
+## 5. Übergabe, Start-/Test-Anleitung, Kostenbilanz & Wartungsverantwortung
 
 - **Vollständige Start-, Test- und Deployment-Anleitung:** [`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md)
-- **Schnellstart ohne Factory:**
+- **Gemini-Ausnahmegenehmigung:** [`docs/GEMINI_PROVIDER_WAIVER.md`](../docs/GEMINI_PROVIDER_WAIVER.md) (formell genehmigt durch Kursleitung)
+- **Bereinigte Gesamtkosten T3–T5 ([`costs/usage.csv`](../costs/usage.csv)):**
+  - **Kundenlieferung T3–T5:** `3.307,92 Credits` (`3.250,00 Cr.` menschliche Arbeit + `57,92 Cr.` LLM-Agentenläufe).
+  - **Experiment R-01 (T4/T5):** `931,31 Credits` (`900,00 Cr.` Mensch + `31,31 Cr.` Agentenläufe).
+  - **Factory-Entwicklung (T3–T5):** `1.961,00 Credits` (`1.850,00 Cr.` Mensch + `111,00 Cr.` für 111 GitHub Actions CI-Läufe à 1 Credit).
+  - **Gesamtsumme aller Aktivitäten T3–T5:** **`6.200,23 Credits`**.
+- **Schnellstart des Kundenprodukts (ohne Factory):**
   ```powershell
-  cd client-01-website
+  # Im Produkt-Repository (Nordwerk-Industrie-Service-Website):
   python test_website.py
   python test_cr01.py
   python -m http.server 8000

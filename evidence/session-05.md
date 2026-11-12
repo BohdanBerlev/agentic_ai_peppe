@@ -8,7 +8,19 @@
 
 ---
 
-## 0. Vollständige Aufarbeitung des Feedbacks aus Termin 4 (`92/100 Punkte`)
+## 0. Aufarbeitung der Dozenten-Feedbacks (Termin 4 & Termin 5)
+
+### 0.1 Aufarbeitung des Feedbacks aus Termin 5 (`90/100 Punkte`)
+
+Referenz: [`docs/Review/Feedback_Session_05_Team_3.md`](../docs/Review/Feedback_Session_05_Team_3.md)
+
+| Feedback-Punkt aus Termin 5 | Durchgeführte Lösung & Verweis | Status |
+| :--- | :--- | :--- |
+| **1. Experimente vollständig reproduzierbar machen** | Code-Freeze verbindlich vor dem Lauf etabliert (Commit `f803ece` / Tag `F-NEW-v1.0`). Das isolierte `R-01`-Nachher-Ergebnis ist als eigenständiger Branch [`experiment/r-01-fnew`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew) (Commit **`e301375`**) im Produkt-Repo und als Patchfile [`evidence/r01-fnew.patch`](r01-fnew.patch) gesichert. Methodische Aufschlüsselung der Parameterkonfundierung (~59,5 s Rate-Limiter vs. ~14,4 s Cache/HTTP) und verbindliche Single-Variable-Regel für Folgeexperimente in [`evidence/R01-comparison.md`](R01-comparison.md) verankert. | ✅ **Erledigt** |
+| **2. Cost Engineering korrigieren (1 Credit je CI-Lauf & CSV-Maskierung)** | Alle 111 GitHub-Actions-Läufe in [`costs/usage.csv`](../costs/usage.csv) mit jeweils 1,0 Credit bewertet (53 CI test runs = 53 Cr., 47 Agent Issue Reviewer failures = 47 Cr., 11 Agent Issue Reviewer successes = 11 Cr. $\rightarrow$ Summe: **111,0 Credits**). Alle 17 CSV-Zeilen mit nicht maskierten Kommas wurden mit doppelten Anführungszeichen umschlossen und sind nun nachweislich fehlerfrei maschinenlesbar. Gesamtkostenbilanz in Abschnitt 6 auf **6.200,23 Credits** korrigiert. | ✅ **Erledigt** |
+| **3. Übergabe kundengerecht und nachweisbar machen** | Die `SR-01`-Kundenantwort in [`evidence/SR-01-response.md`](SR-01-response.md) wurde von 1.108 auf 511 Wörter (~1 Seite) gestrafft, ohne Pflichtkriterien einzubüßen. Alle kaputten relativen Links auf das Produkt-Repo wurden auf die offiziellen GitHub-Pfade ([`Nordwerk-Industrie-Service-Website`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website)) korrigiert. Der Genehmigungsstatus der Gemini-Ausnahmegenehmigung wurde in [`docs/GEMINI_PROVIDER_WAIVER.md`](../docs/GEMINI_PROVIDER_WAIVER.md) explizit als durch die Kursleitung genehmigt dokumentiert. | ✅ **Erledigt** |
+
+### 0.2 Aufarbeitung des Feedbacks aus Termin 4 (`92/100 Punkte`)
 
 Referenz: [`docs/Review/Feedback_Session_04_Team_3.md`](../docs/Review/Feedback_Session_04_Team_3.md)
 
@@ -27,6 +39,7 @@ Referenz: [`docs/Review/Feedback_Session_04_Team_3.md`](../docs/Review/Feedback_
 | **Produkt-Basis aus Termin 4 (`R-BASE`)** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` (`main`) | `fef6a55` | **`18d222b`** (Tags: **`v0.2.0-rc1`**, **`R-BASE`**) / `7805e3b` (inkl. README) |
 | **Produkt-Release Termin 5 (`CR-01`)** | `https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website` (`main` & `cr-01-factory`) | `7805e3b` / `316b5d4` | Agent-Commits **`5227307`** (Lauf A: `index_en.html`) $\rightarrow$ **`263d007`** (Lauf B: `index.html`) $\rightarrow$ Release-Commit **`f2feebb`** (Tags: **`CR-01-v1.0`**, **`v0.3.0`**) |
 | **`R-01` Baseline-Ergebnis (Termin 4)** | `Nordwerk-Industrie-Service-Website` (`origin/experiment/r-01-baseline`) | `18d222b` (`R-BASE`) | **`ad7d304`** (isoliert vom Kunden-Release `main`) |
+| **`R-01` Nachher-Ergebnis (Termin 5)** | [`Nordwerk-Industrie-Service-Website`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website) ([`experiment/r-01-fnew`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew)) | `18d222b` (`R-BASE`) | **`e301375`** (Branch `experiment/r-01-fnew`, Patch [`evidence/r01-fnew.patch`](r01-fnew.patch)) |
 | **Factory-Baseline (`F-BASE`, Termin 4)** | `https://github.com/BohdanBerlev/agentic_ai_peppe` (`main`) | `6da5414` | **`5a146a3`** (Tag: **`F-BASE`**) |
 | **Factory-Verbesserung (`F-NEW-v1.0`, Termin 5)** | `https://github.com/BohdanBerlev/agentic_ai_peppe` (`main`) | `5a146a3` (`F-BASE`) | Code-Commit `f803ece` / `0da8ba0` + Test `test_factory_fnew_t5.py` (Tag: **`F-NEW-v1.0`**) |
 
@@ -35,7 +48,7 @@ Referenz: [`docs/Review/Feedback_Session_04_Team_3.md`](../docs/Review/Feedback_
 ## 2. Kundenänderung `CR-01`: Englische Einstiegsseite & Zielgruppen-Erweiterung (`A1`–`A3`, `B1`–`B3`, `L5.1`)
 
 ### 2.1 Änderungs-Issue & Auswirkungsanalyse (`A1`)
-- **Spezifikation im Produkt-Repo:** [`client-01-website/issue_cr01.md`](../client-01-website/issue_cr01.md) (Commit `316b5d4`, ausgehend vom Termin-4-Release-Candidate `7805e3b` / `v0.2.0-rc1`).
+- **Spezifikation im Produkt-Repo:** [`issue_cr01.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/issue_cr01.md) (Commit `316b5d4`, ausgehend vom Termin-4-Release-Candidate `7805e3b` / `v0.2.0-rc1`).
 - **Auswirkungsanalyse:**
   - **Neu:** `index_en.html` (`<html lang="en">`) mit allen wörtlichen Pflichtinhalten aus dem Aufgabenblatt Termin 5 (*Nordwerk Industrie-Service*, *Practical support for your technical operations.*, *Maintenance planning*, *Spare parts coordination*, *Operational documentation*, *Technical purchasing departments*, *Request information* $\rightarrow$ `mailto:kontakt@nordwerk.example`, *Fictional company – HAW Hamburg course project. No real offers or contact.*, Rücklink `Deutsch` auf `index.html`).
   - **Geändert:** `index.html` erhält die zusätzliche Zielgruppe *„Technische Einkaufsabteilungen“* unter `#zielgruppen` sowie den Sprachwechsel-Link `<a href="index_en.html" hreflang="en" lang="en">English</a>` in der `<nav>`.
@@ -73,7 +86,7 @@ Beide Läufe wurden mit derselben zentralen Factory (`src.workflows.feature_pipe
 
 ## 3. Sicherheitsanfrage `SR-01` & Komponentenübersicht (`B4`, `B5`, `D1`, `L5.3`)
 
-- **Kundenantwort (max. 1 Seite, inkl. Komponentenübersicht):** **[`evidence/SR-01-response.md`](SR-01-response.md)** (identisch im Produkt-Repo unter [`client-01-website/SR-01-response.md`](../client-01-website/SR-01-response.md)).
+- **Kundenantwort (max. 1 Seite, inkl. Komponentenübersicht):** **[`evidence/SR-01-response.md`](SR-01-response.md)** (identisch im Produkt-Repo unter [`SR-01-response.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/SR-01-response.md)).
 - **Technische Detailanalyse:** **[`docs/SECURITY_SR-01.md`](../docs/SECURITY_SR-01.md)**.
 - **Abgedeckte Pflichtpunkte gemäß Bewertungsraster `B4`, `B5` & `L5.3`:**
   1. **Primärquelle mit Datum:** ENISA-Mitteilung vom **21.10.2026** (*Joint Statement on Critical PHP Vulnerabilities*, `CVE-2026-109618` & `CVE-2026-109619`) inkl. verlinkter PHP-Quelle und Abrufdatum (`2026-11-08` / `2026-11-09`, Kurs-Primärquellenauszug).
@@ -92,6 +105,7 @@ Beide Läufe wurden mit derselben zentralen Factory (`src.workflows.feature_pipe
 - **Deterministischer Unit-Test (`A4`):** [`tests/test_factory_fnew_t5.py`](../tests/test_factory_fnew_t5.py) (`test_resolve_google_model_lru_cache_prevents_redundant_http_calls` $\rightarrow$ `PASSED`; gesamter Testbericht: `76 passed, 2 skipped` in [`evidence/session-05/pytest.xml`](session-05/pytest.xml)).
 - **Vollständige Vergleichsanalyse:** **[`evidence/R01-comparison.md`](R01-comparison.md)**
 - **Live-Trace `R-NEW`:** [`evidence/session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl`](session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl) (ausgeführt auf frischer Kopie von `R-BASE` = `18d222b`).
+- **Isolierter Produkt-Commit & Patch:** Commit **[`e301375`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew)** auf Branch `experiment/r-01-fnew` sowie Patchfile [`evidence/r01-fnew.patch`](r01-fnew.patch).
 
 | Messgröße | `R-BASE` (`0cef313b`, Termin 4) | `R-NEW` (`24b3bc4f`, Termin 5) | $\Delta$ relativ | Bewertung gegen T4-Hypothese |
 | :--- | :--- | :--- | :--- | :--- |
@@ -102,14 +116,15 @@ Beide Läufe wurden mit derselben zentralen Factory (`src.workflows.feature_pipe
 | **Qualität & Regression (`test_r01.py`)** | `Exit-Code 0` (`0` Regressionen) | **`Exit-Code 0` (`0` Regressionen)** | unverändert | ✅ Volle Prüfqualität erhalten |
 
 - **Empirische Entscheidung (`C3`):** **`F-NEW-v1.0` beibehalten (`retain`) und künftig um einen `--lean`-Modus ergänzen (`adapt`)**, da die Laufzeit stabil um $>60\,\%$ sinkt (bestätigt in allen 3 Session-5-Läufen: `44,48 s`, `43,53 s`, `42,45 s`), während für eine $\ge 30\,\%$-Kostensenkung pro Einzellauf die Anzahl der aufgerufenen Agentenrollen bei Kleinständerungen von 8 auf 5 reduziert werden muss.
+- **Methodische Erkenntnis aus Feedback Session 5:** Künftig wird strikt nur ein Parameter pro Vergleich geändert (*Single Variable Testing*), um Konfundierungen zwischen Rate-Limiter-Drosselung (~59,5 s) und HTTP-Lookup-Cache (~14,4 s) isoliert auszuweisen.
 
 ---
 
 ## 5. Abnahme (`AC-01` bis `AC-10`), Technische Freigabe & Übergabe (`B6`, `D1`, `D2`, `L5.4`)
 
 - **Detaillierte Abnahmetabelle (`AC-01` bis `AC-10`):** **[`docs/customer-01/acceptance.md`](../docs/customer-01/acceptance.md)**
-- **Übergabeprotokoll:** **[`evidence/hand-over.md`](hand-over.md)** (sowie [`client-01-website/HANDOVER.md`](../client-01-website/HANDOVER.md))
-- **Start-, Test- und Wartungsanleitung:** **[`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md)** (sowie [`client-01-website/README.md`](../client-01-website/README.md))
+- **Übergabeprotokoll:** **[`evidence/hand-over.md`](hand-over.md)** (sowie [`HANDOVER.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/HANDOVER.md))
+- **Start-, Test- und Wartungsanleitung:** **[`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md)** (sowie [`README.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/README.md))
 - **Klare Trennung von technischer Freigabe und Kundenstatus (`D1` / `B6`):**
   - **Technischer Freigabestatus (Team 3):** ✅ **Technisch freigegeben** (`approved` durch **Mehrose Farooq**, **David Pisarkiewicz**, **Lars Boos** und **Maxim Bers** am `2026-11-09`; alle Tests `F1`–`F4`, `CR-01 EN`, `CR-01 DE` sowie Browser-Review bestanden).
   - **Kundenabnahme-Status:** ⬜ **Ausstehend (offene Kundenentscheidung durch den Dozenten in Termin 5)** – es wird ausdrücklich **keine** Selbstbehauptung *„vom Kunden akzeptiert“* aufgestellt.
@@ -134,10 +149,10 @@ Vollständige Rohdaten ohne doppelte Stunden: **[`costs/usage.csv`](../costs/usa
 | **Termin 5** | **Factory-Entwicklung (`FACTORY-DEV` `F-NEW-v1.0`)** | `4,0 h` = `400,00 Cr.` | — | `0,0000 Cr.` | `400,0000 Cr.` |
 | **Gesamt T3–T5** | **1. Reine Kundenlieferung (`TASK-001` + `TASK-002` + `CR-01` + `SR-01`)** | **`32,5 h` = `3.250,00 Cr.`** | **4 erfolgreiche Produkt-Läufe (0 Fehlläufe)** | **`57,9241 Cr.`** | **`3.307,9241 Cr.`** |
 | **Gesamt T3–T5** | **2. Referenzexperiment `R-01` (`R-BASE` + `R-NEW`)** | **`9,0 h` = `900,00 Cr.`** | **2 Erfolge + 2 Fehlläufe (`429`)** | **`31,3087 Cr.`** | **`931,3087 Cr.`** |
-| **Gesamt T3–T5** | **3. Übergreifende Factory-Entwicklung (`FACTORY-DEV`)** | **`18,5 h` = `1.850,00 Cr.`** | **76 `pytest`-Tests lokal + 111 GitHub-Actions-Runs** | **`0,0000 Cr.`** | **`1.850,0000 Cr.`** |
-| **GESAMT T3–T5** | **Alle Aktivitäten T3–T5 (4 Mitglieder × 3 Termine × 5 h = 60,0 h)** | **`60,0 h` = `6.000,00 Cr.`** | **8 Pipeline-Läufe (6 Erfolge, 2 Fehlläufe)** | **`89,2328 Cr.`** | **`6.089,2328 Cr.`** |
+| **Gesamt T3–T5** | **3. Übergreifende Factory-Entwicklung (`FACTORY-DEV`)** | **`18,5 h` = `1.850,00 Cr.`** | **76 `pytest`-Tests lokal + 111 GitHub-Actions-Runs** | **`111,0000 Cr.`** | **`1.961,0000 Cr.`** |
+| **GESAMT T3–T5** | **Alle Aktivitäten T3–T5 (4 Mitglieder × 3 Termine × 5 h = 60,0 h)** | **`60,0 h` = `6.000,00 Cr.`** | **8 Pipeline-Läufe (6 Erfolge, 2 Fehlläufe) + 111 CI-Läufe** | **`200,2328 Cr.`** | **`6.200,2328 Cr.`** |
 
-*(Hinweis zu GitHub Actions T2–T5 aus [`costs/usage.csv`](../costs/usage.csv): Insgesamt **111 GitHub-Actions-Workflows** auf GitHub Free-Tier [0 Credits Zusatzkosten], davon **53 `CI`-Testläufe** [`51 success`, `2 failure`] und **58 `Agentic Issue Reviewer`-Webhook-Läufe** [`11 success`, `47 failure` bei Issue-Edits vor/während T4]).*
+*(Hinweis zu GitHub Actions T2–T5 aus [`costs/usage.csv`](../costs/usage.csv): Gemäß Kursmodell gilt **1 Credit je CI-Lauf** [gesamt **111,00 Credits**], davon **53 `CI`-Testläufe** [`51 success`, `2 failure` = 53 Credits] und **58 `Agentic Issue Reviewer`-Webhook-Läufe** [`11 success`, `47 failure` bei Issue-Edits vor Intended-Actor-Filter PR #57 = 58 Credits]; alle 17 CSV-Zeilen mit Notiz-Kommas wurden mit Anführungszeichen maschinenlesbar maskiert).*
 
 ### 6.2 Budgetabweichungs-Analyse (Geplantes Kundenbudget vs. Ist-Aufwand T3–T5)
 - **Geplantes Kunden-Lieferbudget aus Termin 3:** `1.200,00 Credits` Basis-Lieferbudget (T3/T4) + `400,00 Credits` Änderungsreserve (T5) = **`1.600,00 Credits` Gesamtbudget**.
@@ -154,7 +169,7 @@ Vollständige Rohdaten ohne doppelte Stunden: **[`costs/usage.csv`](../costs/usa
 | # | Übertragbare Erkenntnis (Lesson Learned) | Empirischer Beleg im Projekt (T3–T5) | Konsequenz für zukünftige Kundenprojekte |
 | :--- | :--- | :--- | :--- |
 | **1** | **Vorab-Review-Stände (Pre-Implementation) dürfen nach erfolgreicher Code-Generierung und grünem QA-Test das Release-Gate nicht dauerhaft blockieren.** | In **Termin 3** (`bf81352d`) markierte der `software_architect` das leere Starter-Template vor dem `backend_agent`-Lauf korrekt mit `changes_requested`; obwohl `backend_agent` und `qa_test_engineer` (`test_website.py`) danach bestanden, blieb die Gesamtempfehlung auf `changes_requested`. Durch den Fix in [`_compute_agent_recommendation`](../src/workflows/feature_pipeline.py) (Commit `b112623`) wurde dieses Fehlverhalten behoben – in **Termin 5 Lauf A** (`52b69365`) meldete der Architect am leeren `index_en.html`-Gerüst erneut `changes_requested`, das Gate de-eskalierte nach grünem `test_cr01_en.py` jedoch vollautomatisch und korrekt auf `agent_recommendation: "approved"`. | In mehrstufigen Agenten-Graphen müssen Vorab-Befunde als *Input-Auftrag* für den Implementierungs-Agenten modelliert werden, während das Freigabe-Gate strikt am *Post-Implementation-Artefakt* hängt. |
-| **2** | **Deterministische, domänenspezifische Prüffamilien am Gate schlagen reine LLM-Selbstbewertungen und müssen durch gezielte Fault-Injection validiert werden.** | In **Termin 4** haben wir die Produktprüfung in 4 deterministische Prüffamilien (`F1`–`F4` in [`test_website.py`](../client-01-website/test_website.py)) plus `enforce_quality_gate()` in [`feature_pipeline.py`](../src/workflows/feature_pipeline.py) überführt. Die beiden kontrollierten Fehlerinjektionen ([`557714eb.json`](session-04/fault-injection/557714eb-efba-4260-af95-46ee17d95e22.json) Kontaktfehler & [`0210bc84.json`](session-04/fault-injection/0210bc84-e836-4066-adc5-c6bf7fcfe032.json) defekter Ankerlink) bewiesen, dass `quality_gate_blocked=True` jede Freigabe technisch verhindert, bis der Fehler behoben ist. In **Termin 5** schützten dieselben 4 Familien `index.html` bei `CR-01` ohne jede Regression. | Für jedes neue Kundenprojekt zuerst einen schnellen, deterministischen Akzeptanz- & Security-Check (`F1`–`F4`) schreiben und diesen technisch erzwingend ans Human Gate koppeln. |
+| **2** | **Deterministische, domänenspezifische Prüffamilien am Gate schlagen reine LLM-Selbstbewertungen und müssen durch gezielte Fault-Injection validiert werden.** | In **Termin 4** haben wir die Produktprüfung in 4 deterministische Prüffamilien (`F1`–`F4` in [`test_website.py`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/test_website.py)) plus `enforce_quality_gate()` in [`feature_pipeline.py`](../src/workflows/feature_pipeline.py) überführt. Die beiden kontrollierten Fehlerinjektionen ([`557714eb.json`](session-04/fault-injection/557714eb-efba-4260-af95-46ee17d95e22.json) Kontaktfehler & [`0210bc84.json`](session-04/fault-injection/0210bc84-e836-4066-adc5-c6bf7fcfe032.json) defekter Ankerlink) bewiesen, dass `quality_gate_blocked=True` jede Freigabe technisch verhindert, bis der Fehler behoben ist. In **Termin 5** schützten dieselben 4 Familien `index.html` bei `CR-01` ohne jede Regression. | Für jedes neue Kundenprojekt zuerst einen schnellen, deterministischen Akzeptanz- & Security-Check (`F1`–`F4`) schreiben und diesen technisch erzwingend ans Human Gate koppeln. |
 | **3** | **Infrastruktur-Optimierungen (Caching & Rate-Limiting) halbieren die Durchlaufzeit, aber echte Token-/Credit-Einsparungen erfordern aufgabenabhängiges Überspringen redundanter Agentenrollen.** | Im **`R-01`-Experiment (Termin 4 vs. Termin 5, [`R01-comparison.md`](R01-comparison.md))** senkte `F-NEW-v1.0` (`@lru_cache` auf `resolve_google_model()` + Rate-Limiter `0.08 -> 0.25`) die Agenten-Laufzeit drastisch um **$-62,4\,\%$** (`118,40 s` $\rightarrow$ `44,48 s`), die Einzellauf-Credits jedoch nur um **$-7,9\,\%$** (`9,45` $\rightarrow$ `8,70 Credits`), weil weiterhin alle 8 Agentenrollen aufgerufen wurden. Zudem zeigten **47 fehlgeschlagene GitHub-Actions-Issue-Reviewer-Triggers**, dass ungedrosselte Event-Webhooks ohne Vorfilterung (`Intended actor = Agent`, PR #57) unnötige Fehlversuche erzeugen. | Kleine Änderungs-Tasks (`R-01`, `CR-01`) sollten über ein leichtgewichtiges Routing (`--lean`: nur PO $\rightarrow$ Backend $\rightarrow$ QA/Security $\rightarrow$ Gate) laufen, statt bei jeder 2-Zeilen-Änderung alle 8 Rollen aufzurufen. |
 
 ---
@@ -163,8 +178,8 @@ Vollständige Rohdaten ohne doppelte Stunden: **[`costs/usage.csv`](../costs/usa
 
 | Kriterium / Lernziel | Status | Beleg / Fundstelle |
 | :--- | :--- | :--- |
-| **A1–A3 & L5.1 (Kundenänderung durch Factory & Regression)** | ✅ Erfüllt | [`client-01-website/issue_cr01.md`](../client-01-website/issue_cr01.md), Traces [`52b69365`](session-05/52b69365-3d49-4bcd-9c4d-f51ab8c136e7.jsonl) & [`c0ee2cc3`](session-05/c0ee2cc3-4031-4ce9-8188-d37da99a1583.jsonl), Produkt-Commits `5227307` & `263d007` (Tag `CR-01-v1.0`) |
-| **A4, C1–C3 & L5.2 (Factory-Änderung `F-NEW` & ehrlicher `R-01`-Vergleich)** | ✅ Erfüllt | [`src/llm/factory.py`](../src/llm/factory.py) (Tag `F-NEW-v1.0`), Unit-Test [`tests/test_factory_fnew_t5.py`](../tests/test_factory_fnew_t5.py), Trace [`24b3bc4f`](session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl), [`evidence/R01-comparison.md`](R01-comparison.md) |
-| **B1–B3 (Englischer Einstieg, Zielgruppe, Sprachwechsel, Browser-Review)** | ✅ Erfüllt | [`client-01-website/index_en.html`](../client-01-website/index_en.html), [`client-01-website/index.html`](../client-01-website/index.html), [`client-01-website/test_cr01.py`](../client-01-website/test_cr01.py), [`docs/customer-01/browser_review_t5.md`](../docs/customer-01/browser_review_t5.md) |
-| **B4–B5, D1 & L5.3 (Komponentenübersicht, `SR-01`-Antwort & Faktenprüfung)** | ✅ Erfüllt | [`evidence/SR-01-response.md`](SR-01-response.md), [`docs/SECURITY_SR-01.md`](../docs/SECURITY_SR-01.md), [`client-01-website/SR-01-response.md`](../client-01-website/SR-01-response.md) |
+| **A1–A3 & L5.1 (Kundenänderung durch Factory & Regression)** | ✅ Erfüllt | [`issue_cr01.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/issue_cr01.md), Traces [`52b69365`](session-05/52b69365-3d49-4bcd-9c4d-f51ab8c136e7.jsonl) & [`c0ee2cc3`](session-05/c0ee2cc3-4031-4ce9-8188-d37da99a1583.jsonl), Produkt-Commits `5227307` & `263d007` (Tag `CR-01-v1.0`) |
+| **A4, C1–C3 & L5.2 (Factory-Änderung `F-NEW` & ehrlicher `R-01`-Vergleich)** | ✅ Erfüllt | [`src/llm/factory.py`](../src/llm/factory.py) (Tag `F-NEW-v1.0`), Unit-Test [`tests/test_factory_fnew_t5.py`](../tests/test_factory_fnew_t5.py), Trace [`24b3bc4f`](session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl), [`evidence/R01-comparison.md`](R01-comparison.md), Branch [`experiment/r-01-fnew`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew) (`e301375`), Patch [`evidence/r01-fnew.patch`](r01-fnew.patch) |
+| **B1–B3 (Englischer Einstieg, Zielgruppe, Sprachwechsel, Browser-Review)** | ✅ Erfüllt | [`index_en.html`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/index_en.html), [`index.html`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/index.html), [`test_cr01.py`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/test_cr01.py), [`docs/customer-01/browser_review_t5.md`](../docs/customer-01/browser_review_t5.md) |
+| **B4–B5, D1 & L5.3 (Komponentenübersicht, `SR-01`-Antwort & Faktenprüfung)** | ✅ Erfüllt | [`evidence/SR-01-response.md`](SR-01-response.md), [`docs/SECURITY_SR-01.md`](../docs/SECURITY_SR-01.md), [`SR-01-response.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/SR-01-response.md) |
 | **B6, C4, D2 & L5.4 (Übergabe, Gesamtkosten T3–T5, 3 Erkenntnisse, Abschluss)** | ✅ Erfüllt | [`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md), [`evidence/hand-over.md`](hand-over.md), [`docs/customer-01/acceptance.md`](../docs/customer-01/acceptance.md), [`costs/usage.csv`](../costs/usage.csv), dieses Dokument |

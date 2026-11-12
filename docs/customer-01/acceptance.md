@@ -56,7 +56,7 @@
 
 ## 3. Historischer Abnahmestand Termin 3 (`TASK-001`, Tag `v0.1.0-t3`)
 
-- **Produkt-Repository:** `client-01-website` (Eingabe-Commit: `cbbf7a9` -> Geprüfter Release-Commit: `3e6121b`, Tag `v0.1.0-t3`)  
+- **Produkt-Repository:** [`Nordwerk-Industrie-Service-Website`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website) (Eingabe-Commit: `cbbf7a9` -> Geprüfter Release-Commit: `3e6121b`, Tag `v0.1.0-t3`)  
 - **Workflow-ID:** `bf81352d-f7cb-4628-ad10-475cad888f73` ([`evidence/session-03/bf81352d-f7cb-4628-ad10-475cad888f73.jsonl`](../../evidence/session-03/bf81352d-f7cb-4628-ad10-475cad888f73.jsonl))  
 - **Verifizierte SHA-256 Hashes (Stand `v0.1.0-t3`):**
   - `client-01-website/index.html`: `b3cf793ce3a1ee7b3eda042f4a9a17e5abde88c1abb7336d962f8e3fb3bfb7cf`

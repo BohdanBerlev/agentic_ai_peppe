@@ -17,11 +17,11 @@ Beide Vergleichswerte stammen aus **echten Live-Läufen** gegen die Google Gemin
 | **Produkt-Basis-Commit** | **`18d222b`** (Tag: `R-BASE` / `v0.2.0-rc1`) | **`18d222b`** (frischer Checkout von Tag `R-BASE`, keine Lösungsübernahme) |
 | **Modell** | `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` *(identisch, kein Modellwechsel)* |
 | **LLM-Provider & Temperatur** | Google Gemini (`temperature=0.2`, `timeout=90s`) | Google Gemini (`temperature=0.2`, `timeout=90s`) |
-| **Aufgaben-Spezifikation** | `issue_r01.md`: Leistungskarte *„Projektkoordination“* ergänzen | `issue_r01.md`: **identische Aufgabe & identischer CLI-Befehl** |
-| **Automatisierter Produktcheck** | `python test_r01.py` (`F1`–`F4` + `R-01`) | `python test_r01.py` (`F1`–`F4` + `R-01`) |
+| **Aufgaben-Spezifikation** | [`issue_r01.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/issue_r01.md): Leistungskarte *„Projektkoordination“* ergänzen | [`issue_r01.md`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/issue_r01.md): **identische Aufgabe & identischer CLI-Befehl** |
+| **Automatisierter Produktcheck** | [`python test_r01.py`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/test_r01.py) (`F1`–`F4` + `R-01`) | [`python test_r01.py`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/blob/main/test_r01.py) (`F1`–`F4` + `R-01`) |
 | **Ausführungsmodus** | `--full-company --use-backend-agent` (8 Rollen) | `--full-company --use-backend-agent` (8 Rollen) |
 | **Session / Workflow-Trace** | [`session-04/0cef313b-b39e-4749-992f-c2c980403a8f.jsonl`](session-04/0cef313b-b39e-4749-992f-c2c980403a8f.jsonl) | [`session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl`](session-05/24b3bc4f-9baa-4c2a-bd9d-9ccf1cf53158.jsonl) |
-| **Produkt-Ergebnisstand** | Branch `origin/experiment/r-01-baseline` (`ad7d304`) | Isolierter Versuchs-Checkout (getrennt vom Kunden-Release `main`) |
+| **Produkt-Ergebnisstand** | Branch `origin/experiment/r-01-baseline` (`ad7d304`) | Branch [`experiment/r-01-fnew`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew) (Commit **`e301375`**) sowie isolierter Patch [`evidence/r01-fnew.patch`](r01-fnew.patch) |
 
 > [!NOTE]
 > **Abschließende Klärung zum Termin-4-Feedback (`F-BASE = 6da5414` vs. Tag `5a146a3`):**  
@@ -73,9 +73,14 @@ Quelle: `git diff F-BASE..F-NEW-v1.0 -- src/llm/factory.py` sowie Unit-Test [`te
 ### Ehrliche Interpretation & Methodenkritik (Streuung, Stichprobengröße & Störfaktoren)
 1. **Warum sank die Laufzeit um 62,4 %, die Einzellauf-Kosten aber nur um 7,9 %?**  
    In unserer Kostenformel setzt sich jeder der 8 Agenten-Aufrufe aus einem Basispreis ($\approx 1,0\text{ Credit}$ pro Call) plus einem kleinen Laufzeit- und Token-Aufschlag zusammen. Da in `F-NEW-v1.0` weiterhin **alle 8 Rollen** durchlaufen werden (`calls = 8`), bleibt der Sockelbetrag von $\ge 8,0\text{ Credits}$ bestehen; lediglich der zeitabhängige Aufschlag sank durch die kürzere Laufzeit um `0,7449 Credits` ($-7,9\,\%$). Um die Kosten eines einzelnen erfolgreichen Laufs unter `6,60 Credits` ($-30\,\%$) zu drücken, muss zwingend die **Anzahl der LLM-Aufrufe** reduziert werden (z. B. durch einen `--lean`-Modus, der für kleine HTML-Ergänzungen `project_manager` und `agent_engineer` überspringt und von 8 auf 5 Calls reduziert).
-2. **Konfundierung mehrerer Parameter in `F-NEW-v1.0`:**  
-   In `src/llm/factory.py` wurden `@lru_cache(maxsize=4)` und `requests_per_second: 0.08 -> 0.25` gemeinsam aktiviert. Rechnerisch entfallen von den eingesparten `73,92 s` rund `59,5 s` auf das kürzere Rate-Limiter-Intervall ($7 \times [12,5\text{ s} - 4,0\text{ s}]$) und rund `14,4 s` auf das Einsparen der 7 synchronen HTTP-GET-Requests an `/v1beta/models` plus geringere API-Latenz.
-3. **Stichprobenlimit ($n = 1$ pro erfolgreicher Variante):**  
+2. **Konfundierung mehrerer Parameter in `F-NEW-v1.0` & Single-Variable-Regel (Feedback Session 5 Punkt 1):**  
+   In `src/llm/factory.py` wurden `@lru_cache(maxsize=4)` und `requests_per_second: 0.08 -> 0.25` gleichzeitig aktiviert. Rechnerisch entfallen von den eingesparten `73,92 s`:
+   - Rund **`59,5 s`** (~80,5 % der Ersparnis) auf das kürzere Rate-Limiter-Intervall ($7 \times [12,5\text{ s} - 4,0\text{ s}]$).
+   - Rund **`14,4 s`** (~19,5 % der Ersparnis) auf das Einsparen der 7 synchronen HTTP-GET-Requests an `/v1beta/models` durch den RAM-Cache plus geringere API-Latenz.
+   *Konsequenz für zukünftige Experimente:* Strikte Anwendung des **Single-Variable-Prinzips (1 Parameter pro Vergleich)**, damit der kausale Effekt jedes einzelnen Faktors isoliert quantifizierbar ist.
+3. **Verbindliches Vorab-Einfrieren (*Pre-Run Freeze*) & Revisionssicherheit (Feedback Session 5 Punkt 1):**  
+   Zur lückenlosen Reproduzierbarkeit wird der Factory-Code künftig zwingend **vor** dem ersten Messlauf committet und mit einem Git-Tag versehen (in Session 5 lag der Code-Stand in Commit `f803ece` / Tag `F-NEW-v1.0` vor). Zudem ist das Ergebnis des Nachher-Laufs nicht nur im Workflow-Trace, sondern als eigenständiger Produkt-Commit **`e301375`** auf Branch [`experiment/r-01-fnew`](https://github.com/DavidPisark/Nordwerk-Industrie-Service-Website/tree/experiment/r-01-fnew) und als überprüfbarer Patch [`evidence/r01-fnew.patch`](r01-fnew.patch) gesichert.
+4. **Stichprobenlimit ($n = 1$ pro erfolgreicher Variante):**  
    Ein einzelnes Laufpaar erlaubt nur eine **vorläufige empirische Beobachtung**, da Netzwerk- und Gemini-API-Antwortzeiten tageszeitabhängig schwanken. Allerdings bestätigen die beiden anschließenden `CR-01`-Läufe mit `F-NEW-v1.0` (`52b69365`: `43,53 s`, `8,6905 Credits`; `c0ee2cc3`: `42,45 s`, `8,7329 Credits`) die hohe Reproduzierbarkeit der neuen Laufzeit von **42–45 Sekunden** über insgesamt **3 aufeinanderfolgende Läufe**.
 
 ### Begründete Entscheidung (Beibehalten / Anpassen / Zurücknehmen)

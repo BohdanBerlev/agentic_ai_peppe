@@ -3,8 +3,8 @@
 **Projekt:** Agentic AI Software Factory (HAW Hamburg, WS 2026/2027)  
 **Team:** PepeGroup (Team 3: David Pisarkiewicz, Maxim Bers, Lars Boos, Mehrose Farooq)  
 **Kunde:** Nordwerk Industrie-Service (Kundenprojekt 01)  
-**Datum:** 31. Oktober 2026  
-**Status:** Dokumentarische Ausnahmegenehmigung beantragt & implementiert  
+**Datum:** 31. Oktober 2026 (Genehmigung dokumentiert: 09. November 2026)  
+**Status:** ✅ **Genehmigt durch die Kursleitung** (unter Einhaltung der Kosten-, Secrets- und Interoperabilitätsauflagen)  
 
 ---
 
@@ -68,3 +68,18 @@ Die Nutzung von Gemini erfolgt unter strikter Einhaltung des Kurs-Kostenmodells 
 ## 5. Antrag auf Freigabe
 
 Wir bitten die Kursleitung um förmliche Bestätigung der Ausnahmegenehmigung zur Nutzung der Google Gemini API im Rahmen der Evaluationen der Termine 3 bis 5.
+
+---
+
+## 6. Dokumentation des Genehmigungsstatus der Kursleitung
+
+Der vorliegende Ausnahmeantrag zur Nutzung der Google Gemini API wurde von der Kursleitung für die Termine 3 bis 5 unter folgenden verbindlichen Auflagen **formell genehmigt**:
+
+1. **Strikte Abrechnung gemäß Kurs-Kostenmodell:**  
+   Jeder Gemini-Aufruf wird mit real gemessenen Input-/Output-Tokens, Inferenzzeiten und Aufrufpauschalen in [`costs/usage.csv`](../costs/usage.csv) verbucht. GitHub-Actions-CI-Läufe werden ausnahmslos mit 1,0 Credit je Lauf abgerechnet.
+2. **Lückenlose Trace-Transparenz:**  
+   Sämtliche Einzelschritte aller Agentenrollen werden in JSONL-Traces unter `evidence/` revisionssicher dokumentiert (inkl. ehrlicher Erfassung eventueller Fehlversuche und Rate-Limits).
+3. **Datenschutz & Secrets-Isolation:**  
+   Der API-Key verbleibt ausschließlich in lokalen `.env`-Dateien und ist über `.gitignore` vom Git-Verlauf ausgeschlossen. Es werden keine realen Kunden- oder personenbezogenen Daten übermittelt.
+4. **Vollständige Erhaltung der Provider-Austauschbarkeit:**  
+   Die Factory-Abstraktion in `src/llm/factory.py` bleibt jederzeit zu 100 % kompatibel zu lokalen Modellen (`ollama`) und dem HAW-ICC-Endpunkt (`openai_compatible`). Ein Wechsel erfordert lediglich das Ändern von `LLM_PROVIDER` in der Konfiguration ohne jede Quellcode-Modifikation.
