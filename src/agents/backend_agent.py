@@ -469,7 +469,7 @@ def my_backend_agent(state: dict[str, Any], attempt: int = 1) -> dict[str, Any]:
         current_code = ""
 
     # LLM instanziieren (nutzt injiziertes Test-LLM falls vorhanden)
-    llm = state.get("_injected_llm") or get_chat_model()
+    llm = state.get("_injected_llm") or get_chat_model(json_mode=True)
 
     system = SystemMessage(
         content=(
@@ -511,7 +511,18 @@ def my_backend_agent(state: dict[str, Any], attempt: int = 1) -> dict[str, Any]:
         if start >= 0 and end > start:
             text = text[start : end + 1]
 
-        parsed = json.loads(text)
+        try:
+            parsed = json.loads(text, strict=False)
+        except Exception as _e1:
+            import re
+            code_match = re.search(r'"code"\s*:\s*"(.*?)"\s*(?:,\s*"|\})', text, re.DOTALL)
+            if code_match:
+                parsed = {"code": code_match.group(1).encode().decode('unicode_escape', errors='ignore')}
+            elif "```python" in text:
+                parsed = {"code": text.split("```python")[1].split("```")[0].strip()}
+            else:
+                raise _e1
+
         new_code = parsed.get("code")
         if new_code:
             tools_used.append("write_repository_text_file")
