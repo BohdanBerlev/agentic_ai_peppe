@@ -38,8 +38,9 @@ PROJECTS: dict[str, ProjectConfig] = {
         "HansePack",
         "client-02-quotation",
         "Vanitas50/client-02-quotation",
-        ("fixtures/HansePack_Katalog.json",),
+        ("quotation.py",),
         ("test_quotation.py",),
+        default_issue_file="issue_hp01.md",
     ),
 }
 

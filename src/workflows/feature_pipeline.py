@@ -832,6 +832,9 @@ if __name__ == "__main__":
         default_test = ["tests/test_work_items_api.py"]
     input_files = [args.input_file] if args.input_file else default_input
     test_targets = [args.test_target] if args.test_target else default_test
+    issue_file = args.issue_file
+    if issue_file is None and args.target_dir:
+        issue_file = get_project(args.project_id).default_issue_file
 
     backend_fn = None
     if args.use_backend_agent:
@@ -850,7 +853,7 @@ if __name__ == "__main__":
             test_targets=test_targets,
             parent_workflow_id=args.parent_workflow_id,
             human_feedback=args.feedback,
-            issue_file=args.issue_file,
+            issue_file=issue_file,
         ),
         full_company_mode=args.full_company,
         backend_agent_fn=backend_fn,

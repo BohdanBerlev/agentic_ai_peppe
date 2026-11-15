@@ -53,6 +53,9 @@ def two_checkouts(tmp_path: Path) -> tuple[Path, Path]:
     else:
         katalog_content = '{"products": []}'
     (hp / "fixtures" / "HansePack_Katalog.json").write_text(katalog_content, encoding="utf-8")
+    (hp / "quotation.py").write_text(
+        "def calculate_quote(items):\n    raise NotImplementedError\n", encoding="utf-8"
+    )
     (hp / "test_quotation.py").write_text(
         "import sys\nif __name__ == '__main__':\n    sys.exit(0)\n", encoding="utf-8"
     )
@@ -81,7 +84,7 @@ def test_hansepack_run_does_not_touch_nordwerk(tmp_path, two_checkouts):
         project_id="client-02",
         target_dir=str(hp),
         description="HansePack quotation",
-        input_files=["fixtures/HansePack_Katalog.json"],
+        input_files=["quotation.py"],
         test_targets=["test_quotation.py"],
     )
     res = run_feature_pipeline(
@@ -145,4 +148,6 @@ def test_unknown_project_id_rejected():
 
 def test_registry_defaults():
     assert get_project("client-02").default_test_targets == ("test_quotation.py",)
+    assert get_project("client-02").default_input_files == ("quotation.py",)
+    assert get_project("client-02").default_issue_file == "issue_hp01.md"
     assert get_project("client-01").checkout_dir == "client-01-website"

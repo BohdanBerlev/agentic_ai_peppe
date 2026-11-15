@@ -9,7 +9,9 @@ Projekt-spezifische Pfade, Repos und Default-Eingaben liegen zentral in einer Re
 | project_id | Kunde | Checkout-Ordner | Repo | Default-Input | Default-Test |
 |---|---|---|---|---|---|
 | `client-01` | Nordwerk Industrie-Service | `client-01-website` | `DavidPisark/Nordwerk-Industrie-Service-Website` | `index.html` | `test_website.py` |
-| `client-02` | HansePack | `client-02-quotation` | `Vanitas50/client-02-quotation` | `fixtures/HansePack_Katalog.json` | `test_quotation.py` |
+| `client-02` | HansePack | `client-02-quotation` | `Vanitas50/client-02-quotation` | `quotation.py` | `test_quotation.py` |
+
+Default-Issue für `client-02`: `issue_hp01.md` (wird genutzt, wenn `--issue-file` fehlt).
 
 ## Unverändert wiederverwendet
 - Agenten unter `src/agents/`: `architect_agent.py`, `backend_agent.py`, `common.py`, `cost_agent.py`, `integration_agent.py`, `requirements_agent.py` (alle unverändert übernommen; `qa_security_agent.py` siehe unten).
@@ -41,6 +43,6 @@ HansePack-Arbeit findet ausschließlich in `client-02-quotation` statt.
 
 ## Aufruf für HansePack
 ```bash
-python -m src.workflows.feature_pipeline --project-id client-02 --target-dir client-02-quotation --full-company --use-backend-agent --session session-06 --issue-file <issue-datei>
+python -m src.workflows.feature_pipeline --project-id client-02 --target-dir client-02-quotation --full-company --use-backend-agent --session session-06 --issue-file issue_hp01.md
 ```
-Hinweis: Der Test `test_quotation.py` entsteht in Schritt 4 von Termin 6.
+Produkttest: `test_quotation.py` im Produkt-Repo (`python -m pytest -q`).
