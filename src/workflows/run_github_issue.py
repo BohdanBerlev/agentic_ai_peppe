@@ -12,6 +12,7 @@ from typing import Any
 import httpx
 
 from src.app.settings import get_settings
+from src.projects import get_project
 from src.workflows.feature_pipeline import EngineeringTask, run_feature_pipeline
 
 
@@ -202,8 +203,13 @@ def main():
         body = issue_data.get("body", "No Description")
         description = f"GitHub Issue #{args.issue_number}: {title}\n\n{body}"
 
-        input_files = ["index.html"] if args.target_dir else ["src/app/main.py"]
-        test_targets = ["test_website.py"] if args.target_dir else ["tests/test_work_items_api.py"]
+        if args.target_dir:
+            cfg = get_project(args.project_id)
+            input_files = list(cfg.default_input_files)
+            test_targets = list(cfg.default_test_targets)
+        else:
+            input_files = ["src/app/main.py"]
+            test_targets = ["tests/test_work_items_api.py"]
 
         task = EngineeringTask(
             task_id=f"ISSUE-{args.issue_number}",

@@ -35,6 +35,10 @@ from src.agents.requirements_agent import (
 )
 from src.app.settings import get_settings
 from src.observability.tracing import append_trace
+from src.projects import (
+    assert_target_belongs_to_project,
+    get_project,
+)
 
 
 class EngineeringTask(BaseModel):
@@ -315,7 +319,11 @@ def build_pipeline_graph(
         task_id = task.get("task_id", "DRYRUN-002")
         base_dir = task.get("target_dir")
         target_file = (task.get("input_files") or ["src/app/main.py"])[0]
-        test_targets = task.get("test_targets") or (["test_website.py"] if base_dir else ["tests/test_work_items_api.py"])
+        test_targets = task.get("test_targets") or (
+            list(get_project(task.get("project_id") or "client-01").default_test_targets)
+            if base_dir
+            else ["tests/test_work_items_api.py"]
+        )
         arch_rep = state.get("architecture_report", {})
 
         _progress(f"Schritt 4/6: QA fuehrt Produkttests aus ({', '.join(test_targets)}) + Security + Integration")
@@ -633,6 +641,8 @@ def run_feature_pipeline(
         input_files=["src/app/main.py"],
     )
 
+    assert_target_belongs_to_project(task.project_id, task.target_dir)
+
     graph = build_pipeline_graph(llm=llm, backend_agent_fn=backend_agent_fn)
 
     try:
@@ -813,8 +823,13 @@ if __name__ == "__main__":
     parser.add_argument("--max-impl-retries", type=int, default=3, help="Obergrenze Backend<->QA-Reparaturschleife")
     args = parser.parse_args()
 
-    default_input = ["index.html"] if args.target_dir else ["src/app/main.py"]
-    default_test = ["test_website.py"] if args.target_dir else ["tests/test_work_items_api.py"]
+    if args.target_dir:
+        cfg = get_project(args.project_id)
+        default_input = list(cfg.default_input_files)
+        default_test = list(cfg.default_test_targets)
+    else:
+        default_input = ["src/app/main.py"]
+        default_test = ["tests/test_work_items_api.py"]
     input_files = [args.input_file] if args.input_file else default_input
     test_targets = [args.test_target] if args.test_target else default_test
 

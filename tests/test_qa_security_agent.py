@@ -4,6 +4,7 @@ from langchain_core.messages import AIMessage
 
 from src.agents.qa_security_agent import (
     _parse_qa_result,
+    execute_repository_pytest,
     read_repository_text_file,
     run_qa_security_check,
     run_qa_test_execution,
@@ -134,3 +135,19 @@ def test_security_audit_flags_php_rce_surface_cve_2026_109618(tmp_path):
 
     assert sec_res["status_str"] == "changes_requested"
     assert any("CVE-2026-109618" in r for r in sec_res["security_risks"])
+
+
+def test_pytest_only_file_is_run_with_pytest(tmp_path):
+    (tmp_path / "test_q.py").write_text("def test_fail():\n    assert 1 == 2\n", encoding="utf-8")
+    result = execute_repository_pytest(["test_q.py"], base_dir=str(tmp_path))
+    assert result["tests_passed"] is False
+    assert "pytest" in result["command"]
+
+
+def test_main_script_is_run_directly(tmp_path):
+    (tmp_path / "check.py").write_text(
+        "import sys\nif __name__ == '__main__':\n    sys.exit(0)\n", encoding="utf-8"
+    )
+    result = execute_repository_pytest(["check.py"], base_dir=str(tmp_path))
+    assert result["tests_passed"] is True
+    assert result["command"].startswith("python check.py")

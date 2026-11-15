@@ -105,6 +105,12 @@ def detect_php_security_risks(source_snippet: str, target_file: str = "") -> lis
     return risks
 
 
+def _is_standalone_script(path: Path) -> bool:
+    """True, wenn die Datei als Skript gedacht ist: enthält '__main__' ODER enthält keine Funktion 'def test_'."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    return ("__main__" in text) or ("def test_" not in text)
+
+
 def execute_repository_pytest(
     test_targets: list[str] | None = None,
     timeout_seconds: int = 30,
@@ -125,7 +131,12 @@ def execute_repository_pytest(
         validated_targets.append(t)
 
     # If running inside an external customer checkout with a standalone check script, run python directly or pytest
-    if base_dir and len(validated_targets) == 1 and validated_targets[0].endswith(".py"):
+    if (
+        base_dir
+        and len(validated_targets) == 1
+        and validated_targets[0].endswith(".py")
+        and _is_standalone_script(root / validated_targets[0])
+    ):
         cmd = [sys.executable, validated_targets[0]]
         cmd_label = f"python {validated_targets[0]}"
     else:
