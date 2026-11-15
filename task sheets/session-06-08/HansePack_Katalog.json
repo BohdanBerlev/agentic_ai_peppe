@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "customer": "HansePack",
+  "currency": "EUR",
+  "money_unit": "integer_cents",
+  "products": [
+    {
+      "sku": "HP-BOX",
+      "name_de": "Versandkarton",
+      "name_en": "Shipping box",
+      "unit_price_cents": 250
+    },
+    {
+      "sku": "HP-TAPE",
+      "name_de": "Klebeband",
+      "name_en": "Packing tape",
+      "unit_price_cents": 400
+    },
+    {
+      "sku": "HP-FILM",
+      "name_de": "Stretchfolie",
+      "name_en": "Stretch film",
+      "unit_price_cents": 1250
+    }
+  ]
+}

@@ -1,0 +1,682 @@
+{
+  "schema_version": "1.0",
+  "note_de": "Kundenreferenzdaten, keine fertige Produktimplementierung. Produkt-API darf andere Feldnamen verwenden, wenn Tests eine dokumentierte Zuordnung besitzen. expected_reason ist semantisch, kein verpflichtender Fehlercode.",
+  "note_en": "Customer reference data, not a finished product implementation. Product APIs may use other field names with a documented test mapping. expected_reason describes meaning, not a mandatory error code.",
+  "valid_cases": [
+    {
+      "id": "Q01",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 1
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 1,
+          "unit_price_cents": 250,
+          "list_amount_cents": 250,
+          "discount_percent": 0,
+          "discount_cents": 0,
+          "net_cents": 250
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 250,
+          "shipping_cents": 1200,
+          "total_cents": 1450
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 250,
+          "shipping_cents": 1500,
+          "total_cents": 1750
+        }
+      }
+    },
+    {
+      "id": "Q02",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 49
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 49,
+          "unit_price_cents": 250,
+          "list_amount_cents": 12250,
+          "discount_percent": 0,
+          "discount_cents": 0,
+          "net_cents": 12250
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 12250,
+          "shipping_cents": 1200,
+          "total_cents": 13450
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 12250,
+          "shipping_cents": 1500,
+          "total_cents": 13750
+        }
+      }
+    },
+    {
+      "id": "Q03",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 50
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 50,
+          "unit_price_cents": 250,
+          "list_amount_cents": 12500,
+          "discount_percent": 5,
+          "discount_cents": 625,
+          "net_cents": 11875
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 11875,
+          "shipping_cents": 1200,
+          "total_cents": 13075
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 11875,
+          "shipping_cents": 1500,
+          "total_cents": 13375
+        }
+      }
+    },
+    {
+      "id": "Q04",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 99
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 99,
+          "unit_price_cents": 250,
+          "list_amount_cents": 24750,
+          "discount_percent": 5,
+          "discount_cents": 1238,
+          "net_cents": 23512
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 23512,
+          "shipping_cents": 1200,
+          "total_cents": 24712
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 23512,
+          "shipping_cents": 1500,
+          "total_cents": 25012
+        }
+      }
+    },
+    {
+      "id": "Q05",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 100
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 100,
+          "unit_price_cents": 250,
+          "list_amount_cents": 25000,
+          "discount_percent": 10,
+          "discount_cents": 2500,
+          "net_cents": 22500
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 22500,
+          "shipping_cents": 1200,
+          "total_cents": 23700
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 22500,
+          "shipping_cents": 1500,
+          "total_cents": 24000
+        }
+      }
+    },
+    {
+      "id": "Q06",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 200
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 200,
+          "unit_price_cents": 250,
+          "list_amount_cents": 50000,
+          "discount_percent": 10,
+          "discount_cents": 5000,
+          "net_cents": 45000
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 45000,
+          "shipping_cents": 1200,
+          "total_cents": 46200
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 45000,
+          "shipping_cents": 0,
+          "total_cents": 45000
+        }
+      }
+    },
+    {
+      "id": "Q07",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-FILM",
+            "quantity": 40
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-FILM",
+          "quantity": 40,
+          "unit_price_cents": 1250,
+          "list_amount_cents": 50000,
+          "discount_percent": 0,
+          "discount_cents": 0,
+          "net_cents": 50000
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 50000,
+          "shipping_cents": 0,
+          "total_cents": 50000
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 50000,
+          "shipping_cents": 0,
+          "total_cents": 50000
+        }
+      }
+    },
+    {
+      "id": "Q08",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-FILM",
+            "quantity": 39
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-FILM",
+          "quantity": 39,
+          "unit_price_cents": 1250,
+          "list_amount_cents": 48750,
+          "discount_percent": 0,
+          "discount_cents": 0,
+          "net_cents": 48750
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 48750,
+          "shipping_cents": 1200,
+          "total_cents": 49950
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 48750,
+          "shipping_cents": 0,
+          "total_cents": 48750
+        }
+      }
+    },
+    {
+      "id": "Q09",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-TAPE",
+            "quantity": 100
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-TAPE",
+          "quantity": 100,
+          "unit_price_cents": 400,
+          "list_amount_cents": 40000,
+          "discount_percent": 10,
+          "discount_cents": 4000,
+          "net_cents": 36000
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 36000,
+          "shipping_cents": 1200,
+          "total_cents": 37200
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 36000,
+          "shipping_cents": 1500,
+          "total_cents": 37500
+        }
+      }
+    },
+    {
+      "id": "Q10",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-FILM",
+            "quantity": 32
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-FILM",
+          "quantity": 32,
+          "unit_price_cents": 1250,
+          "list_amount_cents": 40000,
+          "discount_percent": 0,
+          "discount_cents": 0,
+          "net_cents": 40000
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 40000,
+          "shipping_cents": 1200,
+          "total_cents": 41200
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 40000,
+          "shipping_cents": 0,
+          "total_cents": 40000
+        }
+      }
+    },
+    {
+      "id": "Q11",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-FILM",
+            "quantity": 31
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-FILM",
+          "quantity": 31,
+          "unit_price_cents": 1250,
+          "list_amount_cents": 38750,
+          "discount_percent": 0,
+          "discount_cents": 0,
+          "net_cents": 38750
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 38750,
+          "shipping_cents": 1200,
+          "total_cents": 39950
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 38750,
+          "shipping_cents": 1500,
+          "total_cents": 40250
+        }
+      }
+    },
+    {
+      "id": "Q12",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 50
+          },
+          {
+            "sku": "HP-TAPE",
+            "quantity": 10
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 50,
+          "unit_price_cents": 250,
+          "list_amount_cents": 12500,
+          "discount_percent": 5,
+          "discount_cents": 625,
+          "net_cents": 11875
+        },
+        {
+          "sku": "HP-TAPE",
+          "quantity": 10,
+          "unit_price_cents": 400,
+          "list_amount_cents": 4000,
+          "discount_percent": 0,
+          "discount_cents": 0,
+          "net_cents": 4000
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 15875,
+          "shipping_cents": 1200,
+          "total_cents": 17075
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 15875,
+          "shipping_cents": 1500,
+          "total_cents": 17375
+        }
+      }
+    },
+    {
+      "id": "Q13",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-FILM",
+            "quantity": 51
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-FILM",
+          "quantity": 51,
+          "unit_price_cents": 1250,
+          "list_amount_cents": 63750,
+          "discount_percent": 5,
+          "discount_cents": 3188,
+          "net_cents": 60562
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 60562,
+          "shipping_cents": 0,
+          "total_cents": 60562
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 60562,
+          "shipping_cents": 0,
+          "total_cents": 60562
+        }
+      }
+    },
+    {
+      "id": "Q14",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 53
+          }
+        ]
+      },
+      "expected_lines": [
+        {
+          "sku": "HP-BOX",
+          "quantity": 53,
+          "unit_price_cents": 250,
+          "list_amount_cents": 13250,
+          "discount_percent": 5,
+          "discount_cents": 663,
+          "net_cents": 12587
+        }
+      ],
+      "expected": {
+        "HP-V1": {
+          "currency": "EUR",
+          "rule_version": "HP-V1",
+          "goods_net_cents": 12587,
+          "shipping_cents": 1200,
+          "total_cents": 13787
+        },
+        "HP-V2": {
+          "currency": "EUR",
+          "rule_version": "HP-V2",
+          "goods_net_cents": 12587,
+          "shipping_cents": 1500,
+          "total_cents": 14087
+        }
+      }
+    }
+  ],
+  "invalid_cases": [
+    {
+      "id": "E01",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 0
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "quantity_out_of_range"
+    },
+    {
+      "id": "E02",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": -1
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "quantity_out_of_range"
+    },
+    {
+      "id": "E03",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 1.5
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "quantity_not_integer"
+    },
+    {
+      "id": "E04",
+      "input": {
+        "items": [
+          {
+            "sku": "UNKNOWN",
+            "quantity": 1
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "unknown_sku"
+    },
+    {
+      "id": "E05",
+      "input": {
+        "items": []
+      },
+      "expected_valid": false,
+      "expected_reason": "empty_items"
+    },
+    {
+      "id": "E06",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 1
+          },
+          {
+            "sku": "HP-BOX",
+            "quantity": 2
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "duplicate_sku"
+    },
+    {
+      "id": "E07",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX"
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "missing_quantity"
+    },
+    {
+      "id": "E08",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": "50"
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "quantity_wrong_type"
+    },
+    {
+      "id": "E09",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": true
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "quantity_wrong_type"
+    },
+    {
+      "id": "E10",
+      "input": {
+        "items": [
+          {
+            "sku": "HP-BOX",
+            "quantity": 10001
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_reason": "quantity_out_of_range"
+    }
+  ]
+}
