@@ -227,9 +227,10 @@ repo_kontext.txt
 repo_scanner.py
 repo_kontext.md
 
-# Separate Customer Product Repository (Session 3-5)
+# Separate Customer Product Repositories (Sessions 3-8)
 client-01-website/
 client-02-quotation/
+client-02-website/
 
 # Local opencode project config (planner/worker models)
 .opencode/

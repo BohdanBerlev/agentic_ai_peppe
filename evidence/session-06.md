@@ -14,7 +14,7 @@
 | :--- | :--- | :--- | :--- |
 | **Produkt 01 (Nordwerk Basis)** | `DavidPisark/Nordwerk-Industrie-Service-Website` (`main`) | `f2feebb` (`CR-01-v1.0`) | **`d140f26`** (gesichert, eingefroren, 0 Änderungen durch T6) |
 | **Produkt 02 (HansePack)** | `Vanitas50/client-02-quotation` (`main`) | `90953d3` (Kunden-Issue, Tests, Starter) | **`2dfb7ae`** (`quotation.py` verfeinert (Team) & durch Agenten geprüft) |
-| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`7179c3c`** (LLM-Robustheit, Session-06-Evidenz) · Evidence-Commits `517fb86`, `dc7d0c1`, `92f6ee0` |
+| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`main` / `termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`7179c3c`** / **`a740db5`** (LLM-Robustheit & JSON-Parsing) · gemergt auf `main` (Tag: **`T6-HANSEPACK-v1.0`**) |
 
 > **Hinweis zum Produkt-Ergebnis `2dfb7ae`:** Im Trace `8f912c03…` ist kein `backend_agent`-Aufruf enthalten; die Verfeinerung in `2dfb7ae` (Rundungsformel, Validierung B1–B4) wird daher als menschliche Nacharbeit gezählt. Agentenbeitrag: `d92d39a` (backend_agent, Lauf HP-T6-REPAIR) sowie Prüfung durch QA/Integration im Lauf `8f912c03…`.
 
@@ -100,7 +100,7 @@ Automatisierte Prüfung via `test_quotation.py` im Produkt-Repository `client-02
 | **Q03 (`B3`)** | `HP-BOX` × 50: Listenbetrag 12500 Cent, 5 % Rabatt (-625 Cent), Warenwert 11875 Cent, Versand 1200 Cent, Gesamt **13075 Cent** | ✅ **PASSED** |
 | **E01 (`B4`)** | `HP-BOX` × 0: Zurückweisung mit `QuotationError("quantity_out_of_range")`, kein Angebot | ✅ **PASSED** |
 
-Darüber hinaus besteht die Implementierung **bereits alle 14 Referenzfälle (Q01–Q14)** sowie **alle 10 Fehlerfälle (E01–E10)** der Kundenreferenzdatei `fixtures/HansePack_Referenzfaelle.json`.
+`test_quotation.py` führt gezielt die 4 automatisierten Termin-6-Testfunktionen (`Q01`, `Q03`, `test_q03_explicit_values`, `E01` $\rightarrow$ `4 passed`) aus; darüber hinaus erfüllt die Implementierung in `quotation.py` bereits alle 14 Referenzfälle (Q01–Q14) sowie alle 10 Fehlerfälle (E01–E10) der Kundenreferenzdatei `fixtures/HansePack_Referenzfaelle.json`.
 
 CLI-Aufrufnachweis:
 ```bash
@@ -157,7 +157,7 @@ Die Verifikation wurde durch die Factory-Agenten (`run_qa_test_execution` und `r
 
 ### 5.2 Vollständige Messung & Kostenrechnung (`C2`)
 
-Die Messung wurde durch unseren **Cost & Observability Agent** ([`cost_analysis.json`](session-06/cost_analysis.json)) automatisiert konsolidiert. Alle Fehlläufe und Kategorien sind transparent ausgewiesen.
+Die Messung wurde durch unseren **Cost & Observability Agent** ([`cost_analysis.json`](session-06/cost_analysis.json)) automatisiert konsolidiert und vollständig in **[`costs/usage.csv`](../costs/usage.csv)** eingetragen. Alle Fehlläufe und Kategorien sind transparent ausgewiesen.
 
 #### A. Menschliche Arbeitszeit (exklusiv erfasst @ 100 Credits / Person-Stunde)
 1. **Kundenlieferung (Projektstart & Briefing-Analyse):** 45 Min. (0,75 h) = **75,00 Credits**  
@@ -249,7 +249,7 @@ $$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 9{,}00 + 0{,}00 = \mathbf
 1. **Deterministische Fachlogik:** Keine Preisberechnung durch LLMs; alle Preise werden direkt aus [`fixtures/HansePack_Katalog.json`](https://github.com/Vanitas50/client-02-quotation/blob/2dfb7ae/fixtures/HansePack_Katalog.json) geladen.
 2. **Kaufmännische Rundung:** Überprüfung der Ganzzahlformel `(list_amount_cents * discount_percent + 50) // 100` gegen die Kundenregeln. Die Umsetzung erfolgt mit dieser Ganzzahlformel (entspricht kaufmännischem Runden), nicht mit `Decimal`/`ROUND_HALF_UP`.
 3. **Pflichtprüfungen T6:** Q01 (1.450 Cent), Q03 (13.075 Cent) und E01 (Zurückweisung Menge 0) automatisiert und per CLI verifiziert.
-4. **Vollabgleich Kundenfixtures:** Alle 14 Referenzfälle (Q01–Q14) und alle 10 Fehlerfälle (E01–E10) fehlerfrei bestanden.
+4. **Vollabgleich Kundenfixtures:** Neben den 4 automatisierten Tests in `test_quotation.py` (Q01, Q03, E01) wurden auch alle 14 Referenzfälle (Q01–Q14) und alle 10 Fehlerfälle (E01–E10) gegen `quotation.py` verifiziert (0 Abweichungen).
 5. **Regressions- & Isolationsschutz:** Nordwerk (`d140f26`) unberührt und voll funktionsfähig; Factory-Trennungstest (`test_project_separation_t6.py`, 5/5) bestanden.
 
 ### 6.3 Agenten-Audit der Schnittstellen (Integration Agent)
