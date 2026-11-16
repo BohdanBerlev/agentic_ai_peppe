@@ -232,7 +232,7 @@ $$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 9{,}00 + 0{,}00 = \mathbf
   - *Befund:* Mit Standard-Kontext (4.096 Tokens) führte das Einspeisen von `HansePack_Katalog.json` zusammen mit Vorstufen-Artefakten zum Überschreiten des Kontextfensters. Ollama schnitt die Ausgabe bei Token 4.095 ab (`truncated=1`), was in unvollständigen JSON-Antworten resultierte (`Unterminated string`).
   - *Behebung:* 
     1. Zentrale Anhebung des Kontextfensters auf `num_ctx=8192` in `src/llm/factory.py`.
-    2. Fehlertolerantes JSON-Parsing (`strict=False`) mit Regex-Fallback in `src/agents/backend_agent.py`.
+    2. Fehlertolerantes JSON-Parsing (`strict=False`) in `src/agents/backend_agent.py`; seit `a740db5` über `_parse_backend_output` (JSON, dann `json`-Block, dann `python`-Block, sonst Fehler) statt des früheren Regex-/`unicode_escape`-Fallbacks.
 - **Methodische Kausalitäts-Klarstellung:**
   Es wird **keine pauschale Ersparnis gegenüber Nordwerk behauptet**. Beide Kundenaufträge stellen grundlegend unterschiedliche Anforderungen dar (semantische HTML-Gestaltung vs. deterministische Rechenlogik mit Cent-Rundung).
 
