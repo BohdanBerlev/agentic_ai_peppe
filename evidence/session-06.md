@@ -199,23 +199,25 @@ Lokale `pytest`-Aufrufe zählen nicht als CI. Als CI zählen die GitHub-Actions-
 - `517fb86` failure: 1,00 Credit
 - `dc7d0c1` failure: 1,00 Credit
 - `92f6ee0` failure: 1,00 Credit
-- Ursache der Fehlschläge: 2 Backend-Agent-Tests, Mock ohne `json_mode`; behoben lokal in diesem Stand.
-- **Zwischensumme CI:** **7,00 Credits** (weitere Läufe nach Korrektur-Push kommen hinzu)
+- `a740db5` success: 1,00 Credit (Korrektur-Commit)
+- Beleg-Commit mit dieser Kostenaktualisierung: 1,00 Credit (Lauf wird durch den Push ausgelöst und vorab gezählt)
+- Ursache der Fehlschläge: 2 Backend-Agent-Tests, Mock ohne `json_mode`; behoben mit `a740db5` (CI wieder grün).
+- **Zwischensumme CI:** **9,00 Credits** (Stand Abschluss Termin 6; spätere Läufe zählen zu Termin 7)
 
 #### D. Externe Cloud-Kosten
-- Keine Cloud-Kosten angefallen, da rein lokaler Kurs-Stack (Ollama mit lokal gehostetem `qwen3.5:9b`) eingesetzt wurde: **0,00 Credits** (markiert).
+- Keine zusätzlichen Cloud-Kosten außerhalb des Kursmodells: Lars’ Läufe liefen lokal (Ollama `qwen3.5:9b`), der Gemini-Lauf HP-T6-01 ist oben mit der Agentenformel erfasst: **0,00 Credits** (markiert).
 
 #### Gesamtkostenbilanz Termin 6:
-$$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 7{,}00 + 0{,}00 = \mathbf{277{,}42\text{ Credits}}$$
+$$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 9{,}00 + 0{,}00 = \mathbf{279{,}42\text{ Credits}}$$
 
 ### 5.3 Planung: Projektstartaufwand, Ist-Kosten & Budget T6–T8 (`C3`)
 
 - **Projektstartaufwand HansePack:** 75,00 Credits (45 Min. Menschenzeit) für Einarbeitung in Domäne, Rechenregeln und Fixtures. Dieser Aufwand ist sauber von der Factory-Entwicklung (75,00 Credits) getrennt.
 - **Budget- und Lieferplan:**
-  - **Termin 6 (Ist): 277,42 Credits** – Eigenständig lauffähiges Python-Produkt mit CLI, Q01/Q03/E01, Factory-Registry, Trennungstest.
+  - **Termin 6 (Ist): 279,42 Credits** – Eigenständig lauffähiges Python-Produkt mit CLI, Q01/Q03/E01, Factory-Registry, Trennungstest.
   - **Termin 7 (Plan): 300,00 Credits** (Mensch: 250 Cr, Agenten: 40 Cr, CI: 10 Cr) – Responsive Browser-Weboberfläche (HTML/CSS/JS), JSON-Export, vollständige Q01–Q14 und E01–E10 Suite, Release-Candidate.
   - **Termin 8 (Plan-Reserve): 200,00 Credits** – Reserve für Kundenänderung CR-02 (angepasste Versandstaffel HP-V2: ab 400 € versandkostenfrei, sonst 15 €) und finale Abnahme.
-  - **Gesamtbudget T6–T8:** **777,42 Credits**.
+  - **Gesamtbudget T6–T8:** **779,42 Credits**.
 
 ### 5.4 Reuse-Lernen, Grenzen & Schwachstellenanalyse (`C4`)
 
