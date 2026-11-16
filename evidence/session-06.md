@@ -13,8 +13,8 @@
 | Rolle / Stand | Repository / Branch | Eingabe-Commit | Ergebnis-Commit & Git-Tag |
 | :--- | :--- | :--- | :--- |
 | **Produkt 01 (Nordwerk Basis)** | `DavidPisark/Nordwerk-Industrie-Service-Website` (`main`) | `f2feebb` (`CR-01-v1.0`) | **`d140f26`** (gesichert, eingefroren, 0 Änderungen durch T6) |
-| **Produkt 02 (HansePack)** | `Vanitas50/client-02-quotation` (`main`) | `90953d3` (Kunden-Issue, Tests, Starter) | **`d92d39a`** (`quotation.py` durch Factory implementiert) |
-| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`a28a182`** (LLM-Robustheit, Session-06-Evidenz) |
+| **Produkt 02 (HansePack)** | `Vanitas50/client-02-quotation` (`main`) | `90953d3` (Kunden-Issue, Tests, Starter) | **`2dfb7ae`** (`quotation.py` verfeinert & agentisch validiert) |
+| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`364eaa7`** (LLM-Robustheit, Session-06-Evidenz) |
 
 ---
 
@@ -77,12 +77,19 @@ In der Full-Company-Pipeline übergeben mindestens 8 Agentenrollen strukturierte
 
 ## 4. Kundenprodukt HansePack (`B1`–`B6`, `L6.3`)
 
-### 4.1 Deterministische Produktlogik (`B1`)
+### 4.1 Deterministische Produktlogik & Rundung (`B1`)
 - `quotation.py` lädt Artikelpreise ausschließlich aus `fixtures/HansePack_Katalog.json`.
 - **Kein LLM zur Laufzeit:** Die Preisberechnung ist vollständig deterministisch in Python umgesetzt.
-- Alle Beträge werden in ganzzahligen Cents (`int`) geführt, Rundungen erfolgen kaufmännisch (`ROUND_HALF_UP`).
+- Alle Beträge werden in ganzzahligen Cents (`int`) geführt.
+- **Kaufmännische Rundung (`ROUND_HALF_UP`):** Entsprechend Kundenbriefing Regel 3 mit der verbindlichen Formel implementiert:
+  `discount_cents = (list_amount_cents * discount_percent + 50) // 100`
+- **Umfassende Eingabevalidierung:**
+  - 1–3 Positionen (`empty_items`, `too_many_items`).
+  - Keine doppelten SKUs (`duplicate_sku`).
+  - Typ- und Wertebereichs-Validierung für Mengen (`quantity_wrong_type`, `quantity_not_integer`, `quantity_out_of_range` 1–10.000).
+  - Unbekannte SKUs (`unknown_sku`).
 
-### 4.2 Nachweis der Pflichtfälle (`B2`–`B4`)
+### 4.2 Nachweis der Pflichtfälle (`B2`–`B4`) & Vollabgleich
 Automatisierte Prüfung via `test_quotation.py` im Produkt-Repository `client-02-quotation`:
 
 | Testfall | Geprüfte Werte | Ergebnis |
@@ -90,6 +97,8 @@ Automatisierte Prüfung via `test_quotation.py` im Produkt-Repository `client-02
 | **Q01 (`B2`)** | `HP-BOX` × 1: Warenwert 250 Cent, Versand 1200 Cent, Gesamt **1450 Cent** | ✅ **PASSED** |
 | **Q03 (`B3`)** | `HP-BOX` × 50: Listenbetrag 12500 Cent, 5 % Rabatt (-625 Cent), Warenwert 11875 Cent, Versand 1200 Cent, Gesamt **13075 Cent** | ✅ **PASSED** |
 | **E01 (`B4`)** | `HP-BOX` × 0: Zurückweisung mit `QuotationError("quantity_out_of_range")`, kein Angebot | ✅ **PASSED** |
+
+Darüber hinaus besteht die Implementierung **bereits alle 14 Referenzfälle (Q01–Q14)** sowie **alle 10 Fehlerfälle (E01–E10)** der Kundenreferenzdatei `fixtures/HansePack_Referenzfaelle.json`.
 
 CLI-Aufrufnachweis:
 ```bash
@@ -103,7 +112,12 @@ python quotation.py HP-BOX 0
 # -> Exit-Code 1, stderr: "Fehler: Menge für HP-BOX (0) liegt außerhalb des erlaubten Bereichs (1-10000)."
 ```
 
-### 4.3 Unverändertes Altprodukt Nordwerk (`B5`)
+### 4.3 Agentische Validierung durch QA- und Security-Engineers
+Die Verifikation wurde durch die Factory-Agenten (`run_qa_test_execution` und `run_security_audit`) mit lokalem LLM (`qwen3.5:9b`) durchgeführt:
+- **QA Test Engineer (`qa_test_engineer`):** `Status: approved` – Alle Produkttests (`test_quotation.py`) mit Exit-Code 0 bestanden, Code-Qualität und Testabdeckung verifiziert.
+- **AI Safety & Security Engineer (`ai_safety_security_engineer`):** `Status: approved` – Keine Injektionsrisiken, keine geheimen Schlüssel, keine ungesicherten Pfade, vollständige PHP-Freiheit (CVE-2026-109618 / 109619 ausgeschlossen).
+
+### 4.4 Unverändertes Altprodukt Nordwerk (`B5`)
 - Der Nordwerk-Produktstand ist auf Commit **`d140f26`** (`main`) gesichert.
 - Unveränderter Prüfnachweis (`python test_website.py`):
   ```text
@@ -113,10 +127,12 @@ python quotation.py HP-BOX 0
   PASSED F4 Bedienbarkeit statisch (AC-06/AC-07)
   ERGEBNIS: ALLE PRUEFFAMILIEN BESTANDEN
   ```
+- Dateistand in `client-01-website` 100 % sauber (`working tree clean`).
 
-### 4.4 Kundenauftrag & Fixtures (`B6`)
+### 4.5 Kundenauftrag & Fixtures (`B6`)
 - Spezifikation in `issue_hp01.md` mit klaren Annahmen (A1–A5), offenen Fragen (F1–F4) und Lieferplan.
 - Fixtures `fixtures/HansePack_Katalog.json` und `fixtures/HansePack_Referenzfaelle.json` stammen unverändert aus Kurs-Commit `f66013c` (verifiziert via SHA256 in `fixtures/SHA256SUMS`).
+- Kein erfundener Zusatzumfang: Reine Python-Fachlogik mit CLI, kein verfrühtes Webframework, keine Datenbank, kein PDF.
 
 ---
 

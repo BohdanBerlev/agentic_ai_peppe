@@ -176,7 +176,7 @@ def build_qa_security_graph(
     trace_context: dict[str, Any] | None = None,
     run_tests: bool = False,
 ):
-    llm = llm or get_chat_model()
+    llm = llm or get_chat_model(json_mode=True)
     trace_ctx = trace_context if trace_context is not None else {"tools": [], "calls": 0}
 
     def inspect_file(state: QASecurityState) -> QASecurityState:
