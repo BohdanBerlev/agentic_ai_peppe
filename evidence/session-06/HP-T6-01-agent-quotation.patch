@@ -1,0 +1,142 @@
+diff --git a/quotation.py b/quotation.py
+index 06520e1..87af4ec 100644
+--- a/quotation.py
++++ b/quotation.py
+@@ -1,9 +1,9 @@
+-"""HansePack Angebotsrechner – Fachlogik (Starter, wird durch die Factory implementiert).
+-
+-Spezifikation: issue_hp01.md
+-"""
+ from __future__ import annotations
+ 
++import sys
++import json
++from pathlib import Path
++
+ 
+ class QuotationError(ValueError):
+     """Ungültige Angebotseingabe. `reason` ist ein semantischer Fehlercode."""
+@@ -13,5 +13,122 @@ class QuotationError(ValueError):
+         self.reason = reason
+ 
+ 
++def load_catalog() -> dict:
++    catalog_path = Path(__file__).parent / "fixtures" / "HansePack_Katalog.json"
++    if not catalog_path.exists():
++        # Fallback if running from root or different relative dir
++        catalog_path = Path("fixtures") / "HansePack_Katalog.json"
++    if catalog_path.exists():
++        with open(catalog_path, "r", encoding="utf-8") as f:
++            data = json.load(f)
++            # Support both flat list or dictionary with items/products
++            if isinstance(data, list):
++                return {item["sku"]: item for item in data if "sku" in item}
++            elif isinstance(data, dict):
++                for key in ("items", "products", "articles"):
++                    if key in data and isinstance(data[key], list):
++                        return {item["sku"]: item for item in data[key] if "sku" in item}
++                return data
++    return {}
++
++
+ def calculate_quote(items: list[dict], rule_version: str = "HP-V1") -> dict:
+-    raise NotImplementedError("TODO: implement according to issue_hp01.md")
++    if not isinstance(items, list):
++        raise QuotationError("invalid_input", "Items must be a list")
++
++    catalog = load_catalog()
++    lines = []
++    goods_net_cents = 0
++
++    for item_input in items:
++        if not isinstance(item_input, dict):
++            raise QuotationError("invalid_input", "Item must be a dictionary")
++        
++        sku = item_input.get("sku")
++        quantity = item_input.get("quantity")
++
++        # Validate quantity type and value (must be integer, strictly not bool, 1-10000)
++        if isinstance(quantity, bool) or not isinstance(quantity, int):
++            raise QuotationError("invalid_quantity_type", f"Quantity for {sku} must be an integer")
++        
++        if quantity < 1 or quantity > 10000:
++            raise QuotationError("quantity_out_of_range", f"Quantity {quantity} for {sku} is out of range (1-10000)")
++
++        if sku not in catalog:
++            raise QuotationError("unknown_sku", f"Unknown SKU: {sku}")
++
++        catalog_item = catalog[sku]
++        # Support various price keys in catalog ('price_cents', 'unit_price_cents', 'price')
++        unit_price_cents = catalog_item.get("price_cents") or catalog_item.get("unit_price_cents")
++        if unit_price_cents is None and "price" in catalog_item:
++            unit_price_cents = int(catalog_item["price"] * 100)
++        if unit_price_cents is None:
++            raise QuotationError("catalog_error", f"Price not found for SKU: {sku}")
++
++        list_amount_cents = quantity * unit_price_cents
++
++        # Discount rules: 1-49 -> 0%, 50-99 -> 5%, >= 100 -> 10%
++        if quantity >= 100:
++            discount_percent = 10
++        elif quantity >= 50:
++            discount_percent = 5
++        else:
++            discount_percent = 0
++
++        # ROUND_HALF_UP: (list_amount_cents * discount_percent + 50) // 100
++        discount_cents = (list_amount_cents * discount_percent + 50) // 100
++        net_cents = list_amount_cents - discount_cents
++
++        goods_net_cents += net_cents
++
++        lines.append({
++            "sku": sku,
++            "quantity": quantity,
++            "unit_price_cents": unit_price_cents,
++            "list_amount_cents": list_amount_cents,
++            "discount_percent": discount_percent,
++            "discount_cents": discount_cents,
++            "net_cents": net_cents
++        })
++
++    # Shipping rules for HP-V1: 1200 cents if goods_net_cents < 50000, else 0
++    shipping_cents = 1200 if goods_net_cents < 50000 else 0
++    total_cents = goods_net_cents + shipping_cents
++
++    return {
++        "lines": lines,
++        "goods_net_cents": goods_net_cents,
++        "shipping_cents": shipping_cents,
++        "total_cents": total_cents,
++        "currency": "EUR",
++        "rule_version": rule_version
++    }
++
++
++def main():
++    if len(sys.argv) < 3:
++        print("Usage: python quotation.py <SKU> <QUANTITY>", file=sys.stderr)
++        sys.exit(1)
++
++    sku = sys.argv[1]
++    qty_str = sys.argv[2]
++
++    try:
++        quantity = int(qty_str)
++    except ValueError:
++        print(f"Error: Invalid quantity '{qty_str}'", file=sys.stderr)
++        sys.exit(1)
++
++    try:
++        quote = calculate_quote([{"sku": sku, "quantity": quantity}])
++        print(json.dumps(quote, indent=2, ensure_ascii=False))
++    except QuotationError as e:
++        print(f"QuotationError [{e.reason}]: {e}", file=sys.stderr)
++        sys.exit(1)
++    except Exception as e:
++        print(f"Error: {e}", file=sys.stderr)
++        sys.exit(1)
++
++
++if __name__ == "__main__":
++    main()

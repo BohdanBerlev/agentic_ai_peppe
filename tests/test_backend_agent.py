@@ -124,7 +124,7 @@ def test_my_backend_agent_contract_success(monkeypatch):
             "code": "# mock updated code",
         })
     )
-    monkeypatch.setattr("src.agents.backend_agent.get_chat_model", lambda: mock_llm)
+    monkeypatch.setattr("src.agents.backend_agent.get_chat_model", lambda *args, **kwargs: mock_llm)
 
     # Intercept write_repository_text_file to avoid modifying actual repo files
     written_files = {}
@@ -176,7 +176,7 @@ def test_my_backend_agent_contract_with_qa_feedback(monkeypatch):
 
     mock_llm = MagicMock()
     mock_llm.invoke.side_effect = mock_invoke
-    monkeypatch.setattr("src.agents.backend_agent.get_chat_model", lambda: mock_llm)
+    monkeypatch.setattr("src.agents.backend_agent.get_chat_model", lambda *args, **kwargs: mock_llm)
 
     fake_state = {
         "task": {

@@ -115,6 +115,31 @@ def _message_text(message: Any) -> str:
     return str(content)
 
 
+def _parse_backend_output(text: str) -> dict:
+    """Parst die Backend-Agent-Antwort robust als JSON.
+
+    Reihenfolge: direktes JSON, JSON-Codeblock, Python-Codeblock.
+    Der ursprüngliche JSON-Fehler wird erneut ausgelöst, wenn nichts passt.
+    """
+    try:
+        return json.loads(text, strict=False)
+    except json.JSONDecodeError as exc:
+        first_error = exc
+
+    if "```json" in text:
+        block = text.split("```json", 1)[1].split("```", 1)[0]
+        try:
+            return json.loads(block, strict=False)
+        except json.JSONDecodeError:
+            pass
+
+    if "```python" in text:
+        code = text.split("```python", 1)[1].split("```", 1)[0].strip()
+        return {"code": code}
+
+    raise first_error
+
+
 def _parse_result(text: str, wp_id: str, tests_passed: bool, iterations: int, test_output: str) -> BackendImplementationReport:
     """Parst die Antwort des LLM und sichert deterministische Metriken ab."""
     cleaned = text.strip()
@@ -511,17 +536,7 @@ def my_backend_agent(state: dict[str, Any], attempt: int = 1) -> dict[str, Any]:
         if start >= 0 and end > start:
             text = text[start : end + 1]
 
-        try:
-            parsed = json.loads(text, strict=False)
-        except Exception as _e1:
-            import re
-            code_match = re.search(r'"code"\s*:\s*"(.*?)"\s*(?:,\s*"|\})', text, re.DOTALL)
-            if code_match:
-                parsed = {"code": code_match.group(1).encode().decode('unicode_escape', errors='ignore')}
-            elif "```python" in text:
-                parsed = {"code": text.split("```python")[1].split("```")[0].strip()}
-            else:
-                raise _e1
+        parsed = _parse_backend_output(text)
 
         new_code = parsed.get("code")
         if new_code:

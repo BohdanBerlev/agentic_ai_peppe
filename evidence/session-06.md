@@ -13,8 +13,10 @@
 | Rolle / Stand | Repository / Branch | Eingabe-Commit | Ergebnis-Commit & Git-Tag |
 | :--- | :--- | :--- | :--- |
 | **Produkt 01 (Nordwerk Basis)** | `DavidPisark/Nordwerk-Industrie-Service-Website` (`main`) | `f2feebb` (`CR-01-v1.0`) | **`d140f26`** (gesichert, eingefroren, 0 Änderungen durch T6) |
-| **Produkt 02 (HansePack)** | `Vanitas50/client-02-quotation` (`main`) | `90953d3` (Kunden-Issue, Tests, Starter) | **`2dfb7ae`** (`quotation.py` verfeinert & agentisch validiert) |
-| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`7020450`** (LLM-Robustheit, Session-06-Evidenz) |
+| **Produkt 02 (HansePack)** | `Vanitas50/client-02-quotation` (`main`) | `90953d3` (Kunden-Issue, Tests, Starter) | **`2dfb7ae`** (`quotation.py` verfeinert (Team) & durch Agenten geprüft) |
+| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`7179c3c`** (LLM-Robustheit, Session-06-Evidenz) · Evidence-Commits `517fb86`, `dc7d0c1`, `92f6ee0` |
+
+> **Hinweis zum Produkt-Ergebnis `2dfb7ae`:** Im Trace `8f912c03…` ist kein `backend_agent`-Aufruf enthalten; die Verfeinerung in `2dfb7ae` (Rundungsformel, Validierung B1–B4) wird daher als menschliche Nacharbeit gezählt. Agentenbeitrag: `d92d39a` (backend_agent, Lauf HP-T6-REPAIR) sowie Prüfung durch QA/Integration im Lauf `8f912c03…`.
 
 ---
 
@@ -67,7 +69,7 @@ In der Full-Company-Pipeline übergeben mindestens 8 Agentenrollen strukturierte
 1. `product_owner_requirements`: Parst `issue_hp01.md`, extrahiert Akzeptanzkriterien für HP-BOX und Regelversion HP-V1.
 2. `project_manager`: Erstellt Aufgabenplan mit Priorisierung Q01, Q03, E01.
 3. `software_architect`: Definiert Funktionssignatur `calculate_quote(items, rule_version)` und Exception-Hierarchie (`QuotationError`).
-4. `backend_api_engineer`: Implementiert `quotation.py` inklusive `load_catalog()` und Rundungslogik (`ROUND_HALF_UP`).
+4. `backend_api_engineer`: Implementiert `quotation.py` inklusive `load_catalog()` und Rundungslogik als Ganzzahlformel `(list_amount_cents * discount_percent + 50) // 100` (kaufmännisches Runden).
 5. `qa_test_engineer`: Führt automatisierte Produkttests `test_quotation.py` aus.
 6. `ai_safety_security_engineer`: Prüft auf Pfadtraviersierung und deterministische Ausführung.
 7. `integration_engineer`: Bereitet Diff und Commit-Vorschlag vor.
@@ -81,7 +83,7 @@ In der Full-Company-Pipeline übergeben mindestens 8 Agentenrollen strukturierte
 - `quotation.py` lädt Artikelpreise ausschließlich aus `fixtures/HansePack_Katalog.json`.
 - **Kein LLM zur Laufzeit:** Die Preisberechnung ist vollständig deterministisch in Python umgesetzt.
 - Alle Beträge werden in ganzzahligen Cents (`int`) geführt.
-- **Kaufmännische Rundung (`ROUND_HALF_UP`):** Entsprechend Kundenbriefing Regel 3 mit der verbindlichen Formel implementiert:
+- **Kaufmännische Rundung:** Entsprechend Kundenbriefing Regel 3 mit der Ganzzahlformel implementiert (entspricht kaufmännischem Runden, ohne `Decimal`):
   `discount_cents = (list_amount_cents * discount_percent + 50) // 100`
 - **Umfassende Eingabevalidierung:**
   - 1–3 Positionen (`empty_items`, `too_many_items`).
@@ -148,7 +150,7 @@ Die Verifikation wurde durch die Factory-Agenten (`run_qa_test_execution` und `r
 | **Projekt-ID** | `client-02` (HansePack) | `client-02` (HansePack) |
 | **Eingabe-Commit (Produkt)** | `90953d3` (Kunden-Issue, Tests, Starter) | `90953d3` (Kunden-Issue, Tests, Starter) |
 | **Ergebnis-Commit (Produkt)** | – (QA blockiert) | **`2dfb7ae`** (`quotation.py` verfeinert & validiert) |
-| **Factory-Commit** | `344df70` | **`7020450`** |
+| **Factory-Commit** | `344df70` | **`7179c3c`** (Evidence-Commits `517fb86`, `dc7d0c1`, `92f6ee0`) |
 | **Modell & Parameter** | Ollama `qwen3.5:9b` (`num_ctx=4096`, `temperature=0.0`) | Ollama `qwen3.5:9b` (`num_ctx=8192`, `json_mode=True`) |
 | **Ausgeführte Tests** | `test_quotation.py` (Exit 1: Catalog dict lookup) | `test_quotation.py` (4 passed) + Trennungstest (5 passed) |
 | **Reviewer & Entscheidung** | Automatisch durch QA-Gate abgewiesen | **Lars Boos** · Freigabe: **APPROVED** |
@@ -180,31 +182,45 @@ Die Messung wurde durch unseren **Cost & Observability Agent** ([`cost_analysis.
 - **Fehlläufe enthalten:** Erstlauf HP-T6-01 (`qa_failed`) ist mit 9,53 Credits vollständig in der Bilanz erfasst.
 - **Zwischensumme Agenten:** **19,42 Credits**
 
-#### C. CI- und Testausführungen (@ 1 Credit je Ausführung)
-- Factory-Projektisolationstest (`pytest tests/test_project_separation_t6.py`): 1,00 Credit
-- HansePack-Produkttest (`pytest test_quotation.py`): 1,00 Credit
-- Nordwerk-Regressionscheck (`python test_website.py`): 1,00 Credit
-- **Zwischensumme CI/Tests:** **3,00 Credits**
+#### Zusätzlicher Lauf HP-T6-01 (Gemini, Team)
+- **Workflow-ID:** `1d9fdb94-c030-47f8-a535-a4f9882c6b11` (16 Agentenaufrufe)
+- **Kosten:** **17,67 Credits**, **Laufzeit:** 92,68 s
+- **Details:** [`HP-T6-01-gemini-run.md`](session-06/HP-T6-01-gemini-run.md)
+- **Hinweis auf gemischte Provider:** Bei Lars' Läufen kam lokal Ollama zum Einsatz, in diesem zusätzlichen Lauf Gemini mit genehmigter Ausnahme. Die Kosten pro Lauf sind daher nicht direkt vergleichbar.
+- **Gate:** im Trace `approved` durch Mehrose Farooq; versehentliche Eingabe, gemeint war `changes_requested` (siehe Notiz). Ergebnis nicht übernommen.
+
+#### C. CI- und Testausführungen (@ 1 Credit je CI-Lauf)
+Lokale `pytest`-Aufrufe zählen nicht als CI. Als CI zählen die GitHub-Actions-Läufe auf `termin-6-hansepack` für Termin 6, je 1 Credit inklusive Fehlschlägen:
+
+- `a511c30` success: 1,00 Credit
+- `344df70` success: 1,00 Credit
+- `419b795` failure: 1,00 Credit
+- `7179c3c` failure: 1,00 Credit
+- `517fb86` failure: 1,00 Credit
+- `dc7d0c1` failure: 1,00 Credit
+- `92f6ee0` failure: 1,00 Credit
+- Ursache der Fehlschläge: 2 Backend-Agent-Tests, Mock ohne `json_mode`; behoben lokal in diesem Stand.
+- **Zwischensumme CI:** **7,00 Credits** (weitere Läufe nach Korrektur-Push kommen hinzu)
 
 #### D. Externe Cloud-Kosten
 - Keine Cloud-Kosten angefallen, da rein lokaler Kurs-Stack (Ollama mit lokal gehostetem `qwen3.5:9b`) eingesetzt wurde: **0,00 Credits** (markiert).
 
 #### Gesamtkostenbilanz Termin 6:
-$$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 3{,}00 + 0{,}00 = \mathbf{255{,}75\text{ Credits}}$$
+$$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 7{,}00 + 0{,}00 = \mathbf{277{,}42\text{ Credits}}$$
 
 ### 5.3 Planung: Projektstartaufwand, Ist-Kosten & Budget T6–T8 (`C3`)
 
 - **Projektstartaufwand HansePack:** 75,00 Credits (45 Min. Menschenzeit) für Einarbeitung in Domäne, Rechenregeln und Fixtures. Dieser Aufwand ist sauber von der Factory-Entwicklung (75,00 Credits) getrennt.
 - **Budget- und Lieferplan:**
-  - **Termin 6 (Ist): 255,75 Credits** – Eigenständig lauffähiges Python-Produkt mit CLI, Q01/Q03/E01, Factory-Registry, Trennungstest.
+  - **Termin 6 (Ist): 277,42 Credits** – Eigenständig lauffähiges Python-Produkt mit CLI, Q01/Q03/E01, Factory-Registry, Trennungstest.
   - **Termin 7 (Plan): 300,00 Credits** (Mensch: 250 Cr, Agenten: 40 Cr, CI: 10 Cr) – Responsive Browser-Weboberfläche (HTML/CSS/JS), JSON-Export, vollständige Q01–Q14 und E01–E10 Suite, Release-Candidate.
   - **Termin 8 (Plan-Reserve): 200,00 Credits** – Reserve für Kundenänderung CR-02 (angepasste Versandstaffel HP-V2: ab 400 € versandkostenfrei, sonst 15 €) und finale Abnahme.
-  - **Gesamtbudget T6–T8:** **755,75 Credits**.
+  - **Gesamtbudget T6–T8:** **777,42 Credits**.
 
 ### 5.4 Reuse-Lernen, Grenzen & Schwachstellenanalyse (`C4`)
 
 - **Konkret nachgewiesene Wiederverwendung:**
-  - Die gesamte 8-Agenten-Orchestrierung (`src/workflows/feature_pipeline.py`) und Rollenkonfiguration (`organization/roles.yaml`) wurde zu 100 % unverändert übernommen.
+  - Die Pipeline-Struktur (`src/workflows/feature_pipeline.py`) und die Rollen (`organization/roles.yaml`) blieben unverändert. Angepasst wurden: Projekt-Registry und Isolations-Guard (`src/projects.py`), `json_mode` in Backend-, Cost-, Integration- und QA-Agent, `num_ctx=8192` für Ollama, robustere JSON-Auswertung im Backend-Agent.
   - LLM-Factory (`src/llm/factory.py`), Tracing-Infrastruktur (`src/observability/tracing.py`), Pfadsicherheit (`src/agents/common.py`) und das Human Approval Gate wurden ohne projektspezifischen Fork wiederverwendet.
 - **Kundenspezifischer Aufwand & Grenzen der Wiederverwendung:**
   - Für den zweiten Kunden musste eine Mandanten-Registry (`src/projects.py`) geschaffen werden.
@@ -223,19 +239,19 @@ $$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 3{,}00 + 0{,}00 = \mathbf{255{,}75\
 ## 6. Menschliche Verantwortung & Freigabe (`D1`)
 
 ### 6.1 Reviewer & Rollenzuordnung
-- **Reviewer:** Lars Boos (`lars.boos@haw-hamburg.de`)
+- **Reviewer:** Lars Boos
 - **Accountable Role gemäß `organization/roles.yaml`:** `qa_test_engineer` & `project_manager`.
-- **Geprüfter Produkt-Diff:** `git diff 90953d3..2dfb7ae` im Repository `client-02-quotation` ([`quotation.py`](file:///C:/Users/Lars_Boos/Documents/Entwicklung/Agentic-AI-Projekt-Client02/quotation.py)).
+- **Geprüfter Produkt-Diff:** `git diff 90953d3..2dfb7ae` im Repository `client-02-quotation` ([`quotation.py`](https://github.com/Vanitas50/client-02-quotation/blob/2dfb7ae/quotation.py)).
 
 ### 6.2 Fachliche Begutachtung & Kriterienprüfung
-1. **Deterministische Fachlogik:** Keine Preisberechnung durch LLMs; alle Preise werden direkt aus [`fixtures/HansePack_Katalog.json`](file:///C:/Users/Lars_Boos/Documents/Entwicklung/Agentic-AI-Projekt-Client02/fixtures/HansePack_Katalog.json) geladen.
-2. **Kaufmännische Rundung:** Überprüfung der Formel `(list_amount_cents * discount_percent + 50) // 100` gegen die Kundenregeln (ROUND_HALF_UP).
+1. **Deterministische Fachlogik:** Keine Preisberechnung durch LLMs; alle Preise werden direkt aus [`fixtures/HansePack_Katalog.json`](https://github.com/Vanitas50/client-02-quotation/blob/2dfb7ae/fixtures/HansePack_Katalog.json) geladen.
+2. **Kaufmännische Rundung:** Überprüfung der Ganzzahlformel `(list_amount_cents * discount_percent + 50) // 100` gegen die Kundenregeln. Die Umsetzung erfolgt mit dieser Ganzzahlformel (entspricht kaufmännischem Runden), nicht mit `Decimal`/`ROUND_HALF_UP`.
 3. **Pflichtprüfungen T6:** Q01 (1.450 Cent), Q03 (13.075 Cent) und E01 (Zurückweisung Menge 0) automatisiert und per CLI verifiziert.
 4. **Vollabgleich Kundenfixtures:** Alle 14 Referenzfälle (Q01–Q14) und alle 10 Fehlerfälle (E01–E10) fehlerfrei bestanden.
 5. **Regressions- & Isolationsschutz:** Nordwerk (`d140f26`) unberührt und voll funktionsfähig; Factory-Trennungstest (`test_project_separation_t6.py`, 5/5) bestanden.
 
 ### 6.3 Agenten-Audit der Schnittstellen (Integration Agent)
-Der Factory-Agent [`run_integration_check`](file:///C:/Users/Lars_Boos/Documents/Entwicklung/Agentic-AI-Projekt/src/agents/integration_agent.py) evaluierte die Schnittstellenübergaben:
+Der Factory-Agent [`run_integration_check`](../src/agents/integration_agent.py) evaluierte die Schnittstellenübergaben:
 - **Status:** `approved`
 - **Befund:** `Integration check passed: Requirements, Project Plan, Architecture, QA, and Security artifacts are consistent with the target interface implementation. No gaps detected in API interfaces.`
 - **Validierte Handovers:** `PO -> PM`, `PM -> SA`, `QA/Security -> Human Gate`.
