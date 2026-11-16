@@ -59,7 +59,7 @@ def _parse_integration_result(text: str) -> IntegrationHandoverReport:
 
 
 def build_integration_graph(llm: Any | None = None, *, trace_context: dict[str, Any] | None = None):
-    llm = llm or get_chat_model()
+    llm = llm or get_chat_model(json_mode=True)
     trace_ctx = trace_context if trace_context is not None else {"tools": [], "calls": 0}
 
     def inspect_interfaces(state: IntegrationState) -> IntegrationState:
