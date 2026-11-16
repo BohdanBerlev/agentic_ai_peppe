@@ -14,7 +14,7 @@
 | :--- | :--- | :--- | :--- |
 | **Produkt 01 (Nordwerk Basis)** | `DavidPisark/Nordwerk-Industrie-Service-Website` (`main`) | `f2feebb` (`CR-01-v1.0`) | **`d140f26`** (gesichert, eingefroren, 0 Änderungen durch T6) |
 | **Produkt 02 (HansePack)** | `Vanitas50/client-02-quotation` (`main`) | `90953d3` (Kunden-Issue, Tests, Starter) | **`2dfb7ae`** (`quotation.py` verfeinert & agentisch validiert) |
-| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`4a160ab`** (LLM-Robustheit, Session-06-Evidenz) |
+| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`7020450`** (LLM-Robustheit, Session-06-Evidenz) |
 
 ---
 
@@ -148,7 +148,7 @@ Die Verifikation wurde durch die Factory-Agenten (`run_qa_test_execution` und `r
 | **Projekt-ID** | `client-02` (HansePack) | `client-02` (HansePack) |
 | **Eingabe-Commit (Produkt)** | `90953d3` (Kunden-Issue, Tests, Starter) | `90953d3` (Kunden-Issue, Tests, Starter) |
 | **Ergebnis-Commit (Produkt)** | – (QA blockiert) | **`2dfb7ae`** (`quotation.py` verfeinert & validiert) |
-| **Factory-Commit** | `344df70` | **`7179c3c`** |
+| **Factory-Commit** | `344df70` | **`7020450`** |
 | **Modell & Parameter** | Ollama `qwen3.5:9b` (`num_ctx=4096`, `temperature=0.0`) | Ollama `qwen3.5:9b` (`num_ctx=8192`, `json_mode=True`) |
 | **Ausgeführte Tests** | `test_quotation.py` (Exit 1: Catalog dict lookup) | `test_quotation.py` (4 passed) + Trennungstest (5 passed) |
 | **Reviewer & Entscheidung** | Automatisch durch QA-Gate abgewiesen | **Lars Boos** · Freigabe: **APPROVED** |
