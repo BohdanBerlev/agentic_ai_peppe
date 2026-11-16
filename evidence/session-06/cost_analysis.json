@@ -1,0 +1,29 @@
+{
+  "status": "success",
+  "total_runs_analyzed": 15,
+  "total_cost_credits": 19.415,
+  "total_duration_seconds": 356.1104,
+  "summary": "Analyse der Kosten und Agentenbeiträge für Session 6 (HansePack). Insgesamt wurden 15 Ausführungen mit einer Gesamtkosten von 17,9432 gelistet.",
+  "insights": [
+    {
+      "agent_name": "requirements_agent",
+      "finding": "Verantwortlich für Tasks HP-T6-02 und HP-T6-01. In HP-T6-02: 3 Runs (Kosten: 3,5979). In HP-T6-01: 3 Runs (Kosten: 3,9813)."
+    },
+    {
+      "agent_name": "architect_agent",
+      "finding": "Verantwortlich für Tasks HP-T6-02 und HP-T6-01. In HP-T6-02: 1 Run (Kosten: 1,1332). In HP-T6-01: 1 Run (Kosten: 1,3594)."
+    },
+    {
+      "agent_name": "qa_security_agent",
+      "finding": "Verantwortlich für Tasks HP-T6-02 und HP-T6-01. In HP-T6-02: 2 Runs (Kosten: 2,2349). In HP-T6-01: 2 Runs (Kosten: 2,7477)."
+    },
+    {
+      "agent_name": "integration_agent",
+      "finding": "Verantwortlich für Tasks HP-T6-02 und HP-T6-01. In HP-T6-02: 1 Run (Kosten: 1,1156). In HP-T6-01: 1 Run (Kosten: 1,3792)."
+    },
+    {
+      "agent_name": "backend_agent",
+      "finding": "Verantwortlich für Task HP-T6-REPAIR. 1 Run mit hoher Dauer (68,433s) und Kosten (1,8158)."
+    }
+  ]
+}

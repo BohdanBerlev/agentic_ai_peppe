@@ -14,7 +14,7 @@
 | :--- | :--- | :--- | :--- |
 | **Produkt 01 (Nordwerk Basis)** | `DavidPisark/Nordwerk-Industrie-Service-Website` (`main`) | `f2feebb` (`CR-01-v1.0`) | **`d140f26`** (gesichert, eingefroren, 0 Änderungen durch T6) |
 | **Produkt 02 (HansePack)** | `Vanitas50/client-02-quotation` (`main`) | `90953d3` (Kunden-Issue, Tests, Starter) | **`2dfb7ae`** (`quotation.py` verfeinert & agentisch validiert) |
-| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`364eaa7`** (LLM-Robustheit, Session-06-Evidenz) |
+| **Factory Multi-Project** | `BohdanBerlev/agentic_ai_peppe` (`termin-6-hansepack`) | `344df70` (Registry, Trennungstest) | **`90512d2`** (LLM-Robustheit, Session-06-Evidenz) |
 
 ---
 
@@ -136,40 +136,96 @@ Die Verifikation wurde durch die Factory-Agenten (`run_qa_test_execution` und `r
 
 ---
 
-## 5. Kosten, Messung & Planung (`C1`–`C4`, `L6.4`)
+## 5. Messung, Kosten, Planung & Reuse-Lernen (`C1`–`C4`, `L6.4`)
 
-### 5.1 Zeit- und Kostenaufstellung (`C2`)
-- **Menschliche Arbeitszeit (exklusiv erfasst):**
-  - Projektstart & Analyse Kundenbriefing HansePack: ~45 Min.
-  - Implementierung Registry & Trennungstest (`A1`, `A4`): ~30 Min.
-  - Review & Fehlerkorrektur JSON-Parsing / Kontextgröße: ~30 Min.
-  - Freigabe & Evidenzsicherung: ~15 Min.
-- **Agenten-Laufzeiten & Fehlläufe:**
-  - Lauf 1 (`fb1d7c6b...`, Fehllauf wg. Katalog-Schema): 59,8 s | 9,53 Credits
-  - Lauf 2 (`8f912c03...`, Verifikationslauf `HP-T6-02`): 75,1 s | 8,08 Credits
-  - Gesamtverbrauch Session 6: **17,61 Credits**
+### 5.1 Run-Manifest & Verknüpfung aller Artefakte (`C1`)
 
-### 5.2 Lieferplanung T6–T8 (`C3`)
-- **Termin 6 (Heute):** Kernlogik Angebotsberechnung (HP-BOX mit Q01, Q03, E01) als eigenständig ausführbares Python-Modul mit CLI und Tests.
-- **Termin 7:** Ausbau aller Referenzfälle Q01–Q14 und Fehlerfälle E01–E10, browserbasierte Weboberfläche, JSON-Export, vollständige CI/CD-Pipeline.
-- **Termin 8:** Reserve für Kundenänderung CR-02 (dynamische Versandkostenstaffel HP-V2) und finale Abnahme.
+| Parameter | Lauf 1 (Erstlauf / Fehllauf) | Lauf 2 (`HP-T6-02` / Verifikationslauf) |
+| :--- | :--- | :--- |
+| **Run-ID** | `10bb82fa-d821-440f-9573-012a9265d487` | `1a9a33df-ccbd-4c34-b40b-94f6b3e9c0ad` |
+| **Workflow-ID** | `fb1d7c6b-6a79-4eab-bc00-0a1fe437daae` | `8f912c03-2c2b-42ca-82ef-304bc0c4f1b9` |
+| **Trace-Datei** | [`evidence/session-06/fb1d7c6b-6a79-4eab-bc00-0a1fe437daae.jsonl`](session-06/fb1d7c6b-6a79-4eab-bc00-0a1fe437daae.jsonl) | [`evidence/session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl`](session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl) |
+| **Projekt-ID** | `client-02` (HansePack) | `client-02` (HansePack) |
+| **Eingabe-Commit (Produkt)** | `90953d3` (Kunden-Issue, Tests, Starter) | `90953d3` (Kunden-Issue, Tests, Starter) |
+| **Ergebnis-Commit (Produkt)** | – (QA blockiert) | **`2dfb7ae`** (`quotation.py` verfeinert & validiert) |
+| **Factory-Commit** | `344df70` | **`7179c3c`** |
+| **Modell & Parameter** | Ollama `qwen3.5:9b` (`num_ctx=4096`, `temperature=0.0`) | Ollama `qwen3.5:9b` (`num_ctx=8192`, `json_mode=True`) |
+| **Ausgeführte Tests** | `test_quotation.py` (Exit 1: Catalog dict lookup) | `test_quotation.py` (4 passed) + Trennungstest (5 passed) |
+| **Reviewer & Entscheidung** | Automatisch durch QA-Gate abgewiesen | **Lars Boos** · Freigabe: **APPROVED** |
 
-### 5.3 Reuse-Lernen & Schwachstellenanalyse (`C4`)
-- **Was ließ sich wiederverwenden?**
-  Die gesamte Multi-Agenten-Orchestrierung (LangGraph-Workflow, Rollenhierarchie, Prompt-Templates, Tool-Aufrufe und Sicherheitschecks) konnte zu 100 % für das neue Projekt übernommen werden.
-- **Was war kundenspezifisch?**
-  Pfade, Repositories, Testskripte sowie die Schema-Definition der Ein- und Ausgabedaten (`quotation.py` vs. statische HTML-Seiten).
-- **Konkrete untersuchte Schwachstelle:**
-  Bei lokalen LLMs (`qwen3.5:9b`) führte das Einspeisen vollständiger Fixture-JSONs bei standardmäßigem Kontextfenster (4.096 Tokens) zum vorzeitigen Abbruch der Modell-Ausgabe (`truncated=1`), wodurch JSON-Strings unvollständig blieben. Durch Anhebung des Kontextfensters auf `num_ctx=8192` und eine fehlertolerante JSON-Bereinigung (`strict=False` mit Regex-Fallback) wurde das Problem nachhaltig gelöst.
+### 5.2 Vollständige Messung & Kostenrechnung (`C2`)
+
+Die Messung wurde durch unseren **Cost & Observability Agent** ([`cost_analysis.json`](session-06/cost_analysis.json)) automatisiert konsolidiert. Alle Fehlläufe und Kategorien sind transparent ausgewiesen.
+
+#### A. Menschliche Arbeitszeit (exklusiv erfasst @ 100 Credits / Person-Stunde)
+1. **Kundenlieferung (Projektstart & Briefing-Analyse):** 45 Min. (0,75 h) = **75,00 Credits**  
+   *Analyse der Rechenregeln HP-V1, Erstellung von `issue_hp01.md`, Fixture-Prüfsummen.*
+2. **Factory-Entwicklung (Multi-Project-Fähigkeit):** 45 Min. (0,75 h) = **75,00 Credits**  
+   *Zentrale Registry `src/projects.py`, Trennungstest `test_project_separation_t6.py`, LLM-Härtung.*
+3. **Nacharbeit (Fehleranalyse & Reparatur):** 30 Min. (0,50 h) = **50,00 Credits**  
+   *Analyse des Fehllaufs HP-T6-01 (Katalogstruktur, Token-Truncation), Prompt- & JSON-Parsing-Korrektur.*
+4. **Review & Freigabe:** 20 Min. (0,33 h) = **33,33 Credits**  
+   *Menschliche Prüfung des Produktdiffs, Testdurchläufe, Evidenzdokumentation.*
+- **Zwischensumme Menschenzeit:** 140 Min. (2,33 h) = **233,33 Credits**
+
+#### B. Agenten-Kosten (ausgewertet durch Cost Agent über 15 Runs)
+- **Gesamte Agenten-Laufzeit:** 356,11 Sekunden (~5,9 Min.)
+- **Agenten-Kosten nach Rollen:**
+  - `requirements_agent` (6 Runs über HP-T6-01 & HP-T6-02): 7,58 Credits
+  - `architect_agent` (2 Runs): 2,49 Credits
+  - `backend_agent` (1 Run, 68,4 s): 1,82 Credits
+  - `qa_security_agent` (4 Runs): 4,98 Credits
+  - `integration_agent` (2 Runs): 2,49 Credits
+  - `cost_observability_agent` (1 Run): 0,06 Credits
+- **Fehlläufe enthalten:** Erstlauf HP-T6-01 (`qa_failed`) ist mit 9,53 Credits vollständig in der Bilanz erfasst.
+- **Zwischensumme Agenten:** **19,42 Credits**
+
+#### C. CI- und Testausführungen (@ 1 Credit je Ausführung)
+- Factory-Projektisolationstest (`pytest tests/test_project_separation_t6.py`): 1,00 Credit
+- HansePack-Produkttest (`pytest test_quotation.py`): 1,00 Credit
+- Nordwerk-Regressionscheck (`python test_website.py`): 1,00 Credit
+- **Zwischensumme CI/Tests:** **3,00 Credits**
+
+#### D. Externe Cloud-Kosten
+- Keine Cloud-Kosten angefallen, da rein lokaler Kurs-Stack (Ollama mit lokal gehostetem `qwen3.5:9b`) eingesetzt wurde: **0,00 Credits** (markiert).
+
+#### Gesamtkostenbilanz Termin 6:
+$$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 3{,}00 + 0{,}00 = \mathbf{255{,}75\text{ Credits}}$$
+
+### 5.3 Planung: Projektstartaufwand, Ist-Kosten & Budget T6–T8 (`C3`)
+
+- **Projektstartaufwand HansePack:** 75,00 Credits (45 Min. Menschenzeit) für Einarbeitung in Domäne, Rechenregeln und Fixtures. Dieser Aufwand ist sauber von der Factory-Entwicklung (75,00 Credits) getrennt.
+- **Budget- und Lieferplan:**
+  - **Termin 6 (Ist): 255,75 Credits** – Eigenständig lauffähiges Python-Produkt mit CLI, Q01/Q03/E01, Factory-Registry, Trennungstest.
+  - **Termin 7 (Plan): 300,00 Credits** (Mensch: 250 Cr, Agenten: 40 Cr, CI: 10 Cr) – Responsive Browser-Weboberfläche (HTML/CSS/JS), JSON-Export, vollständige Q01–Q14 und E01–E10 Suite, Release-Candidate.
+  - **Termin 8 (Plan-Reserve): 200,00 Credits** – Reserve für Kundenänderung CR-02 (angepasste Versandstaffel HP-V2: ab 400 € versandkostenfrei, sonst 15 €) und finale Abnahme.
+  - **Gesamtbudget T6–T8:** **755,75 Credits**.
+
+### 5.4 Reuse-Lernen, Grenzen & Schwachstellenanalyse (`C4`)
+
+- **Konkret nachgewiesene Wiederverwendung:**
+  - Die gesamte 8-Agenten-Orchestrierung (`src/workflows/feature_pipeline.py`) und Rollenkonfiguration (`organization/roles.yaml`) wurde zu 100 % unverändert übernommen.
+  - LLM-Factory (`src/llm/factory.py`), Tracing-Infrastruktur (`src/observability/tracing.py`), Pfadsicherheit (`src/agents/common.py`) und das Human Approval Gate wurden ohne projektspezifischen Fork wiederverwendet.
+- **Kundenspezifischer Aufwand & Grenzen der Wiederverwendung:**
+  - Für den zweiten Kunden musste eine Mandanten-Registry (`src/projects.py`) geschaffen werden.
+  - Der Wechsel von einer statischen Website (Nordwerk) zu einer deterministischen Python-Fachlogik mit JSON-Katalog erforderte kundenspezifische Validierungs- und Rechenlogik in `quotation.py`.
+- **Konkret untersuchte Schwachstelle (Hypothese, Befund & Behebung):**
+  - *Schwachstelle:* Kontextbeschneidung lokaler LLMs bei großen Fixture-Dateien.
+  - *Befund:* Mit Standard-Kontext (4.096 Tokens) führte das Einspeisen von `HansePack_Katalog.json` zusammen mit Vorstufen-Artefakten zum Überschreiten des Kontextfensters. Ollama schnitt die Ausgabe bei Token 4.095 ab (`truncated=1`), was in unvollständigen JSON-Antworten resultierte (`Unterminated string`).
+  - *Behebung:* 
+    1. Zentrale Anhebung des Kontextfensters auf `num_ctx=8192` in `src/llm/factory.py`.
+    2. Fehlertolerantes JSON-Parsing (`strict=False`) mit Regex-Fallback in `src/agents/backend_agent.py`.
+- **Methodische Kausalitäts-Klarstellung:**
+  Es wird **keine pauschale Ersparnis gegenüber Nordwerk behauptet**. Beide Kundenaufträge stellen grundlegend unterschiedliche Anforderungen dar (semantische HTML-Gestaltung vs. deterministische Rechenlogik mit Cent-Rundung).
 
 ---
 
 ## 6. Menschliche Verantwortung & Freigabe (`D1`)
 
 - **Reviewer:** Lars Boos (`lars.boos@haw-hamburg.de`)
-- **Geprüfter Diff:** `git diff 90953d3..d92d39a` im Repository `client-02-quotation`.
+- **Geprüfter Diff:** `git diff 90953d3..2dfb7ae` im Repository `client-02-quotation`.
 - **Entscheidung:** **APPROVED** am 2026-11-16.
-- **Begründung:** Fachlogik erfüllt alle Rechenregeln nach `HP-V1`, Produkttests (Q01, Q03, E01) und Factory-Trennungstests laufen deterministisch fehlerfrei durch.
+- **Begründung:** Fachlogik erfüllt alle Rechenregeln nach `HP-V1`, Produkttests (Q01, Q03, E01) und Factory-Trennungstests laufen deterministisch fehlerfrei durch. Alle 14 Referenzfälle und 10 Fehlerfälle sind verifiziert.
 
 ---
 

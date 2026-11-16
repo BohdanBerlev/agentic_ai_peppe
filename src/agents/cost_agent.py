@@ -168,7 +168,7 @@ def _parse_result(text: str, metrics: dict[str, Any]) -> CostReport:
 
 
 def build_cost_graph(llm: Any | None = None):
-    llm = llm or get_chat_model()
+    llm = llm or get_chat_model(json_mode=True)
 
     def load_logs(state: CostState) -> CostState:
         try:
