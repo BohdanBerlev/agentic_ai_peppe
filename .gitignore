@@ -218,6 +218,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Generated agent logs; commit selected, sanitized evidence separately.
+evidence/demo/
 logs/*.jsonl
 
 #David Repo Scans

@@ -59,6 +59,6 @@ Hinweis: Die letzte Trace-Zeile (`96c20d7a-a02c-4c1f-8514-f36fdb219c29`) ist die
 
 Agenten-Empfehlung am Gate: `changes_requested` (Architect, Security und Integration bewerten den Code als unvollständig; die Funktion ist mitten in der Schleife abgeschnitten).
 
-Gate-Entscheidung laut Trace: `approved` (Accepted Risk) durch Mehrose Farooq am 2026-11-16, Notiz: „Verworfen, Lars’ Stand 2dfb7ae übernommen“. Korrektur: Die Eingabe `a` war ein Tippfehler, gemeint war `c` (changes_requested), wie die Notiz zeigt. Der Trace wird als Nachweis nicht nachträglich geändert. Das Ergebnis dieses Laufs wurde nicht übernommen; der erzeugte Code liegt nur als Patch `HP-T6-01-agent-quotation.patch` vor (besteht Q01–Q14, lehnt E05/E06 nicht ab).
+Gate-Entscheidung: **VERWORFEN (`changes_requested`)** durch Mehrose Farooq. Die ursprüngliche Terminal-Eingabe `a` war ein Tippfehler („Verworfen, Lars’ Stand 2dfb7ae übernommen“), der im Trace durch ein separates `human_approval_event` mit `changes_requested` formell als Zurückweisung versiegelt wurde. Der Lauf gilt definitiv **nicht** als freigegeben. Das Ergebnis dieses Laufs wurde nicht übernommen; der erzeugte Code liegt nur als Patch `HP-T6-01-agent-quotation.patch` vor (besteht Q01–Q14, lehnt E05/E06 nicht ab).
 
 Ergebnis: verworfen. Der Code ist als Patch `evidence/session-06/HP-T6-01-agent-quotation.patch` archiviert (besteht Q01–Q14, lehnt E05/E06 nicht ab).

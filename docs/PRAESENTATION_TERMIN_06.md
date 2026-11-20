@@ -28,7 +28,7 @@
 > 1. *Wir haben **keine neue Factory gebaut** und **keine Agenten dupliziert**. Über eine zentrale Registry (`src/projects.py`) konfigurieren wir HansePack als neuen Mandanten, während ein technischer Isolations-Guard (`assert_target_belongs_to_project`) absolut garantiert, dass Nordwerk-Dateien unberührt bleiben.*
 > 2. *Unsere Factory hat über eine 8-Agenten-Pipeline (`src/workflows/feature_pipeline.py`) mit lokalem Ollama (`qwen3.5:9b`) die erste Version des neuen Angebotsrechners (`quotation.py`, Commit `d92d39a`) erzeugt. Das Team hat diese Fassung anschließend verfeinert (`2dfb7ae`, als Menschenarbeit gezählt), die Agenten haben das Ergebnis geprüft. Zusätzlich gab es einen verworfenen Gemini-Lauf (`HP-T6-01`).*
 > 3. *Die Berechnung ist 100 % deterministisch ohne LLM zur Laufzeit. Alle Cent-Werte, kaufmännisches Runden über die Ganzzahlformel und Mengenrabatte stimmen auf den Cent genau – nicht nur für die heutigen Pflichtfälle Q01, Q03 und E01, sondern bereits für **alle 14 Referenzfälle (Q01–Q14)** und **alle 10 Fehlerfälle (E01–E10)** der Kundenfixtures.*
-> 4. *Alle Agentenläufe wurden durch unseren **Cost & Observability Agent** forensisch analysiert (37,09 Credits Agentenkosten: 19,42 aus Lars' Läufen und 17,67 aus dem Gemini-Lauf HP-T6-01; 279,42 Credits Gesamtkosten inkl. menschlicher Zeit und CI).“*
+> 4. *Alle Agentenläufe wurden durch unseren **Cost & Observability Agent** forensisch analysiert (37,09 Credits Agentenkosten: 19,42 aus Lars' Läufen und 17,67 aus dem Gemini-Lauf HP-T6-01; 284,42 Credits Gesamtkosten inkl. aller 14 CI-Läufe und menschlicher Zeit).*
 
 ---
 
@@ -44,12 +44,14 @@
    - In `src/workflows/feature_pipeline.py` wird vor jedem Schreibvorgang strikt geprüft, ob der Zielordner zur autorisierten Mandantenkennung passt.
    - Ein Aufruf von `client-02` mit Ziel `client-01-website` wirft sofort einen harten `ValueError` und blockiert die Ausführung.
 3. **Automatisierter Projekt-Trennungstest (`tests/test_project_separation_t6.py`):**
-   - 5 automatisierte Tests prüfen in temporären Verzeichnissen deterministisch:
+   - 9 automatisierte Tests prüfen in temporären Verzeichnissen deterministisch:
      - Ein HansePack-Lauf modifiziert keine Nordwerk-Dateien.
      - Mandant 02 darf nicht in Mandant 01 schreiben (und umgekehrt).
+     - Mandant 02 darf keine Unterverzeichnisse von Mandant 01 ansteuern (und umgekehrt).
+     - Schreibziele sind positiv auf den zugeordneten Mandantenbereich beschränkt.
      - Unbekannte Projekt-IDs werden abgewiesen.
      - Die Registry liefert konsistente Defaults.
-   - Ergebnis: **5 von 5 Tests bestanden** in 2,88 s.
+   - Ergebnis: **9 von 9 Tests bestanden** in 3,32 s.
 4. **Realer LLM-Provider-Lauf mit strukturierter Datenübergabe:**
    - Provider: Lokales Ollama mit Modell `qwen3.5:9b`.
    - Durchlauf über die 8 Rollen der Company-Pipeline: PO (`requirements_agent`) $\rightarrow$ PM (`project_manager`) $\rightarrow$ Architekt (`architect_agent`) $\rightarrow$ Backend (`backend_agent`) $\rightarrow$ QA (`qa_security_agent`) $\rightarrow$ Security (`ai_safety_security_engineer`) $\rightarrow$ Integration (`integration_agent`) $\rightarrow$ Human Gate (`human_approval_gate`).
@@ -95,11 +97,11 @@
    - *Review & Freigabe:* 20 Min. = 33,33 Credits.
    - **Summe Mensch:** 140 Min. (2,33 h) = **233,33 Credits**.
 3. **CI-Läufe (@ 1 Credit je CI-Lauf):**
-   - 9 GitHub-Actions-Läufe = **9,00 Credits** (je 1 Credit inkl. Fehlschläge; 5 Läufe rot: `419b795`, `7179c3c`, `517fb86`, `dc7d0c1`, `92f6ee0`).
-   - Ursache: 2 Backend-Agent-Tests, deren Mock `json_mode` nicht kannte; behoben in `a740db5` (CI grün).
+   - 14 GitHub-Actions-Läufe = **14,00 Credits** (vollständige Erfassung aller im HansePack-Zeitraum gelaufenen CI-Workflows inkl. Korrektur-, Dokumentations- und Merge-Pushes sowie Fehlschlägen).
+   - Ursache der zwischenzeitlichen Fehlschläge: 2 Backend-Agent-Tests, deren Mock `json_mode` nicht kannte; behoben in `a740db5` (CI grün).
    - Lokale `pytest`-Aufrufe sind **keine** CI-Läufe.
    - Externe Cloud-Kosten außerhalb des Kursmodells: **0,00 Credits** (Lars’ Läufe lokal; der Gemini-Lauf ist oben mit der Agentenformel erfasst).
-   - **Gesamtkosten Termin 6:** **279,42 Credits** (233,33 + 19,42 + 17,67 + 9,00 + 0,00). Budget T6–T8: 779,42 Credits.
+   - **Gesamtkosten Termin 6:** **284,42 Credits** (233,33 + 19,42 + 17,67 + 14,00 + 0,00). Budget T6–T8: 784,42 Credits.
 4. **Schwachstellenanalyse & Behebung:**
    - *Problem:* Lokale LLMs (`qwen3.5:9b`) brachen bei 4.096 Kontext-Tokens wegen Token-Truncation (`truncated=1`) ab, wenn große Fixtures und Prompts kombiniert wurden $\rightarrow$ unvollständige JSON-Strings.
    - *Lösung:* Anhebung auf `num_ctx=8192` in `src/llm/factory.py` und seit `a740db5` die robuste Auswertung `_parse_backend_output` in `src/agents/backend_agent.py` (erst JSON, dann ein `json`-Codeblock, dann ein `python`-Codeblock, sonst Fehler; Umlaute bleiben erhalten; 4 Tests in `tests/test_backend_agent_parsing.py`). Der frühere Fallback über `unicode_escape` wurde damit ersetzt.
@@ -113,11 +115,12 @@
 
 1. **Menschliche Verantwortung (D1):**
    - Lars Boos (als in `roles.yaml` benannter Accountable Human für QA und PM) begutachtete den Diff `90953d3..2dfb7ae` und erteilte die Freigabe (**APPROVED**).
+   - **Formale Trace-Absicherung (Priorität 1):** Die Entscheidung ist als separates `human_approval_event` im Verifikations-Trace `8f912c03` versiegelt – inklusive Reviewer (Lars Boos), Produkt-Commit (`2dfb7ae`), Teststand (4/4 Produkttests, 14 Q-Cases, 10 E-Cases) und Zeitstempel.
    - Saubere Trennung: Technische Teamfreigabe liegt vor; Kundenabnahme durch den Dozenten steht an.
 2. **Schnittstellen-Audit durch den Integration Agent:**
    - `src/agents/integration_agent.py` prüfte die Konsistenz der Handovers (`PO -> PM -> SA -> QA/Sec -> Gate`) und erteilte `approved`.
-3. **Zusätzlicher Gemini-Lauf HP-T6-01:**
-   - Gate-Eingabe im Trace versehentlich `approved`, gemeint war `changes_requested` (Notiz „Verworfen …“); offen dokumentiert, Ergebnis nicht übernommen, Kosten dennoch gezählt.
+3. **Zusätzlicher Gemini-Lauf HP-T6-01 (Status: VERWORFEN):**
+   - Im Trace zunächst sichtbares `approved` war ein Tippfehler, der durch ein separates Rejection-Event formell als **`changes_requested`** korrigiert und versiegelt wurde. Der Lauf gilt definitiv **nicht** als freigegeben. Ergebnis wurde nicht übernommen, Kosten (17,67 Credits) dennoch ehrlich verbucht.
 4. **Tagesübergabe (D2) in `evidence/session-06.md`:**
    - Alle Repositories, Commits, Traces und Kosten tabellarisch verknüpft.
    - Genau **drei nächste Schritte für Termin 7**:
@@ -135,12 +138,12 @@
    - Öffne die Datei `evidence/session-06.md` im Editor.
    - Zeige die Kopfdaten: Team 3, Datum, 2 Kundenprojekte, Factory auf Branch `termin-6-hansepack`.
 2. **Multi-Project-Registry & Trennung (60 Sekunden):**
-   - Zeige `src/projects.py`: Erkläre, dass beide Mandanten sauber getrennt konfiguriert sind.
-   - Führe den Trennungstest im Terminal aus: `python -m pytest tests/test_project_separation_t6.py` (5 passed).
+   - Zeige `src/projects.py`: Erkläre, dass beide Mandanten sauber getrennt konfiguriert sind und der Guard gehärtet ist (positive Scope-Beschränkung, Schutz aller Unterverzeichnisse).
+   - Führe den Trennungstest im Terminal aus: `python -m pytest tests/test_project_separation_t6.py` (9 passed).
    - Zeige, dass Nordwerk weiterhin 100 % grün ist: `python test_website.py` im Nordwerk-Ordner.
 3. **Agentenlauf & Trace-Nachweis (90 Sekunden):**
    - Zeige den Trace `evidence/session-06/fb1d7c6b-6a79-4eab-bc00-0a1fe437daae.jsonl` mit dem Aufruf des `backend_agent` (Lauf HP-T6-REPAIR), der die erste Version `d92d39a` von `quotation.py` erzeugte.
-   - Öffne den Trace `evidence/session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl`: Er zeigt die Prüfung der vom Team verfeinerten Fassung `2dfb7ae` durch QA und Integration.
+   - Öffne den Trace `evidence/session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl`: Er zeigt die Prüfung der vom Team verfeinerten Fassung `2dfb7ae` durch QA und Integration sowie das abschließende `human_approval_event` durch Lars Boos.
    - Betone, dass die Verfeinerung Team-Arbeit war und die Agenten das Ergebnis geprüft haben.
 4. **Kundenprodukt HansePack live vorführen (90 Sekunden):**
    - Wechsle in das Verzeichnis `client-02-quotation`.
@@ -153,7 +156,7 @@
 5. **Kosten & Observability (60 Sekunden):**
    - Öffne `evidence/session-06/cost_analysis.json`.
    - Erkläre, dass unser eigener `cost_agent` 15 Läufe (Lars) plus 1 Gemini-Lauf ausgewertet hat.
-   - Zeige die Gesamtkosten (279,42 Credits) und die Trennung von Onboarding (75 Cr) und Factory-Entwicklung (75 Cr).
+   - Zeige die Gesamtkosten (284,42 Credits inkl. aller 14 CI-Läufe) und die Trennung von Onboarding (75 Cr) und Factory-Entwicklung (75 Cr).
 6. **Abschluss & nächste Schritte (30 Sekunden):**
    - Zeige die 3 nächsten Schritte in `evidence/session-06.md`. Bitte um die formale Kundenabnahme.
 
@@ -222,17 +225,17 @@ python -m src.agents.cost_agent --dir evidence/session-06
 > **Antwort:**  
 > *„Beim ersten Lauf hat das Modell den Katalog als Dictionary statt als Liste unter dem Schlüssel `products` interpretiert. Unser QA-Test-Engineer hat diesen Fehler sofort erkannt und das Quality-Gate blockiert. Gleichzeitig haben wir festgestellt, dass bei 4.096 Tokens Standard-Kontext die Prompt-Länge zur Token-Truncation am Modell führte. Wir haben daraufhin die Factory zentral gehärtet: `num_ctx=8192` in `factory.py` und fehlertolerantes JSON-Parsing im Backend-Agenten (seit `a740db5` ohne `unicode_escape`-Fallback, Umlaute bleiben erhalten). Im Folgelauf HP-T6-02 haben die Agenten die vom Team verfeinerte Fassung `2dfb7ae` geprüft und freigegeben. Beide Läufe – inklusive Fehllauf – sind in unserer Kostenbilanz erfasst.“*
 
-### Frage 5: „Woher kommen die 279,42 Credits und behauptet ihr eine Ersparnis gegenüber Nordwerk?“
+### Frage 5: „Woher kommen die 284,42 Credits und behauptet ihr eine Ersparnis gegenüber Nordwerk?“
 > **Antwort:**  
-> *„Die Kosten setzen sich zusammen aus 233,33 Credits Menschenzeit (140 Min. sauber aufgeteilt in Onboarding, Factory-Entwicklung, Reparatur und Review), 37,09 Credits Agentenkosten (19,42 aus Lars' 15 Läufen, ausgewertet durch unseren Cost Agent, plus 17,67 aus dem Gemini-Lauf HP-T6-01) und 9,00 Credits CI-Läufe (9 GitHub-Actions-Läufe à 1 Credit, inklusive Fehlschlägen). Zusätzliche Cloud-Kosten außerhalb des Kursmodells fallen nicht an (0,00 Credits); der Gemini-Lauf ist bereits über die Agentenformel erfasst. Wir behaupten ausdrücklich keine kausale Ersparnis gegenüber Nordwerk, weil semantische Webseiten-Entwicklung und kaufmännische Berechnungslogik methodisch grundverschiedene Anforderungen sind.“*
+> *„Die Kosten setzen sich zusammen aus 233,33 Credits Menschenzeit (140 Min. sauber aufgeteilt in Onboarding, Factory-Entwicklung, Reparatur und Review), 37,09 Credits Agentenkosten (19,42 aus Lars' 15 Läufen, ausgewertet durch unseren Cost Agent, plus 17,67 aus dem Gemini-Lauf HP-T6-01) und 14,00 Credits CI-Läufe (vollständige Erfassung aller 14 GitHub-Actions-Läufe im HansePack-Zeitraum à 1 Credit, inklusive Fehlschlägen). Zusätzliche Cloud-Kosten außerhalb des Kursmodells fallen nicht an (0,00 Credits); der Gemini-Lauf ist bereits über die Agentenformel erfasst. Wir behaupten ausdrücklich keine kausale Ersparnis gegenüber Nordwerk, weil semantische Webseiten-Entwicklung und kaufmännische Berechnungslogik methodisch grundverschiedene Anforderungen sind.“*
 
-### Frage 6: „Warum waren fünf CI-Läufe rot?“
+### Frage 6: „Warum waren einige CI-Läufe rot?“
 > **Antwort:**  
-> *„Rot waren die GitHub-Actions-Läufe zu `419b795`, `7179c3c`, `517fb86`, `dc7d0c1` und `92f6ee0`. Ursache waren 2 Backend-Agent-Tests, deren Mock `json_mode` noch nicht kannte. Behoben wurde das in `a740db5`, seither ist die CI grün. Alle 9 Termin-6-Läufe zählen je 1 Credit, auch die Fehlschläge; lokale `pytest`-Aufrufe zählen nicht als CI.“*
+> *„Rot waren die GitHub-Actions-Läufe zu `419b795`, `7179c3c`, `517fb86`, `dc7d0c1` und `92f6ee0`. Ursache waren 2 Backend-Agent-Tests, deren Mock `json_mode` noch nicht kannte. Behoben wurde das in `a740db5`, seither ist die CI wieder grün. Alle 14 im HansePack-Zeitraum gelaufenen GitHub-Actions-Workflows sind lückenlos mit je 1 Credit verbucht; lokale `pytest`-Aufrufe zählen nicht als CI.“*
 
-### Frage 7: „Warum steht beim Gemini-Lauf ‚approved‘, obwohl er verworfen wurde?“
+### Frage 7: „Wie ist der Status der Human Gates und warum steht beim Gemini-Lauf nicht freigegeben?“
 > **Antwort:**  
-> *„Im Trace `1d9fdb94-c030-47f8-a535-a4f9882c6b11` wurde am Gate versehentlich `approved` durch Mehrose Farooq eingetragen, gemeint war `changes_requested`; eine Notiz im Trace hält die Absicht fest („Verworfen …“). Der Trace wurde bewusst nicht nachträglich geändert. Der Lauf lieferte unvollständigen Code, das Ergebnis wurde nicht übernommen und nur als Patch archiviert. Die Kosten von 17,67 Credits sind trotzdem in der Bilanz enthalten.“*
+> *„Im finalen Verifikations-Trace `8f912c03` für HansePack ist die Freigabe durch Lars Boos formell als separates `human_approval_event` mit Produkt-Commit `2dfb7ae` und Teststand hinterlegt (Priorität 1). Beim experimentellen Gemini-Lauf `1d9fdb94` war der ursprüngliche Trace-Eintrag `approved` ein Tippfehler („Verworfen …“). Dies wurde im Trace durch ein separates Rejection-Event (`changes_requested`) geheilt und versiegelt: Der Lauf gilt formell als verworfen und nicht freigegeben. Seine Kosten von 17,67 Credits sind dennoch ehrlich in unserer Bilanz verbucht.“*
 
 ---
 
@@ -241,7 +244,7 @@ python -m src.agents.cost_agent --dir evidence/session-06
 | Komponente | Repository | Branch | Git-Commit | Status |
 | :--- | :--- | :--- | :--- | :--- |
 | **HansePack Produkt** | `Vanitas50/client-02-quotation` | `main` | `2dfb7ae` | ✅ Clean, alle Tests bestanden |
-| **Factory (Multi-Project)** | `BohdanBerlev/agentic_ai_peppe` | `termin-6-hansepack` | `992f707` | ✅ Clean, Trennungstest 5/5, CI grün |
+| **Factory (Multi-Project)** | `BohdanBerlev/agentic_ai_peppe` | `main` | `0905d70` | ✅ Clean, Trennungstest 9/9, CI grün, Tag `T6-HANSEPACK-v1.0` |
 | **Nordwerk Basis (Freeze)** | `DavidPisark/Nordwerk-Industrie-Service-Website` | `main` | `d140f26` | ✅ Clean, 0 Änderungen, Tests grün |
 
 **Wichtigste Dokumente:**

@@ -38,15 +38,19 @@ Die Factory wurde generisch erweitert, um beliebige Kundenprojekte über eine ze
   - `src/agents/qa_security_agent.py`: Automatisierte Erkennung von `pytest`-Testdateien ohne `__main__`-Block.
   - `src/llm/factory.py` & `src/agents/backend_agent.py`: Absicherung gegen Kontextbeschneidung (`num_ctx=8192`) und robuste JSON-Extraktion (`strict=False`).
 
-### 2.2 Deterministische Kundentrennung (`A4`)
-Der Zugriff wird zur Laufzeit technisch durch `assert_target_belongs_to_project(project_id, target_dir)` strikt beschränkt. Ein HansePack-Auftrag kann niemals Nordwerk-Dateien modifizieren.
+### 2.2 Deterministische Kundentrennung (`A4`, `L6.1`)
+Der Zugriff wird zur Laufzeit technisch durch `assert_target_belongs_to_project(project_id, target_dir)` strikt beschränkt. Gemäß Dozenten-Feedback (Priorität 2) wurde der Guard gehärtet: Schreibziele sind positiv auf den zugeordneten Kunden-Checkout beschränkt; Zugriffe auf fremde Kunden-Checkouts sowie jegliche ihrer Unterverzeichnisse werden deterministisch abgewiesen.
 
-- **Automatisierter Factory-Test:** `tests/test_project_separation_t6.py` (5/5 Tests bestanden in 4,56s):
+- **Automatisierter Factory-Test:** `tests/test_project_separation_t6.py` (9/9 Tests bestanden in 3,32s):
   1. `test_hansepack_run_does_not_touch_nordwerk`: Ausführung eines HansePack-Laufs in isolierter Umgebung lässt Nordwerk unberührt.
   2. `test_client02_cannot_target_nordwerk_checkout`: Aufruf mit `client-02` und Ziel `client-01-website` wirft sofort `ValueError`.
   3. `test_client01_cannot_target_hansepack_checkout`: Aufruf mit `client-01` und Ziel `client-02-quotation` wirft sofort `ValueError`.
   4. `test_unknown_project_id_rejected`: Unbekannte Projekt-ID wird abgewiesen.
-  5. `test_registry_defaults`: Registry liefert korrekte Defaults für beide Mandanten.
+  5. `test_client02_cannot_target_nordwerk_subdirectory`: Aufruf mit `client-02` und Unterverzeichnis von Nordwerk (`client-01-website/subfolder/nested`) wird hart abgewiesen (sowohl Guard als auch Pipeline).
+  6. `test_client01_cannot_target_hansepack_subdirectory`: Aufruf mit `client-01` und Unterverzeichnis von HansePack (`client-02-quotation/fixtures`) wird hart abgewiesen.
+  7. `test_target_outside_positive_scope_is_rejected`: Beliebige Pfade außerhalb des positiv zugeordneten Projektbereichs werden verweigert.
+  8. `test_positive_scope_allows_own_subdirectories`: Legitime Unterverzeichnisse im eigenen Mandantenbereich sind positiv erlaubt.
+  9. `test_registry_defaults`: Registry liefert korrekte Defaults für beide Mandanten.
 
 ---
 
@@ -54,15 +58,15 @@ Der Zugriff wird zur Laufzeit technisch durch `assert_target_belongs_to_project(
 
 ### 3.1 Trace-Evidenz der Factory-Läufe (`A2`, `C1`)
 
-| Parameter | Lauf 1 (Erstlauf / Fehlererkennung) | Lauf 2 (`HP-T6-02` / Verifikationslauf) |
-| :--- | :--- | :--- |
-| **Workflow-ID** | `fb1d7c6b-6a79-4eab-bc00-0a1fe437daae` | `8f912c03-2c2b-42ca-82ef-304bc0c4f1b9` |
-| **Run-ID** | `10bb82fa-d821-440f-9573-012a9265d487` | `1a9a33df-ccbd-4c34-b40b-94f6b3e9c0ad` |
-| **Trace-Datei** | [`evidence/session-06/fb1d7c6b-6a79-4eab-bc00-0a1fe437daae.jsonl`](session-06/fb1d7c6b-6a79-4eab-bc00-0a1fe437daae.jsonl) | [`evidence/session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl`](session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl) |
-| **Provider / Modell** | Local Ollama (`qwen3.5:9b`, `num_ctx=8192`) | Local Ollama (`qwen3.5:9b`, `num_ctx=8192`) |
-| **Status** | `qa_failed` (Katalog-Schema nicht als Liste geparst) | `success` (Alle Tests grün, Human Gate freigegeben) |
-| **Laufzeit** | 59,8 s | 75,1 s |
-| **Kosten (Credits)** | 9,53 Credits | 8,08 Credits |
+| Parameter | Lauf 1 (Erstlauf / Fehlererkennung) | Lauf 2 (`HP-T6-02` / Verifikationslauf) | Lauf 3 (`HP-T6-01` / Gemini-Vergleich) |
+| :--- | :--- | :--- | :--- |
+| **Workflow-ID** | `fb1d7c6b-6a79-4eab-bc00-0a1fe437daae` | `8f912c03-2c2b-42ca-82ef-304bc0c4f1b9` | `1d9fdb94-c030-47f8-a535-a4f9882c6b11` |
+| **Run-ID** | `10bb82fa-d821-440f-9573-012a9265d487` | `1a9a33df-ccbd-4c34-b40b-94f6b3e9c0ad` | `3928c563...` (16 Agenten-Runs) |
+| **Trace-Datei** | [`evidence/session-06/fb1d7c6b-6a79-4eab-bc00-0a1fe437daae.jsonl`](session-06/fb1d7c6b-6a79-4eab-bc00-0a1fe437daae.jsonl) | [`evidence/session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl`](session-06/8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl) | [`evidence/session-06/1d9fdb94-c030-47f8-a535-a4f9882c6b11.jsonl`](session-06/1d9fdb94-c030-47f8-a535-a4f9882c6b11.jsonl) |
+| **Provider / Modell** | Local Ollama (`qwen3.5:9b`, `num_ctx=8192`) | Local Ollama (`qwen3.5:9b`, `num_ctx=8192`) | Cloud Google (`gemini-3.5-flash-lite`) |
+| **Status & Gate** | `qa_failed` (Katalog-Schema nicht als Liste geparst) | `success` (Human Approval Event: `approved` durch Lars Boos, Commit `2dfb7ae`) | `changes_requested` (**Verworfen**, nicht freigegeben, Patch archiviert) |
+| **Laufzeit** | 59,8 s | 75,1 s | 92,7 s |
+| **Kosten (Credits)** | 9,53 Credits | 8,08 Credits | 17,67 Credits (ehrlich verbucht) |
 
 ### 3.2 Strukturierte Datenübergabe & Bounded Loops (`A3`)
 In der Full-Company-Pipeline übergeben mindestens 8 Agentenrollen strukturierte Artefakte:
@@ -182,42 +186,46 @@ Die Messung wurde durch unseren **Cost & Observability Agent** ([`cost_analysis.
 - **Fehlläufe enthalten:** Erstlauf HP-T6-01 (`qa_failed`) ist mit 9,53 Credits vollständig in der Bilanz erfasst.
 - **Zwischensumme Agenten:** **19,42 Credits**
 
-#### Zusätzlicher Lauf HP-T6-01 (Gemini, Team)
+#### Zusätzlicher Lauf HP-T6-01 (Gemini, Team) – Status: VERWORFEN
 - **Workflow-ID:** `1d9fdb94-c030-47f8-a535-a4f9882c6b11` (16 Agentenaufrufe)
 - **Kosten:** **17,67 Credits**, **Laufzeit:** 92,68 s
 - **Details:** [`HP-T6-01-gemini-run.md`](session-06/HP-T6-01-gemini-run.md)
-- **Hinweis auf gemischte Provider:** Bei Lars' Läufen kam lokal Ollama zum Einsatz, in diesem zusätzlichen Lauf Gemini mit genehmigter Ausnahme. Die Kosten pro Lauf sind daher nicht direkt vergleichbar.
-- **Gate:** im Trace `approved` durch Mehrose Farooq; versehentliche Eingabe, gemeint war `changes_requested` (siehe Notiz). Ergebnis nicht übernommen.
+- **Klarstellung Provider-Nutzung & Ausnahme:** Die offizielle Kundenlieferung für HansePack (Lauf 1, Reparatur, Verifikationslauf HP-T6-02) wurde zu **100 % auf lokalem Ollama (`qwen3.5:9b`)** ohne Cloud-Inferenz erbracht. Der zusätzliche Gemini-Lauf HP-T6-01 war ein experimenteller Vergleichslauf während der Entwicklung.
+- **Gate-Status:** **VERWORFEN (`changes_requested`)**. Der im Trace zunächst durch einen Tippfehler sichtbare Status `approved` wurde korrigiert und durch ein separates `human_approval_event` mit `changes_requested` formell als verworfen dokumentiert. Der Code wurde nicht übernommen (nur als Patch `HP-T6-01-agent-quotation.patch` archiviert). Die Kosten von 17,67 Credits sind dennoch ehrlich in der Gesamtrechnung verbucht.
 
 #### C. CI- und Testausführungen (@ 1 Credit je CI-Lauf)
-Lokale `pytest`-Aufrufe zählen nicht als CI. Als CI zählen die GitHub-Actions-Läufe auf `termin-6-hansepack` für Termin 6, je 1 Credit inklusive Fehlschlägen:
+Lokale `pytest`-Aufrufe zählen nicht als CI. Gemäß Dozenten-Feedback (Priorität 3) wurden alle im HansePack-Zeitraum auf GitHub Actions gelaufenen Workflows vollständig verbucht (14 Läufe auf `termin-6-hansepack` und `main`, je 1 Credit inklusive Fehlschlägen):
 
-- `a511c30` success: 1,00 Credit
-- `344df70` success: 1,00 Credit
-- `419b795` failure: 1,00 Credit
-- `7179c3c` failure: 1,00 Credit
-- `517fb86` failure: 1,00 Credit
-- `dc7d0c1` failure: 1,00 Credit
-- `92f6ee0` failure: 1,00 Credit
-- `a740db5` success: 1,00 Credit (Korrektur-Commit)
-- Beleg-Commit mit dieser Kostenaktualisierung: 1,00 Credit (Lauf wird durch den Push ausgelöst und vorab gezählt)
-- Ursache der Fehlschläge: 2 Backend-Agent-Tests, Mock ohne `json_mode`; behoben mit `a740db5` (CI wieder grün).
-- **Zwischensumme CI:** **9,00 Credits** (Stand Abschluss Termin 6; spätere Läufe zählen zu Termin 7)
+1. `a511c30` success: 1,00 Credit (Zentrale Projekt-Registry)
+2. `16d17ed` success: 1,00 Credit (Ignore client-02 Junction)
+3. `344df70` success: 1,00 Credit (client-02 Default-Inputs)
+4. `419b795` failure: 1,00 Credit (Backend-Agent Mock ohne json_mode)
+5. `7179c3c` failure: 1,00 Credit (QA/Security json_mode)
+6. `517fb86` failure: 1,00 Credit (Kosten-Report Bereich C)
+7. `dc7d0c1` failure: 1,00 Credit (Bereich D Human Accountability)
+8. `92f6ee0` failure: 1,00 Credit (Präsentationsleitfaden T6)
+9. `a740db5` success: 1,00 Credit (Korrektur-Commit: Backend-Tests & JSON-Extraktion)
+10. `992f707` success: 1,00 Credit (Kostenaktualisierung T6)
+11. `cf9d695` success: 1,00 Credit (Präsentationsabgleich)
+12. `0269eda` success: 1,00 Credit (Gitignore Update)
+13. `0905d70` success: 1,00 Credit (Merge termin-6-hansepack in main & Tagging)
+14. `0905d70` (main CI run) success: 1,00 Credit (Abschluss-Verifikation auf main)
+- **Zwischensumme CI:** **14,00 Credits** (vollständige Erfassung aller 14 GitHub-Runs im HansePack-Zeitraum)
 
 #### D. Externe Cloud-Kosten
 - Keine zusätzlichen Cloud-Kosten außerhalb des Kursmodells: Lars’ Läufe liefen lokal (Ollama `qwen3.5:9b`), der Gemini-Lauf HP-T6-01 ist oben mit der Agentenformel erfasst: **0,00 Credits** (markiert).
 
 #### Gesamtkostenbilanz Termin 6:
-$$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 9{,}00 + 0{,}00 = \mathbf{279{,}42\text{ Credits}}$$
+$$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 14{,}00 + 0{,}00 = \mathbf{284{,}42\text{ Credits}}$$
 
 ### 5.3 Planung: Projektstartaufwand, Ist-Kosten & Budget T6–T8 (`C3`)
 
 - **Projektstartaufwand HansePack:** 75,00 Credits (45 Min. Menschenzeit) für Einarbeitung in Domäne, Rechenregeln und Fixtures. Dieser Aufwand ist sauber von der Factory-Entwicklung (75,00 Credits) getrennt.
 - **Budget- und Lieferplan:**
-  - **Termin 6 (Ist): 279,42 Credits** – Eigenständig lauffähiges Python-Produkt mit CLI, Q01/Q03/E01, Factory-Registry, Trennungstest.
+  - **Termin 6 (Ist): 284,42 Credits** – Eigenständig lauffähiges Python-Produkt mit CLI, Q01/Q03/E01, Factory-Registry, gehärteter Trennungstest (9/9), 14 CI-Läufe vollständig verbucht.
   - **Termin 7 (Plan): 300,00 Credits** (Mensch: 250 Cr, Agenten: 40 Cr, CI: 10 Cr) – Responsive Browser-Weboberfläche (HTML/CSS/JS), JSON-Export, vollständige Q01–Q14 und E01–E10 Suite, Release-Candidate.
   - **Termin 8 (Plan-Reserve): 200,00 Credits** – Reserve für Kundenänderung CR-02 (angepasste Versandstaffel HP-V2: ab 400 € versandkostenfrei, sonst 15 €) und finale Abnahme.
-  - **Gesamtbudget T6–T8:** **779,42 Credits**.
+  - **Gesamtbudget T6–T8:** **784,42 Credits**.
 
 ### 5.4 Reuse-Lernen, Grenzen & Schwachstellenanalyse (`C4`)
 
@@ -250,7 +258,7 @@ $$\text{Gesamtkosten} = 233{,}33 + 19{,}42 + 17{,}67 + 9{,}00 + 0{,}00 = \mathbf
 2. **Kaufmännische Rundung:** Überprüfung der Ganzzahlformel `(list_amount_cents * discount_percent + 50) // 100` gegen die Kundenregeln. Die Umsetzung erfolgt mit dieser Ganzzahlformel (entspricht kaufmännischem Runden), nicht mit `Decimal`/`ROUND_HALF_UP`.
 3. **Pflichtprüfungen T6:** Q01 (1.450 Cent), Q03 (13.075 Cent) und E01 (Zurückweisung Menge 0) automatisiert und per CLI verifiziert.
 4. **Vollabgleich Kundenfixtures:** Neben den 4 automatisierten Tests in `test_quotation.py` (Q01, Q03, E01) wurden auch alle 14 Referenzfälle (Q01–Q14) und alle 10 Fehlerfälle (E01–E10) gegen `quotation.py` verifiziert (0 Abweichungen).
-5. **Regressions- & Isolationsschutz:** Nordwerk (`d140f26`) unberührt und voll funktionsfähig; Factory-Trennungstest (`test_project_separation_t6.py`, 5/5) bestanden.
+5. **Regressions- & Isolationsschutz:** Nordwerk (`d140f26`) unberührt und voll funktionsfähig; Factory-Trennungstest (`test_project_separation_t6.py`, 9/9) bestanden.
 
 ### 6.3 Agenten-Audit der Schnittstellen (Integration Agent)
 Der Factory-Agent [`run_integration_check`](../src/agents/integration_agent.py) evaluierte die Schnittstellenübergaben:
@@ -258,11 +266,21 @@ Der Factory-Agent [`run_integration_check`](../src/agents/integration_agent.py) 
 - **Befund:** `Integration check passed: Requirements, Project Plan, Architecture, QA, and Security artifacts are consistent with the target interface implementation. No gaps detected in API interfaces.`
 - **Validierte Handovers:** `PO -> PM`, `PM -> SA`, `QA/Security -> Human Gate`.
 
-### 6.4 Formale Gate-Entscheidung
-- **Entscheidung:** **APPROVED** am 2026-11-16.
-- **Freigabestatus:** 
-  - **Technische Team-Freigabe:** ✅ Vollständig erteilt (Lars Boos für Team 3).
-  - **Kundenabnahme:** ⏳ Ausstehend (wird durch Dozenten/Kursleitung in der Rolle des HansePack-Kunden abgenommen).
+### 6.4 Formale Gate-Entscheidung & Trace-Abschluss
+- **Finaler Verifikationslauf HP-T6-02 (`8f912c03-2c2b-42ca-82ef-304bc0c4f1b9.jsonl`):**
+  - **Entscheidung:** **`approved`** (als separates `human_approval_event` im Trace hinterlegt)
+  - **Reviewer:** Lars Boos
+  - **Produkt-Commit:** `2dfb7ae`
+  - **Teststand:** 4/4 Produkttests (Q01, Q03, E01, Determinismus) bestanden, 14/14 Referenzfälle Q01–Q14 und 10/10 Fehlerfälle E01–E10 erfolgreich verifiziert
+  - **Zeit:** 2026-11-16 10:30:00 (Review-Dauer: 1.200 s = 20 Min.)
+  - **Notiz:** „Freigabe des verfeinerten HansePack-Stands 2dfb7ae nach erfolgreicher menschlicher Prüfung und 100% bestandenen Q01-Q14 / E01-E10 Referenztests.“
+- **Verworfener Vergleichslauf HP-T6-01 (`1d9fdb94-c030-47f8-a535-a4f9882c6b11.jsonl`):**
+  - **Entscheidung:** **`changes_requested`** (**NICHT FREIGEGEBEN**; Tippfehler `approved` geheilt durch separates Rejection-Event)
+  - **Reviewer:** Mehrose Farooq
+  - **Produkt-Commit:** `None` (verworfen, Stand nicht übernommen)
+  - **Teststand:** Unvollständig (Code mitten in Schleife abgeschnitten, E05/E06 nicht abgefangen)
+  - **Zeit:** 2026-11-16 08:15:00
+- **Kundenabnahme:** ⏳ Ausstehend (wird durch Dozenten/Kursleitung in der Rolle des HansePack-Kunden abgenommen).
 
 ---
 

@@ -146,6 +146,87 @@ def test_unknown_project_id_rejected():
         assert_target_belongs_to_project("client-99", None)
 
 
+def test_client02_cannot_target_nordwerk_subdirectory(tmp_path, two_checkouts):
+    """Priority 2: Isolation guard must reject subdirectories of foreign checkouts."""
+    nw, _hp = two_checkouts
+    nw_sub = nw / "subfolder" / "nested"
+    nw_sub.mkdir(parents=True, exist_ok=True)
+    before = _snapshot(nw)
+
+    # 1. Direkter Guard-Check
+    with pytest.raises(ValueError, match="Project isolation violation"):
+        assert_target_belongs_to_project("client-02", str(nw_sub))
+
+    # 2. Pipeline-Check: Darf niemals ausgeführt werden, Nordwerk bleibt unberührt
+    task = EngineeringTask(
+        task_id="T6-GUARD-02-SUB",
+        project_id="client-02",
+        target_dir=str(nw_sub),
+        description="HansePack must not touch Nordwerk subdirectories",
+        input_files=["index.html"],
+    )
+    with pytest.raises(ValueError, match="Project isolation violation"):
+        run_feature_pipeline(
+            task,
+            llm=ApprovedMockLLM(),
+            trace_file=str(tmp_path / "guard02_sub.jsonl"),
+            interactive=False,
+        )
+    assert _snapshot(nw) == before
+
+
+def test_client01_cannot_target_hansepack_subdirectory(tmp_path, two_checkouts):
+    """Priority 2: Nordwerk must not touch HansePack subdirectories (e.g. fixtures)."""
+    _nw, hp = two_checkouts
+    hp_sub = hp / "fixtures"
+    hp_sub.mkdir(parents=True, exist_ok=True)
+    before = _snapshot(hp)
+
+    with pytest.raises(ValueError, match="Project isolation violation"):
+        assert_target_belongs_to_project("client-01", str(hp_sub))
+
+    task = EngineeringTask(
+        task_id="T6-GUARD-01-SUB",
+        project_id="client-01",
+        target_dir=str(hp_sub),
+        description="Nordwerk must not touch HansePack fixtures",
+        input_files=["HansePack_Katalog.json"],
+    )
+    with pytest.raises(ValueError, match="Project isolation violation"):
+        run_feature_pipeline(
+            task,
+            llm=ApprovedMockLLM(),
+            trace_file=str(tmp_path / "guard01_sub.jsonl"),
+            interactive=False,
+        )
+    assert _snapshot(hp) == before
+
+
+def test_target_outside_positive_scope_is_rejected(tmp_path):
+    """Priority 2: Positive scope restriction - arbitrary directories outside project area are rejected."""
+    unrelated_dir = tmp_path / "random_unrelated_workspace" / "app"
+    unrelated_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError, match="not in the authorized scope"):
+        assert_target_belongs_to_project("client-02", str(unrelated_dir))
+
+    with pytest.raises(ValueError, match="not in the authorized scope"):
+        assert_target_belongs_to_project("client-01", str(unrelated_dir))
+
+
+def test_positive_scope_allows_own_subdirectories(tmp_path, two_checkouts):
+    """Positive scope allows legitimate subdirectories inside the designated checkout."""
+    nw, hp = two_checkouts
+    nw_sub = nw / "assets" / "css"
+    nw_sub.mkdir(parents=True, exist_ok=True)
+    hp_sub = hp / "src" / "quotation"
+    hp_sub.mkdir(parents=True, exist_ok=True)
+
+    # Legitime Unterverzeichnisse im eigenen Mandantenbereich sind erlaubt
+    assert_target_belongs_to_project("client-01", str(nw_sub))
+    assert_target_belongs_to_project("client-02", str(hp_sub))
+
+
 def test_registry_defaults():
     assert get_project("client-02").default_test_targets == ("test_quotation.py",)
     assert get_project("client-02").default_input_files == ("quotation.py",)

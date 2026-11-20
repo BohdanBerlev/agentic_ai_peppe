@@ -83,3 +83,18 @@ Der vorliegende Ausnahmeantrag zur Nutzung der Google Gemini API wurde von der K
    Der API-Key verbleibt ausschließlich in lokalen `.env`-Dateien und ist über `.gitignore` vom Git-Verlauf ausgeschlossen. Es werden keine realen Kunden- oder personenbezogenen Daten übermittelt.
 4. **Vollständige Erhaltung der Provider-Austauschbarkeit:**  
    Die Factory-Abstraktion in `src/llm/factory.py` bleibt jederzeit zu 100 % kompatibel zu lokalen Modellen (`ollama`) und dem HAW-ICC-Endpunkt (`openai_compatible`). Ein Wechsel erfordert lediglich das Ändern von `LLM_PROVIDER` in der Konfiguration ohne jede Quellcode-Modifikation.
+
+---
+
+## 7. Statusklärung Termin 6 und Ergänzungsantrag für Termine 7–8
+
+### 7.1 Statusklärung für Termin 6 (HansePack-Projektstart)
+1. **Reguläre Kundenlieferung zu 100 % auf lokalem Standard-Modell:**  
+   Die offizielle Bereitstellung und Verifikation des Kundenprodukts HansePack (`client-02`, Release-Stand `2dfb7ae`) wurde in Termin 6 **vollständig auf lokalem Ollama (`qwen3.5:9b`)** durchgeführt (vgl. Erstlauf `fb1d7c6b` und Verifikationslauf `8f912c03`). Termin 6 hat das Pflicht-Tagesziel somit vollkommen autonom ohne Cloud-Abhängigkeit und im Einklang mit den regulären Kursvorgaben erreicht.
+2. **Experimenteller Benchmark-Lauf HP-T6-01 (Gemini):**  
+   Im Zuge von Kontext- und Robustheitsuntersuchungen (Schwachstelle Ollama-Kontextfenster bei großen JSON-Katalogen) führte das Team einen vergleichenden Parallel-Lauf mit `gemini-3.5-flash-lite` durch (Workflow `1d9fdb94`). Dieser Lauf wurde am Human Gate **abgelehnt/verworfen (`changes_requested`)**, da der Code mitten in der Schleife abbrach. Der erzeugte Stand floss nicht in das Kundenprodukt ein (nur als Patch archiviert). Die entstandenen 17,67 Credits wurden dennoch transparent und lückenlos in [`costs/usage.csv`](../costs/usage.csv) gegen das Teambudget abgerechnet.
+
+### 7.2 Förmlicher Ergänzungsantrag für Termin 7 und Termin 8
+Für die anstehenden Termine 7 (Responsive Browser-Weboberfläche für HansePack) und 8 (CR-02 & finale Abnahme) beantragt Team 3 hiermit die **Fortführung der Ausnahmegenehmigung für die Google Gemini API** (`gemini-3.5-flash-lite` bzw. `gemini-3.8-flash`) unter unveränderter Gültigkeit der vier verbindlichen Auflagen aus Abschnitt 6 (strikte Abrechnung nach Kurs-Kostenmodell, lückenlose Traces, Secrets-Isolation in `.env`, 100% Interoperabilität/Fallback zu lokalem Ollama und HAW-ICC).
+
+Sollte die Kursleitung keine Verlängerung für T7/T8 erteilen, wird die Factory für Termin 7 standardmäßig zu 100 % über das lokale Modell (`ollama`, `qwen3.5:9b` mit `num_ctx=8192`) bzw. den HAW-ICC betrieben.

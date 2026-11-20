@@ -124,6 +124,8 @@ class HumanApprovalRecord(BaseModel):
     note: str
     quality_gate_blocked: bool = False
     product_tests_passed: bool | None = None
+    product_commit: str | None = None
+    test_status: str | None = None
 
 
 class PipelineState(TypedDict, total=False):
@@ -750,6 +752,9 @@ def record_human_decision(
     decision: Literal["approved", "changes_requested", "escalate_to_human_review"],
     note: str,
     review_seconds: float = 0.0,
+    product_commit: str | None = None,
+    test_status: str | None = None,
+    timestamp: str | None = None,
 ) -> dict[str, Any]:
     """Explicitly record a human gate decision for a previously pending workflow trace."""
     if reviewer_name not in VALID_ACCOUNTABLE_HUMANS:
@@ -782,10 +787,12 @@ def record_human_decision(
             "reviewed_artifacts",
             ["requirements_report", "architecture_report", "qa_security_report"],
         ),
-        timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
+        timestamp=timestamp or time.strftime("%Y-%m-%d %H:%M:%S"),
         human_review_seconds=round(review_seconds, 4),
         note=note,
         quality_gate_blocked=gate_blocked,
+        product_commit=product_commit,
+        test_status=test_status,
     ).model_dump()
 
     decision_event = {
@@ -798,6 +805,9 @@ def record_human_decision(
         "actor_type": "human",
         "reviewed_by": reviewer_name,
         "decision": decision,
+        "product_commit": product_commit,
+        "test_status": test_status,
+        "timestamp": timestamp or time.strftime("%Y-%m-%d %H:%M:%S"),
         "human_review_seconds": round(review_seconds, 4),
         "human_approval": approval,
         "estimated_cost_credits": 0.0,
