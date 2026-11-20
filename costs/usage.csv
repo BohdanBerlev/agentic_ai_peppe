@@ -91,3 +91,4 @@ date,task_id,actor_type,actor,activity,quantity,unit,credits,notes
 2026-11-20,R-02-BASELINE-1,agent,feature_pipeline_workflow,experiment_r02,1,run,18.1157,"model=qwen3.5:9b; provider=ollama; workflow_id=5ea9dada-74fb-4760-b579-85e031910e78; calls=12; 494.88s; Isolierte R-02-Baseline auf F-BASE/Q-BASE (Patch r02-baseline-run1.patch, nicht gemergt)"
 2026-11-20,COST-AGENT-T7,agent,cost_agent,cost_analysis,1,run,1.2,"model=qwen3.5:9b; provider=ollama; Auswertung aller 8 T7-Traces in evidence/session-07/cost_analysis.json"
 2026-11-20,FACTORY-DEV,ci,github_actions_ci,ci_test_runs,1,run,1.0,"GitHub Actions CI Termin 7 (ci.yml): 1 Push-Lauf auf main fuer T7-Abschluss vorab gezaehlt (1 Credit je CI-Lauf gemaess Kursmodell)"
+2026-11-20,HP-T7-HANDOVER-AUDIT,agent,integration_agent,handover_audit,1,run,1.0552,"model=qwen3.5:9b; provider=ollama; workflow_id=t7-final-handover-audit; 3.82s; status=approved; Schnittstellen-Audit fuer Q-BASE dfb7604"
