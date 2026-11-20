@@ -1,7 +1,9 @@
 {
   "experiment_id": "R-02-BASELINE-1",
   "session": "session-07",
+  "f_base_tag": "F-BASE-T7",
   "f_base_commit": "0d3a93a302ede12c6a6d9bb99b2da94dc39b23cb",
+  "q_base_tag": "Q-BASE",
   "q_base_commit": "dfb7604ed71ca06e4a6549d86fe726638643b36a",
   "isolated_git_status_before": "clean",
   "merged_into_customer_candidate": false,

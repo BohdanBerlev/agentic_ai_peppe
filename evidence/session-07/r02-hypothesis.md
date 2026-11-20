@@ -1,7 +1,7 @@
 # Hypothese für Termin 8 (C4 – Gezielte Factory-Verbesserung nach R-02-Baseline)
 
 **Baseline-Stände (vor Intervention gesichert):**
-- **Factory-Basis (`F-BASE`):** `0d3a93a` (`Agentic-AI-Projekt`, `main`)
+- **Factory-Basis (`F-BASE-T7`):** `0d3a93a` (`Agentic-AI-Projekt`, `main`)
 - **Produkt-Basis (`Q-BASE`):** `dfb7604` (`client-02-quotation`, `main`, 64/64 Tests grün)
 - **Baseline-Lauf (`R-02-BASELINE-1`):** Workflow `5ea9dada-74fb-4760-b579-85e031910e78`, Patch [`r02-baseline-run1.patch`](r02-baseline-run1.patch), Manifest [`r02-baseline-manifest.json`](r02-baseline-manifest.json)
 

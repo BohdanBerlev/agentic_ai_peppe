@@ -15,8 +15,8 @@
 | **Produkt 01 (Nordwerk)** | `DavidPisark/Nordwerk-Industrie-Service-Website` (`main`) | `d140f26` | **`d140f26`** | ✅ Unberührt (0 Änderungen durch T7) |
 | **Produkt 02 (HansePack Candidate)** | `Vanitas50/client-02-quotation` (`main`) | `2dfb7ae` (T6) → `924ed18` (`issue_hp02.md`) | **`dfb7604`** (Tag: **`Q-BASE`**) | ✅ 64/64 Tests grün, frischer Checkout verifiziert |
 | **Isolierter Fehler-Branch (A3)** | `Vanitas50/client-02-quotation` (`t7-fault-injection-q03`) | `d0b16d5` | **`e91db5c`** *(nur Nachweis, **nicht** gemergt!)* | ⛔ Absichtlicher Rabattfehler (`> 50`), vom Gate blockiert |
-| **Factory-Basis vor R-02** | `BohdanBerlev/agentic_ai_peppe` (`main`) | `dde1ea1` (T6-Korrektur) | **`0d3a93a`** (Tag: **`F-BASE`**) | ✅ Saubere Baseline vor T8-Intervention |
-| **Factory T7 Evidenz & Kosten** | `BohdanBerlev/agentic_ai_peppe` (`main`) | `0d3a93a` (`F-BASE`) | `4a33c7a` → aktueller Abschluss-Commit | ✅ 95/95 Factory-Tests grün |
+| **Factory-Basis vor R-02** | `BohdanBerlev/agentic_ai_peppe` (`main`) | `dde1ea1` (T6-Korrektur) | **`0d3a93a`** (Tag: **`F-BASE-T7`**; historischer T4/T5-Tag `F-BASE` bleibt unverändert auf `5a146a3`) | ✅ Saubere Baseline vor T8-Intervention |
+| **Factory T7 Evidenz & Kosten** | `BohdanBerlev/agentic_ai_peppe` (`main`) | `0d3a93a` (`F-BASE-T7`) | `4a33c7a` → `d392312` → aktueller Sync-Commit | ✅ 95/95 Factory-Tests grün |
 
 ---
 
@@ -78,17 +78,17 @@ Alle substanziellen Produktaufgaben wurden über die bestehende Multi-Project-Fa
 ## 5. Messung, R-02-Baseline, Hypothese & Tageskosten (`C1`–`C4`, `L7.4`)
 
 ### 5.1 Isolierte Vergleichsaufgabe `R-02-BASELINE-1` (`C1`, `C3`)
-- **Basisstände:** Factory **`F-BASE`** (`0d3a93a`), Produkt **`Q-BASE`** (`dfb7604`), `git status` clean, **nicht** in den Kunden-Candidate gemergt.
+- **Basisstände:** Factory **`F-BASE-T7`** (`0d3a93a`), Produkt **`Q-BASE`** (`dfb7604`), `git status` clean, **nicht** in den Kunden-Candidate gemergt.
 - **Nachweise:** Manifest [`r02-baseline-manifest.json`](session-07/r02-baseline-manifest.json), isolierter Patch [`r02-baseline-run1.patch`](session-07/r02-baseline-run1.patch), Trace [`5ea9dada...jsonl`](session-07/5ea9dada-74fb-4760-b579-85e031910e78.jsonl).
-- **Messwerte (`F-BASE`, Ollama `qwen3.5:9b`, `temperature=0.0`, `num_ctx=8192`):**
+- **Messwerte (`F-BASE-T7`, Ollama `qwen3.5:9b`, `temperature=0.0`, `num_ctx=8192`):**
   - `12` Calls, `494,88 s`, **`18,1157 Credits`**, Gate-Abschluss `changes_requested`.
-  - **Qualität:** `calculation_note: "Net amounts; shipping shown separately."` wurde korrekt im Export-JSON ergänzt (`TOTAL_CENTS: 13075`, `IN_QUOTE_DICT: False`); `36 passed, 28 failed` (`exit_code = 1`), weil `F-BASE` nur 1 Datei (`quotation.py`) pro Lauf ändern kann und `test_quotation.py` nicht synchron aktualisierte.
+  - **Qualität:** `calculation_note: "Net amounts; shipping shown separately."` wurde korrekt im Export-JSON ergänzt (`TOTAL_CENTS: 13075`, `IN_QUOTE_DICT: False`); `36 passed, 28 failed` (`exit_code = 1`), weil `F-BASE-T7` nur 1 Datei (`quotation.py`) pro Lauf ändern kann und `test_quotation.py` nicht synchron aktualisierte.
 
 ### 5.2 Gezielte Hypothese für Termin 8 (`C4`)
 - Vollständig dokumentiert in [`r02-hypothesis.md`](session-07/r02-hypothesis.md).
 - **Engpass:** Single-File-Limit im `backend_agent` (verursachte 28 Export-Testfehler + 2. Retry in `R-02-BASELINE-1`) sowie `unparseable`-JSON-Antworten in Vorstufen-Agenten (`requirements_agent`).
 - **Geplante kleine Änderung (erst in T8 nach Baseline!):** Multi-File-Support (begrenzt auf autorisierte `input_files` + `test_targets`) im `backend_agent` + einmaliger JSON-Repair-Retry im `requirements_agent`.
-- **Ziel-Messgrößen in T8 (`F-NEW-T8` vs. `F-BASE`):** `pytest exit_code == 0` inkl. neuem `calculation_note`-Test, `≤ 8` Calls, `≤ 13,00 Credits`, `0` `unparseable`-Abbrüche.
+- **Ziel-Messgrößen in T8 (`F-NEW-T8` vs. `F-BASE-T7`):** `pytest exit_code == 0` inkl. neuem `calculation_note`-Test, `≤ 8` Calls, `≤ 13,00 Credits`, `0` `unparseable`-Abbrüche.
 
 ### 5.3 Tageskosten Termin 7 & Budgetabweichung (`C2`)
 Forensisch ausgewertet durch unseren eigenen **`cost_agent`** ([`cost_analysis.json`](session-07/cost_analysis.json)) und vollständig verbucht in [`costs/usage.csv`](../costs/usage.csv):
@@ -103,12 +103,12 @@ Forensisch ausgewertet durch unseren eigenen **`cost_agent`** ([`cost_analysis.j
 | **Agenten – Kundenlieferung** | 5 Ollama-Läufe (`HP-T7-01`, `B-TESTS`, Fehllauf `B-WEBUI`, `B-API`, `B-HTML`; 43 Calls) | `64,85` |
 | **Agenten – Qualitätssicherung A3** | 2 Ollama-Läufe (`HP-T7-FAULT-Q03`, `HP-T7-FAULT-FIXED`; 14 Calls) | `20,25` |
 | **Agenten – Experiment R-02** | `R-02-BASELINE-1` (12 Calls, separat ausgewiesen!) | `18,12` |
-| **Agenten – Cost & Integration Audit** | `cost_agent` (`1,20 Cr.`) + `integration_agent` Handover-Audit (`1,05 Cr.`) | `2,25` |
-| **CI-Läufe (GitHub Actions)** | 1 Abschluss-Push auf `main` (vorab gezählt à 1,00 Cr.; weitere Pushes zählen entsprechend) | `1,00` |
+| **Agenten – Cost & Integration Audit** | `cost_agent` (`1,20 Cr.`) + `integration_agent` Handover-Audit (`1,06 Cr.`) | `2,26` |
+| **CI-Läufe (GitHub Actions)** | 5 Läufe auf `main`: `44818087291` (`dde1ea1` ✅), `44829427257` (`0d3a93a` ✅), `44831252679` (`4a33c7a` ✅), `44832158410` (`d392312` ❌ transienter CI-Fehllauf), + Abschluss-Sync-Push (vorab gezählt à 1,00 Cr.) | `5,00` |
 | **Externe Cloud-Kosten** | 100 % lokales Ollama (`qwen3.5:9b`) | `0,00` |
-| **GESAMT TERMIN 7 (Ist)** | **Planbudget T7 aus T6: `300,00 Credits`** | **`314,80 Credits`** |
+| **GESAMT TERMIN 7 (Ist)** | **Planbudget T7 aus T6: `300,00 Credits`** | **`318,80 Credits`** |
 
-- **Erklärung der Planabweichung (`+14,80 Credits` / `+4,9 %`):** Die leichte Überschreitung entsteht vollständig durch den ehrlich verbuchten Fehllauf `HP-T7-B-WEBUI` (`11,23 Cr.`) sowie die Entscheidung, alle Bereich-B-Einzeltasks real über das lokale LLM durch die 8-Agenten-Pipeline laufen zu lassen. Die Termin-8-Änderungsreserve (`200,00 Credits`) bleibt unangetastet.
+- **Erklärung der Planabweichung (`+18,80 Credits` / `+6,3 %`):** Die Überschreitung entsteht durch den ehrlich verbuchten Fehllauf `HP-T7-B-WEBUI` (`11,23 Cr.`), die 5 GitHub-Actions-CI-Läufe (inkl. Fehllauf `44832158410`) sowie die bewusste Entscheidung, alle Bereich-B-Einzeltasks real über das lokale LLM durch die 8-Agenten-Pipeline laufen zu lassen. Die Termin-8-Änderungsreserve (`200,00 Credits`) bleibt unangetastet.
 
 ---
 
