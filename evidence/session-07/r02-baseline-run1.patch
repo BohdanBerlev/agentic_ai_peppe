@@ -1,0 +1,17 @@
+diff --git a/quotation.py b/quotation.py
+index 5a3cb9a..0b2aa07 100644
+--- a/quotation.py
++++ b/quotation.py
+@@ -250,7 +250,11 @@ def build_export_payload(quote: dict) -> dict:
+             message=f"Feld 'lines' muss eine Liste sein."
+         )
+     
+-    return quote
++    # Add static calculation_note field as per R-02 requirement
++    payload = quote.copy()
++    payload["calculation_note"] = "Net amounts; shipping shown separately."
++    
++    return payload
+ 
+ 
+ def export_quote_json(quote: dict) -> str:

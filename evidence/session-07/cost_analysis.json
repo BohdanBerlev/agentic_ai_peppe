@@ -1,0 +1,112 @@
+{
+  "status": "success",
+  "session": "session-07",
+  "provider": "ollama",
+  "model": "qwen3.5:9b",
+  "cost_agent_executed": true,
+  "total_workflows": 8,
+  "total_llm_calls": 69,
+  "total_duration_seconds": 2838.1146,
+  "total_cost_credits": 103.2127,
+  "breakdown_by_category": {
+    "customer_delivery_runs_credits": 64.8491,
+    "fault_injection_a3_runs_credits": 20.2479,
+    "experiment_r02_baseline_credits": 18.1157
+  },
+  "workflows": [
+    {
+      "task_id": "HP-T7-01",
+      "category": "customer_delivery",
+      "workflow_id": "13bf2f9a-4fa9-4835-8c09-87a4006e1012",
+      "calls": 12,
+      "duration_seconds": 471.52,
+      "credits": 17.7408,
+      "decision": "approved",
+      "product_commit": "d0b16d5"
+    },
+    {
+      "task_id": "HP-T7-B-TESTS",
+      "category": "customer_delivery",
+      "workflow_id": "ee32a17f-2e02-4ee4-b0aa-0d7c6144bd80",
+      "calls": 8,
+      "duration_seconds": 287.96,
+      "credits": 11.4146,
+      "decision": "approved",
+      "product_commit": "5e7aa52"
+    },
+    {
+      "task_id": "HP-T7-B-WEBUI",
+      "category": "customer_delivery_failure",
+      "workflow_id": "76eed45c-7107-462d-b5f7-d4bdb2364089",
+      "calls": 7,
+      "duration_seconds": 363.04,
+      "credits": 11.2299,
+      "decision": "changes_requested",
+      "product_commit": "c1f46ff (unveraendert)"
+    },
+    {
+      "task_id": "HP-T7-B-API",
+      "category": "customer_delivery",
+      "workflow_id": "a3deb97b-1f2d-43a2-b987-eff8e0ef6319",
+      "calls": 8,
+      "duration_seconds": 387.75,
+      "credits": 12.5391,
+      "decision": "approved",
+      "product_commit": "7a1f037"
+    },
+    {
+      "task_id": "HP-T7-B-HTML",
+      "category": "customer_delivery",
+      "workflow_id": "cd227006-f612-4ef2-8bfd-48299dd7ad11",
+      "calls": 8,
+      "duration_seconds": 333.6,
+      "credits": 11.9247,
+      "decision": "approved",
+      "product_commit": "dfb7604"
+    },
+    {
+      "task_id": "HP-T7-FAULT-Q03",
+      "category": "fault_injection_a3",
+      "workflow_id": "dd27bc0e-bd77-453d-b1df-38175264a3f3",
+      "calls": 7,
+      "duration_seconds": 257.14,
+      "credits": 10.2076,
+      "decision": "changes_requested",
+      "product_commit": "e91db5c"
+    },
+    {
+      "task_id": "HP-T7-FAULT-FIXED",
+      "category": "fault_injection_a3",
+      "workflow_id": "116b8593-6739-4bf8-b863-20d5d06516ac",
+      "calls": 7,
+      "duration_seconds": 242.23,
+      "credits": 10.0403,
+      "decision": "approved",
+      "product_commit": "d0b16d5"
+    },
+    {
+      "task_id": "R-02-BASELINE-1",
+      "category": "experiment_r02_baseline",
+      "workflow_id": "5ea9dada-74fb-4760-b579-85e031910e78",
+      "calls": 12,
+      "duration_seconds": 494.88,
+      "credits": 18.1157,
+      "decision": "changes_requested",
+      "product_commit": "Q-BASE dfb7604 (unveraendert; Patch r02-baseline-run1.patch)"
+    }
+  ],
+  "cost_agent_insights": [
+    {
+      "agent_name": "requirements_agent",
+      "finding": "Höchster Kosten- und Laufzeitanteil (~40 %) durch 3 sequentielle Rollen (PO, PM, Agent Engineer) sowie wiederholte unparseable-JSON-Antworten auf lokalem Ollama."
+    },
+    {
+      "agent_name": "backend_agent",
+      "finding": "Zweithöchster Kostenanteil (~20 %); Single-File-Beschränkung verursachte bei R-02-BASELINE-1 einen unnötigen Retry-Durchlauf (12 statt 8 Calls)."
+    },
+    {
+      "agent_name": "qa_security_agent",
+      "finding": "Geringe Einzelkosten, aber sehr hoher Sicherheitswert: blockierte Q03-Fehler (HP-T7-FAULT-Q03) und meldete R-02-Testdiskrepanz zuverlässig."
+    }
+  ]
+}
